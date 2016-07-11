@@ -5,7 +5,13 @@ suites:
         src_path: zf3-circlical-user/src
         spec_path: zf3-circlical-user/bundle
 extensions:
-#  - PhpSpec\Extension\CodeCoverageExtension
+  - PhpSpec\Extension\CodeCoverageExtension
 code_coverage:
-  output: build/coverage.xml
-  format: clover
+  whitelist:
+   - zf3-circlical-user/src
+  format:
+   - html
+   - clover
+  output:
+   html: build/coverage
+   clover: build/coverage.xml

@@ -49,7 +49,7 @@ class AccessServiceSpec extends ObjectBehavior
 
         // module-level permissions
         $config = [
-            substr(__NAMESPACE__, 0, strpos('\\', 'Foo\Controller')) => [
+            'Foo' => [
                 // controller-level-permissions
                 'controllers' => [
                     'Foo\Controller\ThisController' => [
@@ -203,17 +203,4 @@ class AccessServiceSpec extends ObjectBehavior
         $this->setUser($user);
         $this->isAllowed('beer','pourout')->shouldBe(false);
     }
-
-    function it_does_verbs_by_user()
-    {
-
-    }
-
-    function it_does_verbs_by_role()
-    {
-
-    }
-
-
-
 }

@@ -20,7 +20,7 @@ class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        return strstr($requestedName, '\\Mapper\\');
+        return strstr($requestedName, '\\Mapper\\') != null;
         
     }
     

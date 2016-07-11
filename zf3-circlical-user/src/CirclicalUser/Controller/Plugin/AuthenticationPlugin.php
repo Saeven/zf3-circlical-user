@@ -48,12 +48,14 @@ class AuthenticationPlugin extends AbstractPlugin
 
     /**
      * Give me a user and password, and I'll create authentication records for you
+     *
      * @param User $user
-     * @param $password
+     * @param string $username Can be an email address or username, should be validated prior
+     * @param string $password
      */
-    public function create(User $user, $password)
+    public function create(User $user, $username, $password)
     {
-        $this->authenticationService->create($user, $password);
+        $this->authenticationService->create($user, $username, $password);
     }
 
 }
