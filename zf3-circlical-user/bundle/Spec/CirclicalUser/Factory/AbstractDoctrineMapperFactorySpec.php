@@ -24,6 +24,5 @@ class AbstractDoctrineMapperFactorySpec extends ObjectBehavior
     {
         $serviceManager->get('doctrine.entitymanager.orm_default')->willReturn($entityManager);
         $this->createServiceWithName($serviceManager, UserMapper::class, UserMapper::class)->shouldBeAnInstanceOf(UserMapper::class);
-
     }
 }
