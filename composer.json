@@ -1,0 +1,52 @@
+{
+  "name": "saeven/zf3-circlical-user",
+  "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://github.com/Saeven/zf2-circlical-user",
+  "keywords": [
+    "user",
+    "zf3",
+    "user management",
+    "acl",
+    "bjyauthorize",
+    "authorization",
+    "auth"
+  ],
+  "authors": [
+    {
+      "name": "Alexandre Lemaire",
+      "email": "alemaire@circlical.com",
+      "homepage": "http://circlical.com/",
+      "role": "Paper Stapler"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^7.0.0",
+    "zendframework/zend-eventmanager": "^3.0.1",
+    "zendframework/zend-servicemanager": "^2.7.6",
+    "zendframework/zend-mvc": "@stable",
+    "zendframework/zend-console": "@stable",
+    "zendframework/zend-view": "@stable",
+    "zendframework/zend-http": "@stable",
+    "doctrine/doctrine-orm-module": "@stable",
+    "doctrine/doctrine-module": "@stable",
+    "doctrine/orm": "@stable",
+    "paragonie/halite": "@stable"
+  },
+  "require-dev": {
+    "phpspec/phpspec": "@stable",
+    "henrikbjorn/phpspec-code-coverage": "@stable"
+  },
+  "autoload": {
+    "psr-0": {
+      "CirclicalUser\\": "zf3-circlical-user/src"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.4-dev"
+    }
+  }
+}

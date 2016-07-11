@@ -1,0 +1,86 @@
+<?php
+
+namespace CirclicalUser\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * CirclicalUser\Entity\UserAtom
+ *
+ * @ORM\Entity
+ * @ORM\Table(name="users_atoms")
+ *
+ */
+class UserAtom
+{
+    /**
+     * @var int
+     * @ORM\Id
+     * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true})
+     */
+    protected $user_id;
+
+
+    /**
+     * @var string
+     * @ORM\Id
+     * @ORM\Column(type="string", length=255, name="`key`")
+     */
+    protected $key;
+
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, name="`value`")
+     */
+    protected $value;
+
+    /**
+     * @return int
+     */
+    public function getUserId()
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @param int $user_id
+     */
+    public function setUserId($user_id)
+    {
+        $this->user_id = $user_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * @param string $key
+     */
+    public function setKey($key)
+    {
+        $this->key = $key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+}

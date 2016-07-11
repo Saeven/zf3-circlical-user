@@ -1,0 +1,11 @@
+suites:
+    CirclicalUser:
+        namespace: CirclicalUser
+        spec_prefix: Spec
+        src_path: zf3-circlical-user/src
+        spec_path: zf3-circlical-user/bundle
+extensions:
+#  - PhpSpec\Extension\CodeCoverageExtension
+code_coverage:
+  output: build/coverage.xml
+  format: clover
