@@ -10,7 +10,6 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class UserMapperFactory implements FactoryInterface
 {
-
     /**
      * Create service
      *
@@ -35,6 +34,9 @@ class UserMapperFactory implements FactoryInterface
             throw new ConfigurationException("The user entity must implement " . UserInterface::class);
         }
 
-        return new UserMapper($config['user']);
+        $mapper = new UserMapper($config['user']);
+        $mapper->setEntityManager($serviceLocator->get('doctrine.entitymanager.orm_default'));
+
+        return $mapper;
     }
 }
