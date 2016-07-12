@@ -2,8 +2,10 @@
 
 namespace CirclicalUser;
 
+use CirclicalUser\Factory\AbstractDoctrineMapperFactory;
 use CirclicalUser\Factory\Listener\AccessListenerFactory;
 use CirclicalUser\Factory\Listener\UserEntityListenerFactory;
+use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
@@ -11,6 +13,7 @@ use CirclicalUser\Mapper\ActionRuleMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserAuthenticationLogMapper;
 use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
@@ -76,6 +79,11 @@ return [
             AccessService::class => AccessServiceFactory::class,
             AccessListener::class => AccessListenerFactory::class,
             UserEntityListener::class => UserEntityListenerFactory::class,
+            UserMapper::class => UserMapperFactory::class,
+        ],
+
+        'abstract_factories' => [
+            AbstractDoctrineMapperFactory::class,
         ],
 
     ],

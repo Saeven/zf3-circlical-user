@@ -2,7 +2,7 @@
 
 namespace Spec\CirclicalUser\Factory;
 
-use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Mapper\RoleMapper;
 use Doctrine\ORM\EntityManager;
 use PhpSpec\ObjectBehavior;
 use Zend\ServiceManager\ServiceManager;
@@ -23,6 +23,6 @@ class AbstractDoctrineMapperFactorySpec extends ObjectBehavior
     public function it_creates_its_service(ServiceManager $serviceManager, EntityManager $entityManager)
     {
         $serviceManager->get('doctrine.entitymanager.orm_default')->willReturn($entityManager);
-        $this->createServiceWithName($serviceManager, UserMapper::class, UserMapper::class)->shouldBeAnInstanceOf(UserMapper::class);
+        $this->createServiceWithName($serviceManager, RoleMapper::class, RoleMapper::class)->shouldBeAnInstanceOf(RoleMapper::class);
     }
 }
