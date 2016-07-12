@@ -31,7 +31,7 @@ class UserMapperFactory implements FactoryInterface
             throw new ConfigurationException("The user entity defined does not exist: " . $config['user']);
         }
 
-        if (!in_array(UserInterface::class, class_implements($config['class']))) {
+        if (!in_array(UserInterface::class, class_implements($config['user']))) {
             throw new ConfigurationException("The user entity must implement " . UserInterface::class);
         }
 
