@@ -41,7 +41,7 @@
   },
   "autoload": {
     "psr-0": {
-      "CirclicalUser\\": "zf3-circlical-user/src"
+      "CirclicalUser\\": "src"
     }
   },
   "extra": {

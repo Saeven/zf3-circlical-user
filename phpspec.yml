@@ -2,10 +2,10 @@ suites:
     CirclicalUser:
         namespace: CirclicalUser
         spec_prefix: Spec
-        src_path: zf3-circlical-user/src
-        spec_path: zf3-circlical-user/bundle
+        src_path: src
+        spec_path: bundle
 extensions:
-  - PhpSpec\Extension\CodeCoverageExtension
+#  - PhpSpec\Extension\CodeCoverageExtension
 code_coverage:
   whitelist:
    - zf3-circlical-user/src

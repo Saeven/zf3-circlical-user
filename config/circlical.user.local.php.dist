@@ -1,0 +1,15 @@
+<?php
+
+return[
+    'circlical' => [
+        'user' => [
+            'providers' => [
+                'user' => \Application\Entity\User::class,
+            ],
+            'auth' => [
+                'crypto_key' => 'sfZGFm1rCc7TgPr9aly3WOtAfbEOb/VafB8L3velkd0=',
+                'transient' => false,
+            ],
+        ],
+    ],
+];
