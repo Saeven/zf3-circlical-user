@@ -4,6 +4,7 @@ namespace CirclicalUser\Factory\Mapper;
 
 use CirclicalUser\Exception\ConfigurationException;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Provider\UserInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -28,6 +29,10 @@ class UserMapperFactory implements FactoryInterface
 
         if (!class_exists($config['user'])) {
             throw new ConfigurationException("The user entity defined does not exist: " . $config['user']);
+        }
+
+        if (!in_array(UserInterface::class, class_implements($config['class']))) {
+            throw new ConfigurationException("The user entity must implement " . UserInterface::class);
         }
 
         return new UserMapper($config['user']);
