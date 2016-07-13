@@ -2,7 +2,7 @@
   "name": "saeven/zf3-circlical-user",
   "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
   "type": "library",
-  "license": "MIT",
+  "license": "MPL2.0",
   "homepage": "https://github.com/Saeven/zf2-circlical-user",
   "keywords": [
     "user",
