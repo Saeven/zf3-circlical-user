@@ -63,7 +63,7 @@ class UserActionRule implements UserActionRuleInterface
     }
 
 
-    public function getResourceClass()
+    public function getResourceClass() : string
     {
         return $this->resource_class;
     }
