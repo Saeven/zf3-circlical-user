@@ -73,20 +73,27 @@ class UserActionRule implements UserActionRuleInterface
         return $this->resource_id;
     }
 
-    public function getActions()
-    {
-        return $this->actions;
-    }
-
     public function getUser()
     {
         return $this->user;
+    }
+
+    public function getActions() : array
+    {
+        if (!$this->actions) {
+            return [];
+        }
+
+        return $this->actions;
     }
 
     public function addAction($action)
     {
         if (!$this->actions) {
             $this->actions = [];
+        }
+        if (in_array($action, $this->actions)) {
+            return;
         }
         $this->actions[] = $action;
     }

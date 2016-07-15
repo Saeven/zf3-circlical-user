@@ -3,6 +3,7 @@
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\GroupActionRuleInterface;
+use CirclicalUser\Provider\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -50,6 +51,15 @@ class GroupActionRule implements GroupActionRuleInterface
     protected $actions;
 
 
+    public function __construct(RoleInterface $role, $resourceClass, $resourceId, array $actions)
+    {
+        $this->role = $role;
+        $this->resource_class = $resourceClass;
+        $this->resource_id = $resourceId;
+        $this->actions = $actions;
+    }
+
+
     public function getResourceClass() : string
     {
         return $this->resource_class;
@@ -65,8 +75,30 @@ class GroupActionRule implements GroupActionRuleInterface
         return $this->role;
     }
 
-    public function getActions()
+    public function getActions() : array
     {
+        if (!$this->actions) {
+            return [];
+        }
         return $this->actions;
+    }
+
+    public function addAction($action)
+    {
+        if (!$this->actions) {
+            $this->actions = [];
+        }
+        if (in_array($action, $this->actions)) {
+            return;
+        }
+        $this->actions[] = $action;
+    }
+
+    public function removeAction($action)
+    {
+        if (!$this->actions) {
+            return;
+        }
+        $this->actions = array_diff($this->actions, [$action]);
     }
 }

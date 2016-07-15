@@ -13,4 +13,8 @@ interface GroupActionRuleInterface
 
     public function getActions() : array;
 
+    public function addAction($action);
+
+    public function removeAction($action);
+
 }
