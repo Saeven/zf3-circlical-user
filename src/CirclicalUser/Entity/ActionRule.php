@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Entity;
 
+use CirclicalUser\Provider\GroupActionRuleInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -11,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="acl_actions")
  *
  */
-class ActionRule
+class GroupActionRule implements GroupActionRuleInterface
 {
     /**
      * @var int
@@ -49,12 +50,6 @@ class ActionRule
     protected $actions;
 
 
-    /**
-     * @ORM\OneToMany(targetEntity="CirclicalUser\Entity\UserActionRule", mappedBy="action_rule", cascade={"all"})
-     */
-    protected $user_exceptions;
-
-
     public function getResourceClass()
     {
         return $this->resource_class;
@@ -74,10 +69,4 @@ class ActionRule
     {
         return $this->actions;
     }
-
-    public function getUserExceptions()
-    {
-        return $this->user_exceptions;
-    }
-
 }

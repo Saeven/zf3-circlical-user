@@ -3,16 +3,18 @@
 namespace CirclicalUser\Provider;
 
 
-interface ActionRuleInterface
+interface UserActionRuleInterface
 {
     public function getResourceClass() : string;
 
     public function getResourceId();
 
-    public function getRole();
+    public function getUser();
 
     public function getActions() : array;
 
-    public function getUserExceptions();
+    public function addAction($action);
+
+    public function removeAction($action);
 
 }

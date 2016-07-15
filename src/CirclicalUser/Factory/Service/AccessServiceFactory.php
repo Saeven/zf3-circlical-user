@@ -16,12 +16,14 @@ class AccessServiceFactory implements FactoryInterface
         $guards = $userConfig['guards'];
 
         $roleProvider = $userConfig['providers']['role'];
-        $ruleProvider = $userConfig['providers']['rule'];
+        $groupRuleProvider = $userConfig['providers']['rule']['group'];
+        $userRuleProvider = $userConfig['providers']['rule']['user'] ?? null;
 
         $accessService = new AccessService(
             $guards,
             $serviceLocator->get($roleProvider),
-            $serviceLocator->get($ruleProvider)
+            $serviceLocator->get($groupRuleProvider),
+            $serviceLocator->get($userRuleProvider)
         );
 
         $authenticationService = $serviceLocator->get(AuthenticationService::class);

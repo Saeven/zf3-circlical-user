@@ -3,18 +3,31 @@
 namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
+use CirclicalUser\Exception\GuardConfigurationException;
+use CirclicalUser\Exception\UnknownResourceTypeException;
+use CirclicalUser\Mapper\GroupActionRuleMapper;
+use CirclicalUser\Mapper\RoleMapper;
+use CirclicalUser\Mapper\UserActionRuleMapper;
+use CirclicalUser\Provider\GroupActionRuleProviderInterface;
+use CirclicalUser\Provider\ResourceInterface;
+use CirclicalUser\Provider\UserActionRuleInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\UserRequiredException;
-use CirclicalUser\Provider\ActionRuleInterface;
-use CirclicalUser\Provider\ActionRuleProviderInterface;
+use CirclicalUser\Provider\GroupActionRuleInterface;
+use CirclicalUser\Provider\UserActionRuleProviderInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
 
 class AccessServiceSpec extends ObjectBehavior
 {
-    function let(RoleProviderInterface $roleMapper, ActionRuleProviderInterface $ruleProvider, User $user, User $admin,
-                 ActionRuleInterface $rule1, ActionRuleInterface $rule2, ActionRuleInterface $rule3 )
+    function let(RoleProviderInterface $roleMapper, GroupActionRuleProviderInterface $groupRules, UserActionRuleProviderInterface $userRules,
+                 User $user, User $admin,
+                 GroupActionRuleInterface $rule1, GroupActionRuleInterface $rule2, GroupActionRuleInterface $rule3,
+                 UserActionRuleInterface $userRule1, UserActionRuleInterface $userRule2, UserActionRuleInterface $userRule3,
+                 ResourceInterface $resourceObject, GroupActionRuleInterface $groupActionRule)
     {
+
         $userRole = new Role();
         $userRole->setId(1);
         $userRole->setName('user');
@@ -26,31 +39,70 @@ class AccessServiceSpec extends ObjectBehavior
 
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
 
+        /*
+         * Rule 1: Users can consume beer
+         */
         $rule1->getActions()->willReturn(['consume']);
         $rule1->getRole()->willReturn($userRole);
         $rule1->getResourceClass()->willReturn('string');
         $rule1->getResourceId()->willReturn('beer');
-        $rule1->getUserExceptions()->willReturn([]);
 
-        $rule2->getActions()->willReturn(['pourout']);
+        /*
+         * Rule 2: Admins can pour beer
+         */
+        $rule2->getActions()->willReturn(['pour']);
         $rule2->getRole()->willReturn($adminRole);
         $rule2->getResourceClass()->willReturn('string');
         $rule2->getResourceId()->willReturn('beer');
-        $rule2->getUserExceptions()->willReturn([]);
 
-        $rule3->getActions()->willReturn(['buy']);
+        /*
+         * Rule 3: Guests can look beer
+         */
+        $rule3->getActions()->willReturn(['look']);
         $rule3->getRole()->willReturn(null);
         $rule3->getResourceClass()->willReturn('string');
         $rule3->getResourceId()->willReturn('beer');
-        $rule3->getUserExceptions()->willReturn([$admin]);
+
+        /*
+         * Rule 4: Admin user can choose beer
+         */
+        $userRule1->getActions()->willReturn(['buy']);
+        $userRule1->getResourceClass()->willReturn('string');
+        $userRule1->getResourceId()->willReturn('beer');
+        $userRule1->getUser()->willReturn($admin);
+
+        $userRule2->getActions()->willReturn(['buy']);
+        $userRule2->getResourceClass()->willReturn('string');
+        $userRule2->getResourceId()->willReturn('beer');
+        $userRule2->getUser()->willReturn($user);
+
+        $userRule3->getActions()->willReturn(['bar']);
+        $userRule3->getResourceClass()->willReturn('ResourceObject');
+        $userRule3->getResourceId()->willReturn('1234');
+        $userRule3->getUser()->willReturn($user);
+        $userRule3->addAction('foo')->willReturn(null);
+
+        $resourceObject->getClass()->willReturn("ResourceObject");
+        $resourceObject->getId()->willReturn("1234");
+
+        $groupActionRule->getResourceClass()->willReturn("ResourceObject");
+        $groupActionRule->getResourceId()->willReturn("1234");
+        $groupActionRule->getRole()->willReturn('user');
+        $groupActionRule->getActions()->willReturn(['bar']);
+
+        $userRules->getUserStringActions(Argument::type('string'), Argument::any())->willReturn(null);
+        $userRules->getUserStringActions('beer', $admin)->willReturn($userRule1);
+        $userRules->create($user, 'string', 'beer', ['buy'])->willReturn($userRule2);
+        $userRules->save($userRule2)->willReturn(null);
+        $userRules->getUserResourceActions($resourceObject, $user)->willReturn($userRule3);
+        $userRules->update(Argument::any())->willReturn(null);
+
+        $groupRules->getStringActions('beer')->willReturn([$rule1, $rule2, $rule3]);
+        $groupRules->getResourceActions($resourceObject)->willReturn([$groupActionRule]);
 
 
-        $ruleProvider->getStringActions('beer')->willReturn([$rule1,$rule2,$rule3]);
-
-        // module-level permissions
         $config = [
             'Foo' => [
-                // controller-level-permissions
                 'controllers' => [
                     'Foo\Controller\ThisController' => [
                         'default' => ['user'],
@@ -66,11 +118,14 @@ class AccessServiceSpec extends ObjectBehavior
                             'superodd' => [],
                         ],
                     ],
+                    'Foo\Controller\FreeForAll' => [
+                        'default' => [],
+                    ],
                 ],
             ],
         ];
 
-        $this->beConstructedWith($config, $roleMapper, $ruleProvider);
+        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules);
 
         $user->getId()->willReturn(100);
         $user->getRoles()->willReturn([$userRole]);
@@ -84,13 +139,68 @@ class AccessServiceSpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Service\AccessService');
     }
 
-    function it_accepts_a_user_with_an_id( User $testUser)
+    function it_requires_an_array_as_default_config()
+    {
+        $config = [
+            'Foo' => [
+                'controllers' => [
+                    'Foo\Controller\ThisController' => [
+                        'default' => 'user',
+                    ],
+                ],
+            ],
+        ];
+        $roleMapper = new RoleMapper();
+        $groupMapper = new GroupActionRuleMapper();
+        $userMapper = new UserActionRuleMapper();
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+    }
+
+    function it_requires_an_array_as_action_config()
+    {
+        $config = [
+            'Foo' => [
+                'controllers' => [
+                    'Foo\Controller\ThisController' => [
+                        'default' => ['user'],
+                        'actions' => 'badConfig',
+                    ],
+                ],
+            ],
+        ];
+        $roleMapper = new RoleMapper();
+        $groupMapper = new GroupActionRuleMapper();
+        $userMapper = new UserActionRuleMapper();
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+    }
+
+    function it_requires_an_array_as_action_roles_config()
+    {
+        $config = [
+            'Foo' => [
+                'controllers' => [
+                    'Foo\Controller\ThisController' => [
+                        'default' => ['user'],
+                        'actions' => [
+                            'verb' => 'roleShouldBeArray',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $roleMapper = new RoleMapper();
+        $groupMapper = new GroupActionRuleMapper();
+        $userMapper = new UserActionRuleMapper();
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+    }
+
+    function it_accepts_a_user_with_an_id(User $testUser)
     {
         $testUser->getId()->willReturn(1);
         $this->setUser($testUser);
     }
 
-    function it_rejects_users_with_no_id( User $noUser )
+    function it_rejects_users_with_no_id(User $noUser)
     {
         $noUser->getId()->willReturn(null);
         $this->shouldThrow(UserRequiredException::class)->during('setUser', [$noUser]);
@@ -126,6 +236,16 @@ class AccessServiceSpec extends ObjectBehavior
     {
         $this->setUser($user);
         $this->canAccessController('Foo\Controller\AdminController')->shouldBe(false);
+    }
+
+    function it_returns_false_when_controllers_are_not_configured()
+    {
+        $this->canAccessController('NotHere')->shouldBe(false);
+    }
+
+    function it_returns_true_when_no_controller_roles_are_configured()
+    {
+        $this->canAccessController('Foo\Controller\FreeForAll')->shouldBe(true);
     }
 
     function it_permits_relaxed_actions($user)
@@ -166,41 +286,86 @@ class AccessServiceSpec extends ObjectBehavior
     function it_accepts_user_verbs($user)
     {
         $this->setUser($user);
-        $this->isAllowed('beer','consume')->shouldBe(true);
+        $this->isAllowed('beer', 'consume')->shouldBe(true);
     }
 
     function it_declines_user_verbs($user)
     {
         $this->setUser($user);
-        $this->isAllowed('beer','pourout')->shouldBe(false);
+        $this->isAllowed('beer', 'pourout')->shouldBe(false);
     }
 
     function it_accepts_hierarchical_user_verbs($admin)
     {
         $this->setUser($admin);
-        $this->isAllowed('beer','consume')->shouldBe(true);
+        $this->isAllowed('beer', 'consume')->shouldBe(true);
     }
 
     function it_works_in_a_multiverb_situation_a($admin)
     {
         $this->setUser($admin);
-        $this->isAllowed('beer','pourout')->shouldBe(true);
+        $this->isAllowed('beer', 'pour')->shouldBe(true);
     }
 
     function it_uses_user_exceptions($admin)
     {
         $this->setUser($admin);
-        $this->isAllowed('beer','buy')->shouldBe(true);
+        $this->isAllowed('beer', 'buy')->shouldBe(true);
     }
 
     function it_stops_userless_verbs()
     {
-        $this->isAllowed('beer','consume')->shouldBe(false);
+        $this->isAllowed('beer', 'consume')->shouldBe(false);
     }
 
     function it_declines_nonexistent_verbs($user)
     {
         $this->setUser($user);
-        $this->isAllowed('beer','pourout')->shouldBe(false);
+        $this->isAllowed('beer', 'pourout')->shouldBe(false);
+    }
+
+    function it_defers_to_controllers_when_actions_are_not_configured($user)
+    {
+        $this->setUser($user);
+        $this->canAccessAction('Foo\Controller\ThisController', 'notConfigured')->shouldBe(true);
+    }
+
+    function it_can_grant_users_access_to_strings($user, $userRules, $userRule2)
+    {
+        $this->setUser($user);
+        $this->isAllowed('beer', 'buy')->shouldBe(false);
+        $userRules->create($user, 'string', 'beer', ['buy'])->shouldBeCalled();
+        $userRules->save($userRule2)->shouldBeCalled();
+        $this->grantUserAccess('beer', 'buy');
+    }
+
+    function it_can_grant_users_access_to_new_resources($user, $resourceObject)
+    {
+        $this->setUser($user);
+        $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
+        $this->grantUserAccess($resourceObject, 'foo');
+    }
+
+    function it_can_grant_users_access_to_existing_resources($user, $resourceObject)
+    {
+        $this->setUser($user);
+        $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
+        $this->grantUserAccess($resourceObject, 'foo');
+    }
+
+    function it_throws_exceptions_when_group_actions_are_requested_for_bad_resources()
+    {
+        $this->shouldThrow(UnknownResourceTypeException::class)->during('getGroupActions', [null]);
+    }
+
+    function it_throws_exceptions_when_no_user_is_set_and_user_actions_are_requested()
+    {
+        $this->shouldThrow(UserRequiredException::class)->during('getUserActions', [null]);
+    }
+
+    function it_throws_exceptions_when_user_actions_are_requested_for_bad_resources($user)
+    {
+        $this->setUser($user);
+        $this->shouldThrow(UnknownResourceTypeException::class)->during('getUserActions', [null]);
     }
 }

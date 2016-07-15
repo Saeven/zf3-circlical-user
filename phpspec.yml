@@ -5,10 +5,10 @@ suites:
         src_path: src
         spec_path: bundle
 extensions:
-#  - PhpSpec\Extension\CodeCoverageExtension
+  - PhpSpec\Extension\CodeCoverageExtension
 code_coverage:
   whitelist:
-   - zf3-circlical-user/src
+   - src
   format:
    - html
    - clover

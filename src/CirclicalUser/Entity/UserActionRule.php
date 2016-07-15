@@ -2,30 +2,100 @@
 
 namespace CirclicalUser\Entity;
 
+use CirclicalUser\Provider\GroupActionRuleInterface;
+use CirclicalUser\Provider\UserActionRuleInterface;
+use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * An example entity that represents an action rule.
+ * Similar to a standard action rule, that is role-based -- this one is user-based.
+ * Used in cases where roles don't fit.
  *
  * @ORM\Entity
  * @ORM\Table(name="acl_actions_users")
  *
  */
-class UserActionRule
+class UserActionRule implements UserActionRuleInterface
 {
     /**
      * @var int
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\ActionRule", inversedBy="user_exceptions")
-     * @ORM\JoinColumn(name="action_rule_id", referencedColumnName="id")
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $action_rule;
+    protected $id;
 
     /**
-     * @ORM\Id
+     * @var string
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $resource_class;
+
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $resource_id;
+
+
+    /**
+     * @var Role
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $user;
 
+
+    /**
+     * @var array
+     * @ORM\Column(type="array")
+     */
+    protected $actions;
+
+
+    public function __construct(UserInterface $user, $resourceClass, $resourceId, array $actions)
+    {
+        $this->user = $user;
+        $this->resource_class = $resourceClass;
+        $this->resource_id = $resourceId;
+        $this->actions = $actions;
+    }
+
+
+    public function getResourceClass()
+    {
+        return $this->resource_class;
+    }
+
+    public function getResourceId()
+    {
+        return $this->resource_id;
+    }
+
+    public function getActions()
+    {
+        return $this->actions;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function addAction($action)
+    {
+        if (!$this->actions) {
+            $this->actions = [];
+        }
+        $this->actions[] = $action;
+    }
+
+    public function removeAction($action)
+    {
+        if (!$this->actions) {
+            return;
+        }
+        $this->actions = array_diff($this->actions, [$action]);
+    }
 }

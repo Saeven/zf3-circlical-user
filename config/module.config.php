@@ -9,7 +9,8 @@ use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
-use CirclicalUser\Mapper\ActionRuleMapper;
+use CirclicalUser\Mapper\GroupActionRuleMapper;
+use CirclicalUser\Mapper\UserActionRuleMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserAuthenticationLogMapper;
 use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
@@ -28,7 +29,9 @@ return [
         'user' => [
             'providers' => [
                 'role' => RoleMapper::class,
-                'rule' => ActionRuleMapper::class,
+                'rules' => [
+                    'group' => GroupActionRuleMapper::class,
+                ],
             ],
         ],
     ],

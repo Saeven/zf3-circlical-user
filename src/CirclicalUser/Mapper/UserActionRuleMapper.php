@@ -2,19 +2,17 @@
 
 namespace CirclicalUser\Mapper;
 
-use CirclicalUser\Provider\ActionRuleInterface;
-use CirclicalUser\Provider\ActionRuleProviderInterface;
+use CirclicalUser\Entity\UserActionRule;
 use CirclicalUser\Provider\ResourceInterface;
+use CirclicalUser\Provider\UserActionRuleInterface;
+use CirclicalUser\Provider\UserActionRuleProviderInterface;
+use CirclicalUser\Provider\UserInterface;
 
-class ActionRuleMapper extends AbstractDoctrineMapper implements ActionRuleProviderInterface
+class UserActionRuleMapper extends AbstractDoctrineMapper implements UserActionRuleProviderInterface
 {
-    protected $entityName = 'CirclicalUser\Entity\ActionRule';
+    protected $entityName = 'CirclicalUser\Entity\UserActionRule';
 
-    /**
-     * @param $string
-     * @return ActionRuleInterface[]
-     */
-    public function getStringActions($string) : array
+    public function getUserStringActions($string, UserInterface $user) : array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -25,11 +23,7 @@ class ActionRuleMapper extends AbstractDoctrineMapper implements ActionRuleProvi
         return $query->getResult();
     }
 
-    /**
-     * @param ResourceInterface $resource
-     * @return array|\CirclicalUser\Provider\ActionRuleInterface[]
-     */
-    public function getResourceActions(ResourceInterface $resource) : array
+    public function getUserResourceActions(ResourceInterface $resource, UserInterface $user) : array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -39,5 +33,10 @@ class ActionRuleMapper extends AbstractDoctrineMapper implements ActionRuleProvi
             ->getQuery();
 
         return $query->getResult();
+    }
+
+    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserActionRuleInterface
+    {
+        return new UserActionRule($user, $resourceClass, $resourceId, $actions);
     }
 }
