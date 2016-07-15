@@ -23,7 +23,7 @@ interface GroupActionRuleProviderInterface
     public function update($rule);
 
 
-    public function create() : GroupActionRuleInterface;
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupActionRuleInterface;
 
 
     public function save($rule);

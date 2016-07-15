@@ -2,10 +2,11 @@
 
 namespace CirclicalUser\Mapper;
 
+use CirclicalUser\Entity\GroupActionRule;
 use CirclicalUser\Provider\GroupActionRuleInterface;
 use CirclicalUser\Provider\GroupActionRuleProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\UserActionRuleInterface;
+use CirclicalUser\Provider\RoleInterface;
 
 class GroupActionRuleMapper extends AbstractDoctrineMapper implements GroupActionRuleProviderInterface
 {
@@ -44,7 +45,13 @@ class GroupActionRuleMapper extends AbstractDoctrineMapper implements GroupActio
         return $query->getResult();
     }
 
-    public function create() : GroupActionRuleInterface
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupActionRuleInterface
     {
+        return new GroupActionRule(
+            $role,
+            $resourceClass,
+            $resourceId,
+            $actions
+        );
     }
 }
