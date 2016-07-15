@@ -50,7 +50,7 @@ class GroupActionRule implements GroupActionRuleInterface
     protected $actions;
 
 
-    public function getResourceClass()
+    public function getResourceClass() : string
     {
         return $this->resource_class;
     }
