@@ -5,6 +5,11 @@ return[
         'user' => [
             'providers' => [
                 'user' => \Application\Entity\User::class,
+                'role' => \CirclicalUser\Mapper\RoleMapper::class,
+                'rules' => [
+                    'group' => \CirclicalUser\Mapper\GroupActionRuleMapper::class,
+                    'user' => \CirclicalUser\Mapper\UserActionRuleMapper::class,
+                ],
             ],
             'auth' => [
                 'crypto_key' => 'sfZGFm1rCc7TgPr9aly3WOtAfbEOb/VafB8L3velkd0=',
