@@ -53,7 +53,7 @@ The act of authentication, will drop cookies that satisfy subsequent identity re
 You need to create an authentication record for each user (1:1).  You should be able to plug this 
  very simply into your user service
      
-     $this->create( $user, $usernameOrEmail, $password ); // controller helper
+     $this->auth()->create( $user, $usernameOrEmail, $password ); // controller helper
 
 or
 
