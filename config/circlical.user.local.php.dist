@@ -7,8 +7,8 @@ return[
                 'user' => \Application\Entity\User::class,
                 'role' => \CirclicalUser\Mapper\RoleMapper::class,
                 'rules' => [
-                    'group' => \CirclicalUser\Mapper\GroupActionRuleMapper::class,
-                    'user' => \CirclicalUser\Mapper\UserActionRuleMapper::class,
+                    'group' => \CirclicalUser\Mapper\GroupPermissionMapper::class,
+                    'user' => \CirclicalUser\Mapper\UserPermissionMapper::class,
                 ],
             ],
             'auth' => [
