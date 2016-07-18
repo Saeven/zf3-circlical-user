@@ -5,27 +5,27 @@ namespace Spec\CirclicalUser\Service;
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
-use CirclicalUser\Mapper\GroupActionRuleMapper;
+use CirclicalUser\Mapper\GroupPermissionMapper;
 use CirclicalUser\Mapper\RoleMapper;
-use CirclicalUser\Mapper\UserActionRuleMapper;
-use CirclicalUser\Provider\GroupActionRuleProviderInterface;
+use CirclicalUser\Mapper\UserPermissionMapper;
+use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\UserActionRuleInterface;
+use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\UserRequiredException;
-use CirclicalUser\Provider\GroupActionRuleInterface;
-use CirclicalUser\Provider\UserActionRuleProviderInterface;
+use CirclicalUser\Provider\GroupPermissionInterface;
+use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class AccessServiceSpec extends ObjectBehavior
 {
-    function let(RoleProviderInterface $roleMapper, GroupActionRuleProviderInterface $groupRules, UserActionRuleProviderInterface $userRules,
+    function let(RoleProviderInterface $roleMapper, GroupPermissionProviderInterface $groupRules, UserPermissionProviderInterface $userRules,
                  User $user, User $admin,
-                 GroupActionRuleInterface $rule1, GroupActionRuleInterface $rule2, GroupActionRuleInterface $rule3,
-                 UserActionRuleInterface $userRule1, UserActionRuleInterface $userRule2, UserActionRuleInterface $userRule3,
-                 ResourceInterface $resourceObject, GroupActionRuleInterface $groupActionRule)
+                 GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
+                 UserPermissionInterface $userRule1, UserPermissionInterface $userRule2, UserPermissionInterface $userRule3,
+                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule)
     {
 
         $userRole = new Role();
@@ -151,8 +151,8 @@ class AccessServiceSpec extends ObjectBehavior
             ],
         ];
         $roleMapper = new RoleMapper();
-        $groupMapper = new GroupActionRuleMapper();
-        $userMapper = new UserActionRuleMapper();
+        $groupMapper = new GroupPermissionMapper();
+        $userMapper = new UserPermissionMapper();
         $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
     }
 
@@ -169,8 +169,8 @@ class AccessServiceSpec extends ObjectBehavior
             ],
         ];
         $roleMapper = new RoleMapper();
-        $groupMapper = new GroupActionRuleMapper();
-        $userMapper = new UserActionRuleMapper();
+        $groupMapper = new GroupPermissionMapper();
+        $userMapper = new UserPermissionMapper();
         $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
     }
 
@@ -189,8 +189,8 @@ class AccessServiceSpec extends ObjectBehavior
             ],
         ];
         $roleMapper = new RoleMapper();
-        $groupMapper = new GroupActionRuleMapper();
-        $userMapper = new UserActionRuleMapper();
+        $groupMapper = new GroupPermissionMapper();
+        $userMapper = new UserPermissionMapper();
         $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
     }
 

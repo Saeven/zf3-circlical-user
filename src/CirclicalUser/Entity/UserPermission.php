@@ -2,18 +2,20 @@
 
 namespace CirclicalUser\Entity;
 
-use CirclicalUser\Provider\GroupActionRuleInterface;
-use CirclicalUser\Provider\RoleInterface;
+use CirclicalUser\Provider\GroupPermissionInterface;
+use CirclicalUser\Provider\UserPermissionInterface;
+use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * An example entity that represents an action rule.
+ * Similar to a standard action rule, that is role-based -- this one is user-based.
+ * Used in cases where roles don't fit.
  *
  * @ORM\Entity
- * @ORM\Table(name="acl_actions")
+ * @ORM\Table(name="acl_actions_users")
  *
  */
-class GroupActionRule implements GroupActionRuleInterface
+class UserPermission implements UserPermissionInterface
 {
     /**
      * @var int
@@ -39,9 +41,10 @@ class GroupActionRule implements GroupActionRuleInterface
 
     /**
      * @var Role
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
+     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    protected $role;
+    protected $user;
 
 
     /**
@@ -51,9 +54,9 @@ class GroupActionRule implements GroupActionRuleInterface
     protected $actions;
 
 
-    public function __construct(RoleInterface $role, $resourceClass, $resourceId, array $actions)
+    public function __construct(UserInterface $user, $resourceClass, $resourceId, array $actions)
     {
-        $this->role = $role;
+        $this->user = $user;
         $this->resource_class = $resourceClass;
         $this->resource_id = $resourceId;
         $this->actions = $actions;
@@ -70,9 +73,9 @@ class GroupActionRule implements GroupActionRuleInterface
         return $this->resource_id;
     }
 
-    public function getRole()
+    public function getUser()
     {
-        return $this->role;
+        return $this->user;
     }
 
     public function getActions() : array
@@ -80,6 +83,7 @@ class GroupActionRule implements GroupActionRuleInterface
         if (!$this->actions) {
             return [];
         }
+
         return $this->actions;
     }
 

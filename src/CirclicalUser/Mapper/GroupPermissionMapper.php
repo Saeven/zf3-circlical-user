@@ -2,20 +2,20 @@
 
 namespace CirclicalUser\Mapper;
 
-use CirclicalUser\Entity\GroupActionRule;
-use CirclicalUser\Provider\GroupActionRuleInterface;
-use CirclicalUser\Provider\GroupActionRuleProviderInterface;
+use CirclicalUser\Entity\GroupPermission;
+use CirclicalUser\Provider\GroupPermissionInterface;
+use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
 use CirclicalUser\Provider\RoleInterface;
 
-class GroupActionRuleMapper extends AbstractDoctrineMapper implements GroupActionRuleProviderInterface
+class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermissionProviderInterface
 {
     protected $entityName = 'CirclicalUser\Entity\ActionRule';
 
     /**
      * @param $string
      *
-     * @return GroupActionRuleInterface[]
+     * @return GroupPermissionInterface[]
      */
     public function getStringActions($string) : array
     {
@@ -31,7 +31,7 @@ class GroupActionRuleMapper extends AbstractDoctrineMapper implements GroupActio
     /**
      * @param ResourceInterface $resource
      *
-     * @return array|\CirclicalUser\Provider\GroupActionRuleInterface[]
+     * @return array|\CirclicalUser\Provider\GroupPermissionInterface[]
      */
     public function getResourceActions(ResourceInterface $resource) : array
     {
@@ -45,9 +45,9 @@ class GroupActionRuleMapper extends AbstractDoctrineMapper implements GroupActio
         return $query->getResult();
     }
 
-    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupActionRuleInterface
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupPermissionInterface
     {
-        return new GroupActionRule(
+        return new GroupPermission(
             $role,
             $resourceClass,
             $resourceId,

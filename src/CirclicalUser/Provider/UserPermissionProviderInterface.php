@@ -3,14 +3,14 @@
 namespace CirclicalUser\Provider;
 
 
-interface UserActionRuleProviderInterface
+interface UserPermissionProviderInterface
 {
 
     /**
      * @param               $string
      * @param UserInterface $user
      *
-     * @return UserActionRuleInterface
+     * @return UserPermissionInterface
      */
     public function getUserStringActions($string, UserInterface $user);
 
@@ -19,7 +19,7 @@ interface UserActionRuleProviderInterface
      * @param ResourceInterface $resource
      * @param UserInterface     $user
      *
-     * @return UserActionRuleInterface
+     * @return UserPermissionInterface
      */
     public function getUserResourceActions(ResourceInterface $resource, UserInterface $user);
 
@@ -27,7 +27,7 @@ interface UserActionRuleProviderInterface
     public function update($rule);
 
 
-    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserActionRuleInterface;
+    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserPermissionInterface;
 
 
     public function save($rule);

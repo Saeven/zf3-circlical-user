@@ -3,7 +3,15 @@
 namespace CirclicalUser\Provider;
 
 
-interface UserActionRuleInterface
+/**
+ * Interface UserPermissionInterface
+ *
+ * This interface defines a user-level permission that supersedes what this user may otherwise have as a function of
+ * its group permissions.
+ *
+ * @package CirclicalUser\Provider
+ */
+interface UserPermissionInterface
 {
     public function getResourceClass() : string;
 

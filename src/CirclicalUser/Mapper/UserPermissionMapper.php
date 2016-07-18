@@ -2,13 +2,13 @@
 
 namespace CirclicalUser\Mapper;
 
-use CirclicalUser\Entity\UserActionRule;
+use CirclicalUser\Entity\UserPermission;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\UserActionRuleInterface;
-use CirclicalUser\Provider\UserActionRuleProviderInterface;
+use CirclicalUser\Provider\UserPermissionInterface;
+use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserInterface;
 
-class UserActionRuleMapper extends AbstractDoctrineMapper implements UserActionRuleProviderInterface
+class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermissionProviderInterface
 {
     protected $entityName = 'CirclicalUser\Entity\UserActionRule';
 
@@ -35,8 +35,8 @@ class UserActionRuleMapper extends AbstractDoctrineMapper implements UserActionR
         return $query->getResult();
     }
 
-    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserActionRuleInterface
+    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserPermissionInterface
     {
-        return new UserActionRule($user, $resourceClass, $resourceId, $actions);
+        return new UserPermission($user, $resourceClass, $resourceId, $actions);
     }
 }

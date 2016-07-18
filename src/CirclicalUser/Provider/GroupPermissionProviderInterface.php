@@ -2,20 +2,20 @@
 
 namespace CirclicalUser\Provider;
 
-interface GroupActionRuleProviderInterface
+interface GroupPermissionProviderInterface
 {
 
     /**
      * @param $string
      *
-     * @return GroupActionRuleInterface[]
+     * @return GroupPermissionInterface[]
      */
     public function getStringActions($string) : array;
 
     /**
      * @param ResourceInterface $resource
      *
-     * @return array|GroupActionRuleInterface[]
+     * @return array|GroupPermissionInterface[]
      */
     public function getResourceActions(ResourceInterface $resource) : array;
 
@@ -23,7 +23,7 @@ interface GroupActionRuleProviderInterface
     public function update($rule);
 
 
-    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupActionRuleInterface;
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupPermissionInterface;
 
 
     public function save($rule);

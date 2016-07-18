@@ -4,14 +4,14 @@ namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\RuleExpectedException;
-use CirclicalUser\Provider\GroupActionRuleProviderInterface;
-use CirclicalUser\Provider\UserActionRuleInterface;
+use CirclicalUser\Provider\GroupPermissionProviderInterface;
+use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
 use CirclicalUser\Exception\UserRequiredException;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\UserActionRuleProviderInterface;
+use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use phpDocumentor\Reflection\Types\Resource;
@@ -37,7 +37,7 @@ class AccessService
 
 
     public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
-                                GroupActionRuleProviderInterface $groupRules, UserActionRuleProviderInterface $userRules)
+                                GroupPermissionProviderInterface $groupRules, UserPermissionProviderInterface $userRules)
     {
         $this->roleProvider = $roleProvider;
         $this->groupRules = $groupRules;
@@ -250,7 +250,7 @@ class AccessService
      *
      * @param $resource
      *
-     * @return UserActionRuleInterface
+     * @return UserPermissionInterface
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
@@ -335,12 +335,12 @@ class AccessService
 
         // make sure we can work with this
         if ($resourceRule) {
-            if (!($resourceRule instanceof UserActionRuleInterface)) {
-                throw new RuleExpectedException(UserActionRuleInterface::class, get_class($resourceRule));
+            if (!($resourceRule instanceof UserPermissionInterface)) {
+                throw new RuleExpectedException(UserPermissionInterface::class, get_class($resourceRule));
             }
         }
 
-        /** @var UserActionRuleInterface $resourceRule */
+        /** @var UserPermissionInterface $resourceRule */
         if ($resourceRule) {
             if (in_array($action, $resourceRule->getActions())) {
                 return;
