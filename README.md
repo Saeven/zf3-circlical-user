@@ -1,4 +1,4 @@
-## Authentication, Identity, and Security for ZF3
+# Authentication, Identity, and RBAC for Zend Framework 3
 [![Build Status](https://travis-ci.org/Saeven/zf3-circlical-user.svg?branch=master)](https://travis-ci.org/Saeven/zf3-circlical-user)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Grade)
 
@@ -10,19 +10,18 @@ Plug and play system for:
 - resource-based permissions, giving you 'resource' and 'verb' control at the role and user level, e.g. 
 (all administrators can 'add' a server, only Pete can 'delete')
 
-### Philosophy
+### Missive
 
-Sure - there are other Authentication, ACL, and User modules out there.  This one is very opinionated, and more 
-importantly, comes with out-of-the-box support for **Doctrine** - just plug in your user entity.
+Sure - there are other Authentication, ACL, and User modules out there.  This one comes with out-of-the-box support for **Doctrine** - just plug in your user entity and go.
 
-Its authentication system is cookie-based, meaning no session usage at all.  This was done because I develop for 
+Authentication is persisted using cookies, meaning no session usage at all.  This was done because I develop for 
 circumstances where this is preferable, removing any need for complex or error-prone solutions for session management on 
 an EC2 auto-scale group for example.
 
-Lastly, authenticated encryption is handled using the well-trusted [Halite](http://google.com), and password hashing is 
+Lastly, authenticated encryption is handled using the well-trusted [Halite](https://github.com/paragonie/halite), and password hashing is 
 properly done with PHP's new password functions. 
 [Feedback always solicited on r/php.](https://www.reddit.com/r/PHP/comments/4r84jn/need_reviews_of_cookiebased_authentication_service/).
-If you are a paranoid fellow like me, this library should serve you well!
+If you are a paranoid fellow like me, this library should serve well!
 
 > Right now, I am waiting for Doctrine-ORM to move to the latest Zend-MVC.
 > When that's done, I will promptly upgrade this package.
@@ -31,27 +30,29 @@ This library works on a deny-first basis.  Everything defined by its parts below
 
 ## User Authentication
 
-The module provides full identity management, starting at the user-level.  A design goal was to connect this into your 
+The module provides full identity/auth management, starting at the user-level.  A design goal was to connect this to 
 registration or login processes with little more than one-liners.
 
 ##### Login
 
-Validate your submitted Login form, and then execute this to get your user
+Validate your submitted Login form, and then execute this to get your user through the door:
        
     $user = $this->auth()->authenticate( $emailOrUsername, $password );
     
-The act of authentication, will drop cookies that satisfy subsequent identity retrieval
+Successful authentication, will drop cookies that satisfy subsequent identity retrieval.
      
      
 ##### Logout
+    
+Trash cookies and regenerate the session key for that user, using this command:
     
      $this->auth()->clearIdentity();
      
      
 ##### During User Creation
      
-You need to create an authentication record for each user (1:1).  You should be able to plug this 
- very simply into your user service
+You need to create a distinct authentication record for each user.  You should be able to plug this 
+ very simply into your user service to get the job done:
      
      $this->auth()->create( $user, $usernameOrEmail, $password ); // controller helper
 
@@ -64,7 +65,7 @@ or
 ## Roles
 
 Your users belong to hierarchical roles that are configured in the database.  *The default guest user, is group-less.*  
-Roles are  used to restrict access to **controllers**, **actions**, or **resources**.
+Roles are used to restrict access to **controllers**, **actions**, or **resources**.
 
 
 ## Guards
