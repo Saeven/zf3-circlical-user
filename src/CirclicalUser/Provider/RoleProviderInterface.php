@@ -11,5 +11,20 @@ namespace CirclicalUser\Provider;
  */
 interface RoleProviderInterface
 {
+    /**
+     * Fetch an array of all RoleInterface objects
+     * @return RoleInterface[]
+     */
     public function getAllRoles() : array;
+
+
+    /**
+     * Fetch a role with a particular name
+     *
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function getRoleWithName($name);
+
 }

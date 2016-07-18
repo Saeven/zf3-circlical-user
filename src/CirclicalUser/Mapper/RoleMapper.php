@@ -2,7 +2,9 @@
 
 namespace CirclicalUser\Mapper;
 
+use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
+use CirclicalUser\Provider\UserInterface;
 
 /**
  * Class RoleMapper
@@ -22,5 +24,18 @@ class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
                 ->getQuery();
 
         return $query->getResult();
+    }
+
+
+    /**
+     * Fetch a role with a particular name
+     *
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function getRoleWithName($name)
+    {
+
     }
 }

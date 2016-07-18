@@ -9,4 +9,6 @@ interface UserInterface
     public function getRoles();
 
     public function getEmail();
+
+    public function addRole(RoleInterface $role);
 }

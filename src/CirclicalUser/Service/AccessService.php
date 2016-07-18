@@ -3,8 +3,11 @@
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
+use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
+use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\GuardConfigurationException;
@@ -21,7 +24,12 @@ class AccessService
 {
     const ACCESS_DENIED = 'ACL_ACCESS_DENIED';
 
+    /**
+     * @var  UserInterface
+     */
     private $user;
+
+    private $userMapper;
 
     private $controllerDefaults;
 
@@ -37,8 +45,10 @@ class AccessService
 
 
     public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
-                                GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider)
+                                GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider,
+                                UserMapper $userMapper)
     {
+        $this->userMapper = $userMapper;
         $this->roleProvider = $roleProvider;
         $this->groupPermissions = $groupPermissionProvider;
         $this->userPermissions = $userPermissionProvider;
@@ -169,6 +179,40 @@ class AccessService
         return $this->hasRoleWithName($role->getName());
     }
 
+
+    /**
+     * Add a role for the current User
+     *
+     * @param $roleName
+     *
+     * @throws InvalidRoleException
+     * @throws UserRequiredException
+     * @internal param $roleId
+     */
+    public function addRoleByName($roleName)
+    {
+        if (!$this->user) {
+            throw new UserRequiredException();
+        }
+
+        $this->compileUserRoles();
+
+        if ($this->hasRoleWithName($roleName)) {
+            return;
+        }
+
+        $role = $this->roleProvider->getRoleWithName($roleName);
+
+        if (!$role) {
+            throw new InvalidRoleException($roleName);
+        }
+
+        $this->user->addRole($role);
+        $this->userRoles[] = $roleName;
+        $this->userMapper->update($this->user);
+    }
+
+
     /**
      * Get the string IDs of all roles accessible to the current user.  If your user has 'admin' role, and 'admin'
      * is a super-role to 'user', this method will return ['admin','user'].
@@ -193,7 +237,6 @@ class AccessService
 
         if (!$this->user) {
             $this->userRoles = [];
-
             return;
         }
 

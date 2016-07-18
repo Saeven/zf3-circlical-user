@@ -7,6 +7,7 @@ use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
 use CirclicalUser\Mapper\GroupPermissionMapper;
 use CirclicalUser\Mapper\RoleMapper;
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
@@ -25,7 +26,7 @@ class AccessServiceSpec extends ObjectBehavior
                  User $user, User $admin,
                  GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
                  UserPermissionInterface $userRule1, UserPermissionInterface $userRule2, UserPermissionInterface $userRule3,
-                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule)
+                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule, UserMapper $userMapper)
     {
 
         $userRole = new Role();
@@ -38,6 +39,7 @@ class AccessServiceSpec extends ObjectBehavior
         $adminRole->setParent($userRole);
 
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
+        $roleMapper->getRoleWithName('admin')->willReturn($adminRole);
 
         /*
          * Rule 1: Users can consume beer
@@ -125,10 +127,11 @@ class AccessServiceSpec extends ObjectBehavior
             ],
         ];
 
-        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules);
+        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules, $userMapper);
 
         $user->getId()->willReturn(100);
         $user->getRoles()->willReturn([$userRole]);
+        $user->addRole(Argument::any())->willReturn(null);
 
         $admin->getId()->willReturn(101);
         $admin->getRoles()->willREturn([$adminRole]);
@@ -152,8 +155,9 @@ class AccessServiceSpec extends ObjectBehavior
         ];
         $roleMapper = new RoleMapper();
         $groupMapper = new GroupPermissionMapper();
-        $userMapper = new UserPermissionMapper();
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+        $userPermissionMapper = new UserPermissionMapper();
+        $userMapper = new UserMapper('Foo');
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
     }
 
     function it_requires_an_array_as_action_config()
@@ -170,8 +174,9 @@ class AccessServiceSpec extends ObjectBehavior
         ];
         $roleMapper = new RoleMapper();
         $groupMapper = new GroupPermissionMapper();
-        $userMapper = new UserPermissionMapper();
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+        $userPermissionMapper = new UserPermissionMapper();
+        $userMapper = new UserMapper('Foo');
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
     }
 
     function it_requires_an_array_as_action_roles_config()
@@ -190,8 +195,9 @@ class AccessServiceSpec extends ObjectBehavior
         ];
         $roleMapper = new RoleMapper();
         $groupMapper = new GroupPermissionMapper();
-        $userMapper = new UserPermissionMapper();
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userMapper]);
+        $userPermissionMapper = new UserPermissionMapper();
+        $userMapper = new UserMapper('Foo');
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
     }
 
     function it_accepts_a_user_with_an_id(User $testUser)
@@ -212,6 +218,14 @@ class AccessServiceSpec extends ObjectBehavior
         $roles = $this->getRoles();
         $roles->shouldContain('admin');
         $roles->shouldContain('user');
+    }
+
+    function it_adds_roles($user)
+    {
+        $this->setUser($user);
+        $this->hasRoleWithName('admin')->shouldBe(false);
+        $this->addRoleByName('admin');
+        $this->hasRoleWithName('admin')->shouldBe(true);
     }
 
     function it_compiles_roles_properly_2($user)

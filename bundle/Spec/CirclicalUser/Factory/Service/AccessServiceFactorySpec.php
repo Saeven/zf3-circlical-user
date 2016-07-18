@@ -2,6 +2,7 @@
 
 namespace Spec\CirclicalUser\Factory\Service;
 
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserInterface as User;
@@ -18,7 +19,7 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Factory\Service\AccessServiceFactory');
     }
 
-    function it_creates_its_service(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper, UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService)
+    function it_creates_its_service(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper, UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, UserMapper $userMapper)
     {
         $config = [
 
@@ -64,10 +65,12 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(GroupPermissionProviderInterface::class)->willReturn($ruleMapper);
         $serviceManager->get(UserPermissionProviderInterface::class)->willReturn($userActionRuleMapper);
         $serviceManager->get(AuthenticationService::class)->willReturn($authenticationService);
+        $serviceManager->get(UserMapper::class)->willReturn($userMapper);
         $this->createService($serviceManager)->shouldBeAnInstanceOf(AccessService::class);
     }
 
-    function it_creates_its_service_with_user_identity(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper, UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, User $user)
+    function it_creates_its_service_with_user_identity(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper,
+                                                       UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, User $user, UserMapper $userMapper)
     {
         $config = [
 
@@ -113,6 +116,7 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(GroupPermissionProviderInterface::class)->willReturn($ruleMapper);
         $serviceManager->get(UserPermissionProviderInterface::class)->willReturn($userActionRuleMapper);
         $serviceManager->get(AuthenticationService::class)->willReturn($authenticationService);
+        $serviceManager->get(UserMapper::class)->willReturn($userMapper);
         $this->createService($serviceManager)->shouldBeAnInstanceOf(AccessService::class);
     }
 }

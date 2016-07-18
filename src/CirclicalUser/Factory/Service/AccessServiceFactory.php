@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Factory\Service;
 
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AccessService;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -23,7 +24,8 @@ class AccessServiceFactory implements FactoryInterface
             $guards,
             $serviceLocator->get($roleProvider),
             $serviceLocator->get($groupRuleProvider),
-            $serviceLocator->get($userRuleProvider)
+            $serviceLocator->get($userRuleProvider),
+            $serviceLocator->get(UserMapper::class)
         );
 
         $authenticationService = $serviceLocator->get(AuthenticationService::class);
