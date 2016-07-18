@@ -133,5 +133,5 @@ You can also give individual users, access to specific actions on resources as w
 # Installation
 
 * Working with Doctrine? [Click Here](INSTALL_DOCTRINE.md) 
-* Roll Your Own
+* Want to roll your own Providers? [Click Here](INSTALL_CUSTOM.md)
 
