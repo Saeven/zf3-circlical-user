@@ -3,6 +3,7 @@
 namespace CirclicalUser\Controller\Plugin;
 
 use CirclicalUser\Provider\UserInterface as User;
+use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
@@ -12,12 +13,18 @@ class AuthenticationPlugin extends AbstractPlugin
     /**
      * @var AuthenticationService
      */
-    protected $authenticationService;
+    private $authenticationService;
+
+    /**
+     * @var AccessService
+     */
+    private $accessService;
 
 
-    public function __construct(AuthenticationService $authenticationService)
+    public function __construct(AuthenticationService $authenticationService, AccessService $accessService)
     {
         $this->authenticationService = $authenticationService;
+        $this->accessService = $accessService;
     }
 
     /**
@@ -56,6 +63,11 @@ class AuthenticationPlugin extends AbstractPlugin
     public function create(User $user, $username, $password)
     {
         $this->authenticationService->create($user, $username, $password);
+    }
+
+    public function isAllowed($resource, $action)
+    {
+        return $this->accessService->isAllowed($resource, $action);
     }
 
 }

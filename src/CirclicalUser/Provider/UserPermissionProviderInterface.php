@@ -3,6 +3,13 @@
 namespace CirclicalUser\Provider;
 
 
+/**
+ * Interface UserPermissionProviderInterface
+ *
+ * Framework for your user-permission provider.
+ *
+ * @package CirclicalUser\Provider
+ */
 interface UserPermissionProviderInterface
 {
 
@@ -12,7 +19,7 @@ interface UserPermissionProviderInterface
      *
      * @return UserPermissionInterface
      */
-    public function getUserStringActions($string, UserInterface $user);
+    public function getUserPermission($string, UserInterface $user);
 
 
     /**
@@ -21,7 +28,7 @@ interface UserPermissionProviderInterface
      *
      * @return UserPermissionInterface
      */
-    public function getUserResourceActions(ResourceInterface $resource, UserInterface $user);
+    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user);
 
 
     public function update($rule);

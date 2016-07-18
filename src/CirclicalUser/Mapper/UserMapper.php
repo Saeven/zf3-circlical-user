@@ -5,10 +5,10 @@ namespace CirclicalUser\Mapper;
 use CirclicalUser\Provider\UserInterface as User;
 
 /**
- * Well a mapper is a pseudo-service that transforms data objects into domain objects. This one is responsible for
- * User entities.
- *
  * Class UserMapper
+ *
+ * A UserMapper that'll use whatever User Entity you pass in through your config, if you choose to use the Doctrine
+ * Entity system that this library provides.  Of course, you can also create your own Providers.
  *
  * @package CirclicalUser\Mapper
  */

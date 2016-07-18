@@ -6,6 +6,13 @@ use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Entity\UserAtom;
 
 
+/**
+ * Class UserAtomMapper
+ *
+ * A convenience class, this lets you drop nuggets of information to support a user with an easy-to-use API.
+ *
+ * @package CirclicalUser\Mapper
+ */
 class UserAtomMapper extends AbstractDoctrineMapper
 {
     protected $entityName = 'CirclicalUser\Entity\UserAtom';

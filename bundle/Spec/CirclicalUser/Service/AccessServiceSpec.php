@@ -90,15 +90,15 @@ class AccessServiceSpec extends ObjectBehavior
         $groupActionRule->getRole()->willReturn('user');
         $groupActionRule->getActions()->willReturn(['bar']);
 
-        $userRules->getUserStringActions(Argument::type('string'), Argument::any())->willReturn(null);
-        $userRules->getUserStringActions('beer', $admin)->willReturn($userRule1);
+        $userRules->getUserPermission(Argument::type('string'), Argument::any())->willReturn(null);
+        $userRules->getUserPermission('beer', $admin)->willReturn($userRule1);
         $userRules->create($user, 'string', 'beer', ['buy'])->willReturn($userRule2);
         $userRules->save($userRule2)->willReturn(null);
-        $userRules->getUserResourceActions($resourceObject, $user)->willReturn($userRule3);
+        $userRules->getResourceUserPermission($resourceObject, $user)->willReturn($userRule3);
         $userRules->update(Argument::any())->willReturn(null);
 
-        $groupRules->getStringActions('beer')->willReturn([$rule1, $rule2, $rule3]);
-        $groupRules->getResourceActions($resourceObject)->willReturn([$groupActionRule]);
+        $groupRules->getPermissions('beer')->willReturn([$rule1, $rule2, $rule3]);
+        $groupRules->getResourcePermissions($resourceObject)->willReturn([$groupActionRule]);
 
 
         $config = [

@@ -3,7 +3,7 @@
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
-use CirclicalUser\Exception\RuleExpectedException;
+use CirclicalUser\Exception\PermissionExpectedException;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
@@ -31,17 +31,17 @@ class AccessService
 
     private $roleProvider;
 
-    private $groupRules;
+    private $groupPermissions;
 
-    private $userRules;
+    private $userPermissions;
 
 
     public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
-                                GroupPermissionProviderInterface $groupRules, UserPermissionProviderInterface $userRules)
+                                GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider)
     {
         $this->roleProvider = $roleProvider;
-        $this->groupRules = $groupRules;
-        $this->userRules = $userRules;
+        $this->groupPermissions = $groupPermissionProvider;
+        $this->userPermissions = $userPermissionProvider;
         $this->controllerDefaults = [];
         $this->actions = [];
 
@@ -219,53 +219,55 @@ class AccessService
     }
 
     /**
-     * Actions are an ability to do 'something' with either a 'string' or ResourceInterface as the subject.  Some
-     * actions are attributed to roles, as defined by your roleProvider.  This method checks to see if the set of
-     * roles associated to your user, grants access to a specific verb on a resource.
+     * Permissions are an ability to do 'something' with either a 'string' or ResourceInterface as the subject.  Some
+     * permissions are attributed to roles, as defined by your role provider.  This method checks to see if the set of
+     * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
-     * @param $resource
+     * @param ResourceInterface|string $resource
      *
      * @return array
      * @throws UnknownResourceTypeException
      */
-    public function getGroupActions($resource) : array
+    public function getGroupPermissions($resource) : array
     {
         if ($resource instanceof ResourceInterface) {
-            return $this->groupRules->getResourceActions($resource);
+            return $this->groupPermissions->getResourcePermissions($resource);
         }
 
         if (is_string($resource)) {
-            return $this->groupRules->getStringActions($resource);
+            return $this->groupPermissions->getPermissions($resource);
         }
 
         throw new UnknownResourceTypeException(get_class($resource));
     }
 
     /**
-     * Action rules can also be defined at a user level.  Similar to group rules (e.g., all admins can 'shutdown' 'servers'),
+     * Permissions can also be defined at a user level.  Similar to group rules (e.g., all admins can 'shutdown' 'servers'),
      * you can give users individual privileges on verbs and resources. You can create circumstances such as
      * "all admins can 'shutdown' 'servers', and user 45 can do it too!"
      *
-     * This method expects that a user has been set by the Factory
+     * This method expects that a user has been set, e.g., by the Factory.
      *
-     * @param $resource
+     * A single permission is returned, since the user can only have one permission set attributed to a given Resource
+     *
+     * @param ResourceInterface|string $resource
      *
      * @return UserPermissionInterface
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
-    public function getUserActions($resource)
+    public function getUserPermission($resource)
     {
         if (!$this->user) {
             throw new UserRequiredException();
         }
 
         if ($resource instanceof ResourceInterface) {
-            return $this->userRules->getUserResourceActions($resource, $this->user);
+            return $this->userPermissions->getResourceUserPermission($resource, $this->user);
         }
 
         if (is_string($resource)) {
-            return $this->userRules->getUserStringActions($resource, $this->user);
+            return $this->userPermissions->getUserPermission($resource, $this->user);
         }
 
         throw new UnknownResourceTypeException(get_class($resource));
@@ -280,14 +282,14 @@ class AccessService
      * It was a design condition to favor consistent method invocation, and let this library handle string or
      * resource distinction, rather than force you to differentiate the cases in your code.
      *
-     * @param $resource
-     * @param $action
+     * @param ResourceInterface|string $resource
+     * @param string                   $action
      *
      * @return bool
      */
     public function isAllowed($resource, $action) : bool
     {
-        $actions = $this->getGroupActions($resource);
+        $actions = $this->getGroupPermissions($resource);
 
         // check roles first
         foreach ($actions as $actionRule) {
@@ -311,14 +313,14 @@ class AccessService
      *
      * isAllowed, will pass the buck to this method if no group rules satisfy the action.
      *
-     * @param $resource
-     * @param $action
+     * @param ResourceInterface|string $resource
+     * @param string                   $action
      *
      * @return bool
      */
     public function isAllowedUser($resource, $action) : bool
     {
-        $actionRule = $this->getUserActions($resource);
+        $actionRule = $this->getUserPermission($resource);
 
         if ($actionRule) {
             if (in_array($action, $actionRule->getActions())) {
@@ -329,14 +331,28 @@ class AccessService
         return false;
     }
 
+    /**
+     * Grant a user, string (simple) or ResourceInterface permissions.  The action whose permission is being granted,
+     * must be specified.
+     *
+     * Example:  $this->grantAccess('car','start');
+     *
+     * The user must have been loaded in using setUser (done automatically by the factory when a user is authenticated)
+     * prior to this call.
+     *
+     * @param ResourceInterface|string $resource
+     * @param string                   $action
+     *
+     * @throws PermissionExpectedException
+     */
     public function grantUserAccess($resource, $action)
     {
-        $resourceRule = $this->getUserActions($resource);
+        $resourceRule = $this->getUserPermission($resource);
 
         // make sure we can work with this
         if ($resourceRule) {
             if (!($resourceRule instanceof UserPermissionInterface)) {
-                throw new RuleExpectedException(UserPermissionInterface::class, get_class($resourceRule));
+                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($resourceRule));
             }
         }
 
@@ -346,16 +362,49 @@ class AccessService
                 return;
             }
             $resourceRule->addAction($action);
-            $this->userRules->update($resourceRule);
+            $this->userPermissions->update($resourceRule);
         } else {
             $isString = is_string($resource);
-            $resourceRule = $this->userRules->create(
+            $resourceRule = $this->userPermissions->create(
                 $this->user,
                 $isString ? 'string' : $resource->getClass(),
                 $isString ? $resource : $resource->getId(),
                 [$action]
             );
-            $this->userRules->save($resourceRule);
+            $this->userPermissions->save($resourceRule);
         }
     }
+
+    /**
+     * Revoke access to a resource
+     *
+     * @param ResourceInterface|string $resource
+     * @param                          $action
+     *
+     * @throws PermissionExpectedException
+     */
+    public function revokeUserAccess($resource, $action)
+    {
+        $resourceRule = $this->getUserPermission($resource);
+
+        if (!$resourceRule) {
+            return;
+        }
+
+        // make sure we can work with this
+        if ($resourceRule) {
+            if (!($resourceRule instanceof UserPermissionInterface)) {
+                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($resourceRule));
+            }
+        }
+
+        if ($resourceRule) {
+            if (!in_array($action, $resourceRule->getActions())) {
+                return;
+            }
+            $resourceRule->removeAction($action);
+            $this->userPermissions->update($resourceRule);
+        }
+    }
+
 }

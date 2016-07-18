@@ -8,11 +8,23 @@ use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserInterface;
 
+/**
+ * Class UserPermissionMapper
+ * @package CirclicalUser\Mapper
+ */
 class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermissionProviderInterface
 {
     protected $entityName = 'CirclicalUser\Entity\UserActionRule';
 
-    public function getUserStringActions($string, UserInterface $user) : array
+    /**
+     * Get any user-level, string (simple) permissions that are configured in the database.
+     *
+     * @param               $string
+     * @param UserInterface $user
+     *
+     * @return array
+     */
+    public function getUserPermission($string, UserInterface $user) : array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -23,7 +35,15 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
         return $query->getResult();
     }
 
-    public function getUserResourceActions(ResourceInterface $resource, UserInterface $user) : array
+    /**
+     * Get resource-type permissions from the database
+     *
+     * @param ResourceInterface $resource
+     * @param UserInterface     $user
+     *
+     * @return array
+     */
+    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user) : array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -35,6 +55,16 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
         return $query->getResult();
     }
 
+    /**
+     * Create a user permission, not persisted, and return it.
+     *
+     * @param UserInterface $user
+     * @param               $resourceClass
+     * @param               $resourceId
+     * @param array         $actions
+     *
+     * @return UserPermissionInterface
+     */
     public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserPermissionInterface
     {
         return new UserPermission($user, $resourceClass, $resourceId, $actions);
