@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Factory\Controller\Plugin;
 
 use CirclicalUser\Controller\Plugin\AuthenticationPlugin;
+use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
 use Zend\Mvc\Controller\PluginManager;
@@ -15,10 +16,12 @@ class AuthenticationPluginFactorySpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory');
     }
 
-    function it_supports_factory_interface(PluginManager $pluginLocator, ServiceManager $serviceLocator, AuthenticationService $authenticationService)
+    function it_supports_factory_interface(PluginManager $pluginLocator, ServiceManager $serviceLocator, AuthenticationService $authenticationService, AccessService $accessService )
     {
-        $pluginLocator->getServiceLocator()->willReturn($serviceLocator);
         $serviceLocator->get(AuthenticationService::class)->willReturn($authenticationService);
+        $serviceLocator->get(AccessService::class)->willReturn($accessService);
+        $pluginLocator->getServiceLocator()->willReturn($serviceLocator);
+
         $this->createService($pluginLocator)->shouldBeAnInstanceOf(AuthenticationPlugin::class);
     }
 }

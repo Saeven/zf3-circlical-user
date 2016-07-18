@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Controller\Plugin;
 
 use CirclicalUser\Provider\UserInterface as User;
+use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -14,7 +15,7 @@ class AuthenticationPluginSpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Controller\Plugin\AuthenticationPlugin');
     }
 
-    public function let(AuthenticationService $authenticationService, User $user, User $newUser)
+    public function let(AuthenticationService $authenticationService, AccessService $accessService, User $user, User $newUser)
     {
         $authenticationService->authenticate(Argument::any(), Argument::any())->willReturn(null);
         $authenticationService->authenticate('user', 'pass')->willReturn($user);
@@ -22,7 +23,7 @@ class AuthenticationPluginSpec extends ObjectBehavior
 
         $authenticationService->create(Argument::type(User::class), Argument::any(), Argument::any())->willReturn($newUser);
 
-        $this->beConstructedWith($authenticationService);
+        $this->beConstructedWith($authenticationService, $accessService);
     }
 
     public function it_can_authenticate_users($authenticationService, $user)

@@ -29,8 +29,10 @@ class AuthenticationPlugin extends AbstractPlugin
 
     /**
      * Pass me an email/username combo and I'll start the user session
+     *
      * @param $email
      * @param $pass
+     *
      * @return User
      * @throws \CirclicalUser\Exception\BadPasswordException
      * @throws \CirclicalUser\Exception\NoSuchUserException
@@ -56,7 +58,7 @@ class AuthenticationPlugin extends AbstractPlugin
     /**
      * Give me a user and password, and I'll create authentication records for you
      *
-     * @param User $user
+     * @param User   $user
      * @param string $username Can be an email address or username, should be validated prior
      * @param string $password
      */

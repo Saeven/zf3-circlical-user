@@ -355,17 +355,17 @@ class AccessServiceSpec extends ObjectBehavior
 
     function it_throws_exceptions_when_group_actions_are_requested_for_bad_resources()
     {
-        $this->shouldThrow(UnknownResourceTypeException::class)->during('getGroupActions', [null]);
+        $this->shouldThrow(UnknownResourceTypeException::class)->during('getGroupPermissions', [null]);
     }
 
     function it_throws_exceptions_when_no_user_is_set_and_user_actions_are_requested()
     {
-        $this->shouldThrow(UserRequiredException::class)->during('getUserActions', [null]);
+        $this->shouldThrow(UserRequiredException::class)->during('getUserPermission', [null]);
     }
 
     function it_throws_exceptions_when_user_actions_are_requested_for_bad_resources($user)
     {
         $this->setUser($user);
-        $this->shouldThrow(UnknownResourceTypeException::class)->during('getUserActions', [null]);
+        $this->shouldThrow(UnknownResourceTypeException::class)->during('getUserPermission', [null]);
     }
 }

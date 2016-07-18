@@ -30,6 +30,7 @@
 
 namespace CirclicalUser\Factory\Controller\Plugin;
 
+use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -48,6 +49,10 @@ class AuthenticationPluginFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        return new AuthenticationPlugin($serviceLocator->getServiceLocator()->get(AuthenticationService::class));
+        $locator = $serviceLocator->getServiceLocator();
+        return new AuthenticationPlugin(
+            $locator->get(AuthenticationService::class),
+            $locator->get(AccessService::class)
+        );
     }
 }
