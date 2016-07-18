@@ -27,19 +27,47 @@ If you are a paranoid fellow like me, this library should serve you well!
 > Right now, I am waiting for Doctrine-ORM to move to the latest Zend-MVC.
 > When that's done, I will promptly upgrade this package.
 
-## Its Parts
+This library works on a deny-first basis.  Everything defined by its parts below, are 'allow' grants.
 
-### User Authentication
+## User Authentication
 
 The module provides full identity management, starting at the user-level.  A design goal was to connect this into your 
 registration or login processes with little more than one-liners.
 
-### Roles
+##### Login
+
+Validate your submitted Login form, and then execute this to get your user
+       
+    $user = $this->auth()->authenticate( $emailOrUsername, $password );
+    
+The act of authentication, will drop cookies that satisfy subsequent identity retrieval
+     
+     
+##### Logout
+    
+     $this->auth()->clearIdentity();
+     
+     
+##### During User Creation
+     
+You need to create an authentication record for each user (1:1).  You should be able to plug this 
+ very simply into your user service
+     
+     $this->create( $user, $usernameOrEmail, $password ); // controller helper
+
+or
+
+    $container->get(AccessService::class)->create($user, $usernameOrEmail, $password );
+    
+
+
+## Roles
 
 Your users belong to hierarchical roles that are configured in the database.  *The default guest user, is group-less.*  
 Roles are  used to restrict access to **controllers**, **actions**, or **resources**.
 
-### Guards
+
+## Guards
 
 Guards are conditions on **controllers** or **actions** that examine **group** or **user** privileges to permit/decline 
 attempted access.  It works very similarly to [BjyAuthorize](https://github.com/bjyoungblood/BjyAuthorize) 
@@ -71,7 +99,7 @@ Configuring guards is very simple.  Your module's config would look like so:
      ];   
 
 
-### Resources & Permissions
+## Resources & Permissions
 
 Resources can be:
 
@@ -94,7 +122,15 @@ Granting a **role** a **permission** is done through the AccessService
 
 ### User Permissions
 
-User exceptions are user exceptions to 
+You can also give individual users, access to specific actions on resources as well.  This library provides 
+ **Doctrine** entities and a mapper to make this happen -- but you could wire your own [UserPermissionProviderInterface](src/CirclicalUser/Provider/UserPermissionProviderInterface)
+ very easily.  In short, this lets the AccessService use the authenticated user to determine whether or
+ not the logged-in individual can perform an action that supersedes what his role permissions otherwise
+ grant.  User Permissions are meant to be more permissive, not restrictive.  
+
 
 # Installation
-(WIP)
+
+* Working with Doctrine? [Click Here](INSTALL_DOCTRINE.md) 
+* Roll Your Own
+
