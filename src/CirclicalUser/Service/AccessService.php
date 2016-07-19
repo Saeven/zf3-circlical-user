@@ -249,13 +249,16 @@ class AccessService
         }
 
         /** @var Role $userRole */
-        foreach ($this->user->getRoles() as $userRole) {
-            $roleExpansion[] = $userRole->getName();
+        $userRoles = $this->user->getRoles();
+        if ($userRoles) {
+            foreach ( as $userRole) {
+                $roleExpansion[] = $userRole->getName();
 
-            $parentRole = $userRole->getParent();
-            while ($parentRole) {
-                $roleExpansion[] = $parentRole->getName();
-                $parentRole = $parentRole->getParent();
+                $parentRole = $userRole->getParent();
+                while ($parentRole) {
+                    $roleExpansion[] = $parentRole->getName();
+                    $parentRole = $parentRole->getParent();
+                }
             }
         }
         $this->userRoles = array_unique($roleExpansion);

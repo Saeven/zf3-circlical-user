@@ -134,7 +134,7 @@ class AccessServiceSpec extends ObjectBehavior
         $user->addRole(Argument::any())->willReturn(null);
 
         $admin->getId()->willReturn(101);
-        $admin->getRoles()->willREturn([$adminRole]);
+        $admin->getRoles()->willReturn([$adminRole]);
     }
 
     function it_is_initializable()
