@@ -421,8 +421,10 @@ class AuthenticationService
                 throw new MismatchedEmailsException();
             }
 
-            if ($this->userMapper->findByEmail($username)) {
-                throw new EmailUsernameTakenException();
+            if ($emailUser = $this->userMapper->findByEmail($username)) {
+                if ($emailUser != $user) {
+                    throw new EmailUsernameTakenException();
+                }
             }
         }
 
