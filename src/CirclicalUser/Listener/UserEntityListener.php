@@ -37,7 +37,7 @@
             }
 
             switch ($classMetadata->getName()) {
-                case 'CirclicalUser\Entity\UserActionRule':
+                case 'CirclicalUser\Entity\UserPermission':
                     $classMetadata->associationMappings['user']['targetEntity'] = $this->userEntity;
                     break;
             }
