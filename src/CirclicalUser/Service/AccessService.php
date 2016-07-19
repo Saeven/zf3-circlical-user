@@ -251,7 +251,7 @@ class AccessService
         /** @var Role $userRole */
         $userRoles = $this->user->getRoles();
         if ($userRoles) {
-            foreach ( as $userRole) {
+            foreach ($userRoles as $userRole) {
                 $roleExpansion[] = $userRole->getName();
 
                 $parentRole = $userRole->getParent();
