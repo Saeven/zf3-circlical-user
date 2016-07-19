@@ -22,17 +22,9 @@ class ModuleSpec extends ObjectBehavior
         $this->getConfig()->shouldBeArray();
     }
 
-    public function it_returns_an_autoloader()
-    {
-        $loaders = $this->getAutoloaderConfig();
-        $loaders->shouldBeArray();
-        $loaders->shouldHaveCount(1);
-    }
-
     public function it_has_a_bootstrap_method(MvcEvent $event, Application $application, ServiceLocatorInterface $serviceLocator,
                                               AccessListener $listener, EventManager $eventManager )
     {
-
         Console::overrideIsConsole(false);
         $application->getEventManager()->willReturn($eventManager);
         $serviceLocator->get(AccessListener::class)->willReturn($listener);
