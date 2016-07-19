@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * An example entity that represents a role.
  *
  * @ORM\Entity
- * @ORM\Table(name="acl_roles")
+ * @ORM\Table(name="acl_roles", indexes={@ORM\Index(name="name_idx", columns={"name"})})
  *
  */
 class Role implements RoleInterface

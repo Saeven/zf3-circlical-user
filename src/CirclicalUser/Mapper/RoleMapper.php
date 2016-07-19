@@ -36,6 +36,6 @@ class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
      */
     public function getRoleWithName($name)
     {
-
+        return $this->getRepository()->findOneBy(['name' => $name]);
     }
 }
