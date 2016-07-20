@@ -117,14 +117,14 @@ or if an object:
     $server = $serverMapper->get(142);
     $this->auth()->isAllowed($server,'shutdown');
 
-The AccessService is also similarly usable.  See [AccessService tests](bundle/Spec/Service/AccessServiceSpec) for more usage examples.
+The AccessService is also similarly usable.  See [AccessService tests](bundle/Spec/Service/AccessServiceSpec.php) for more usage examples.
     
 Granting a **role** a **permission** is done through the AccessService 
 
 ### User Permissions
 
 You can also give individual users, access to specific actions on resources as well.  This library provides 
- **Doctrine** entities and a mapper to make this happen -- but you could wire your own [UserPermissionProviderInterface](src/CirclicalUser/Provider/UserPermissionProviderInterface)
+ **Doctrine** entities and a mapper to make this happen -- but you could wire your own [UserPermissionProviderInterface](src/CirclicalUser/Provider/UserPermissionProviderInterface.php)
  very easily.  In short, this lets the AccessService use the authenticated user to determine whether or
  not the logged-in individual can perform an action that supersedes what his role permissions otherwise
  grant.  User Permissions are meant to be more permissive, not restrictive.  
