@@ -16,6 +16,6 @@ before_install:
 - pecl install libsodium
 - echo "extension = libsodium.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
-before_script: composer install --prefer-source --no-interaction --dev
+before_script: composer install --prefer-source --no-interaction
 
 script: vendor/bin/phpspec --config=phpspec.yml run
