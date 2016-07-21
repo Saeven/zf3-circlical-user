@@ -33,7 +33,7 @@
     "doctrine/doctrine-orm-module": "@stable",
     "doctrine/doctrine-module": "@stable",
     "doctrine/orm": "@stable",
-    "paragonie/halite": "@stable"
+    "paragonie/halite": "2.1.2"
   },
   "require-dev": {
     "phpspec/phpspec": "@stable",
@@ -42,11 +42,6 @@
   "autoload": {
     "psr-0": {
       "CirclicalUser\\": "src"
-    }
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "0.4-dev"
     }
   }
 }
