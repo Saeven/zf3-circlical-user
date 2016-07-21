@@ -2,7 +2,10 @@
 
 namespace CirclicalUser\Factory\Service;
 
+use CirclicalUser\Mapper\GroupPermissionMapper;
+use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -16,16 +19,17 @@ class AccessServiceFactory implements FactoryInterface
         $userConfig = $config['circlical']['user'];
         $guards = $userConfig['guards'];
 
-        $roleProvider = $userConfig['providers']['role'];
-        $groupRuleProvider = $userConfig['providers']['rule']['group'];
-        $userRuleProvider = $userConfig['providers']['rule']['user'] ?? null;
+        $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
+        $roleProvider = $userConfig['providers']['role'] ?? RoleMapper::class;
+        $groupRuleProvider = $userConfig['providers']['rule']['group'] ?? GroupPermissionMapper::class;
+        $userRuleProvider = $userConfig['providers']['rule']['user'] ?? UserPermissionMapper::class;
 
         $accessService = new AccessService(
             $guards,
             $serviceLocator->get($roleProvider),
             $serviceLocator->get($groupRuleProvider),
             $serviceLocator->get($userRuleProvider),
-            $serviceLocator->get(UserMapper::class)
+            $serviceLocator->get($userProvider)
         );
 
         $authenticationService = $serviceLocator->get(AuthenticationService::class);

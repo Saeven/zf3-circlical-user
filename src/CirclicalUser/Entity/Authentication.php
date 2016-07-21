@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Entity;
 
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -11,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="users_auth", indexes={@ORM\Index(name="username_idx", columns={"username"})})
  *
  */
-class Authentication
+class Authentication implements AuthenticationRecordInterface
 {
     /**
      * @var int
@@ -84,7 +85,7 @@ class Authentication
     /**
      * @return string
      */
-    public function getUsername()
+    public function getUsername() : string
     {
         return $this->username;
     }
@@ -116,7 +117,7 @@ class Authentication
     /**
      * @return string
      */
-    public function getSessionKey()
+    public function getSessionKey() : string
     {
         return base64_decode($this->session_key);
     }

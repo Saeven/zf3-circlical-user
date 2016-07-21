@@ -2,7 +2,9 @@
 
 namespace CirclicalUser\Service;
 
-use CirclicalUser\Entity\Authentication;
+
+use CirclicalUser\Provider\AuthenticationProviderInterface;
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
 use CirclicalUser\Exception\EmailUsernameTakenException;
@@ -10,7 +12,7 @@ use CirclicalUser\Exception\MismatchedEmailsException;
 use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
-use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Provider\UserProviderInterface;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
@@ -21,9 +23,7 @@ use ParagonIE\Halite\Symmetric\EncryptionKey;
  * you to log in using email or username.  Note, if you permit an auth model where you allow users to register
  * emails as usernames, it's your responsibility to trigger the username change when the email change occurs.
  *
- * Class Authentication
- *
- * @package LDP\Service
+ * Class AuthenticationService
  */
 class AuthenticationService
 {
@@ -52,12 +52,12 @@ class AuthenticationService
     /**
      * @var AuthenticationMapper
      */
-    private $authenticationMapper;
+    private $authenticationProvider;
 
     /**
-     * @var UserMapper
+     * @var UserProviderInterface
      */
-    private $userMapper;
+    private $userProvider;
 
     /**
      * @var string A config-defined key that's used to encrypt ID cookie
@@ -78,16 +78,16 @@ class AuthenticationService
     /**
      * AuthenticationService constructor.
      *
-     * @param AuthenticationMapper $authenticationMapper
-     * @param UserMapper $userMapper
-     * @param string $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
-     * @param bool $transient True if cookies should expire at the end of the session (zero value, for expiry)
-     * @param bool $secure True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
+     * @param AuthenticationProviderInterface $authenticationProvider
+     * @param UserProviderInterface           $userProvider
+     * @param string                          $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
+     * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
+     * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
      */
-    public function __construct(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, $systemEncryptionKey, $transient, $secure)
+    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $systemEncryptionKey, $transient, $secure)
     {
-        $this->authenticationMapper = $authenticationMapper;
-        $this->userMapper = $userMapper;
+        $this->authenticationProvider = $authenticationProvider;
+        $this->userProvider = $userProvider;
         $this->systemEncryptionKey = $systemEncryptionKey;
         $this->transient = $transient;
         $this->secure = $secure;
@@ -105,6 +105,7 @@ class AuthenticationService
 
     /**
      * Authenticate a user
+     *
      * @param User $user
      */
     private function setIdentity(User $user)
@@ -119,6 +120,7 @@ class AuthenticationService
      *
      * @param $username
      * @param $password
+     *
      * @return User
      *
      * @throws BadPasswordException Thrown when the password doesn't work
@@ -126,12 +128,12 @@ class AuthenticationService
      */
     public function authenticate($username, $password) : User
     {
-        $auth = $this->authenticationMapper->findByUsername($username);
+        $auth = $this->authenticationProvider->findByUsername($username);
         $user = null;
 
         if (!$auth && filter_var($username, FILTER_VALIDATE_EMAIL)) {
-            if ($user = $this->userMapper->findByEmail($username)) {
-                $auth = $this->authenticationMapper->findByUserId($user->getId());
+            if ($user = $this->userProvider->findByEmail($username)) {
+                $auth = $this->authenticationProvider->findByUserId($user->getId());
             }
         }
 
@@ -142,7 +144,7 @@ class AuthenticationService
         if (password_verify($password, $auth->getHash())) {
 
             if (!$user) {
-                $user = $this->userMapper->getUser($auth->getUserId());
+                $user = $this->userProvider->getUser($auth->getUserId());
             }
 
             if ($user) {
@@ -152,7 +154,7 @@ class AuthenticationService
 
                 if (password_needs_rehash($auth->getHash(), PASSWORD_DEFAULT)) {
                     $auth->setHash(password_hash($password, PASSWORD_DEFAULT));
-                    $this->authenticationMapper->update($auth);
+                    $this->authenticationProvider->update($auth);
                 }
 
                 return $user;
@@ -170,22 +172,23 @@ class AuthenticationService
      * Note - in this case username is email.
      *
      * @param User $user
-     * @param $newUsername
-     * @return Authentication
+     * @param      $newUsername
+     *
+     * @return AuthenticationRecordInterface
      * @throws NoSuchUserException Thrown when the user's authentication records couldn't be found
      * @throws UsernameTakenException
      */
-    public function changeUsername(User $user, $newUsername) : Authentication
+    public function changeUsername(User $user, $newUsername) : AuthenticationRecordInterface
     {
-        /** @var Authentication $auth */
-        $auth = $this->authenticationMapper->findByUserId($user->getId());
+        /** @var AuthenticationRecordInterface $auth */
+        $auth = $this->authenticationProvider->findByUserId($user->getId());
 
         if (!$auth) {
             throw new NoSuchUserException();
         }
 
         // check to see if already taken
-        if ($otherAuth = $this->authenticationMapper->findByUsername($newUsername)) {
+        if ($otherAuth = $this->authenticationProvider->findByUsername($newUsername)) {
             if ($auth == $otherAuth) {
                 return $auth;
             } else {
@@ -194,7 +197,7 @@ class AuthenticationService
         }
 
         $auth->setUsername($newUsername);
-        $this->authenticationMapper->update($auth);
+        $this->authenticationProvider->update($auth);
 
         return $auth;
     }
@@ -202,9 +205,10 @@ class AuthenticationService
 
     /**
      * Set the auth session cookies that can be used to regenerate the session on subsequent visits
-     * @param Authentication $authentication
+     *
+     * @param AuthenticationRecordInterface $authentication
      */
-    private function setSessionCookies(Authentication $authentication)
+    private function setSessionCookies(AuthenticationRecordInterface $authentication)
     {
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $userKey = new EncryptionKey($authentication->getSessionKey());
@@ -247,6 +251,7 @@ class AuthenticationService
 
     /**
      * Set a cookie with values defined by configuration
+     *
      * @param $name
      * @param $value
      */
@@ -324,8 +329,8 @@ class AuthenticationService
                 return null;
             }
 
-            /** @var Authentication $auth */
-            if (!($auth = $this->authenticationMapper->findByUserId($cookieUserId))) {
+            /** @var AuthenticationRecordInterface $auth */
+            if (!($auth = $this->authenticationProvider->findByUserId($cookieUserId))) {
                 return null;
             }
 
@@ -363,7 +368,7 @@ class AuthenticationService
                 return null;
             }
 
-            $user = $this->userMapper->getUser($auth->getUserId());
+            $user = $this->userProvider->getUser($auth->getUserId());
             if ($user) {
                 $this->setIdentity($user);
 
@@ -381,13 +386,14 @@ class AuthenticationService
     /**
      * Reset this user's password
      *
-     * @param User $user The user to whom this password gets assigned
+     * @param User   $user        The user to whom this password gets assigned
      * @param string $newPassword Cleartext password that's being hashed
+     *
      * @throws NoSuchUserException
      */
     public function resetPassword(User $user, $newPassword)
     {
-        $auth = $this->authenticationMapper->findByUserId($user->getId());
+        $auth = $this->authenticationProvider->findByUserId($user->getId());
         if (!$auth) {
             throw new NoSuchUserException();
         }
@@ -395,24 +401,25 @@ class AuthenticationService
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
         $auth->setHash($hash);
         $this->resetAuthenticationKey($auth);
-        $this->authenticationMapper->update($auth);
+        $this->authenticationProvider->update($auth);
     }
 
 
     /**
      * Register a new user into the auth tables, and, log them in
      *
-     * @param User $user
+     * @param User   $user
      * @param string $username
      * @param string $password
-     * @return Authentication
+     *
+     * @return AuthenticationRecordInterface
      * @throws EmailUsernameTakenException
      * @throws MismatchedEmailsException
      * @throws UsernameTakenException
      */
-    public function create(User $user, $username, $password) : Authentication
+    public function create(User $user, $username, $password) : AuthenticationRecordInterface
     {
-        if ($this->authenticationMapper->findByUsername($username)) {
+        if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
         }
 
@@ -421,7 +428,7 @@ class AuthenticationService
                 throw new MismatchedEmailsException();
             }
 
-            if ($emailUser = $this->userMapper->findByEmail($username)) {
+            if ($emailUser = $this->userProvider->findByEmail($username)) {
                 if ($emailUser != $user) {
                     throw new EmailUsernameTakenException();
                 }
@@ -429,14 +436,14 @@ class AuthenticationService
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $auth = new Authentication(
+        $auth = $this->authenticationProvider->create(
             $user->getId(),
             $username,
             $hash,
             KeyFactory::generateEncryptionKey()->getRawKeyMaterial()
         );
 
-        $this->authenticationMapper->save($auth);
+        $this->authenticationProvider->save($auth);
         $this->setSessionCookies($auth);
         $this->setIdentity($user);
 
@@ -447,14 +454,15 @@ class AuthenticationService
     /**
      * Resalt a user's authentication table salt
      *
-     * @param Authentication $auth
-     * @return Authentication
+     * @param AuthenticationRecordInterface $auth
+     *
+     * @return AuthenticationRecordInterface
      */
-    private function resetAuthenticationKey(Authentication $auth) : Authentication
+    private function resetAuthenticationKey(AuthenticationRecordInterface $auth) : AuthenticationRecordInterface
     {
         $key = KeyFactory::generateEncryptionKey();
         $auth->setSessionKey($key->getRawKeyMaterial());
-        $this->authenticationMapper->update($auth);
+        $this->authenticationProvider->update($auth);
 
         return $auth;
     }
@@ -466,7 +474,7 @@ class AuthenticationService
     public function clearIdentity()
     {
         if ($user = $this->getIdentity()) {
-            $auth = $this->authenticationMapper->findByUserId($user->getId());
+            $auth = $this->authenticationProvider->findByUserId($user->getId());
             $this->resetAuthenticationKey($auth);
         }
 

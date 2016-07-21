@@ -3,9 +3,11 @@
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\Authentication;
+use CirclicalUser\Provider\AuthenticationProviderInterface;
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 
 
-class AuthenticationMapper extends AbstractDoctrineMapper
+class AuthenticationMapper extends AbstractDoctrineMapper implements AuthenticationProviderInterface
 {
     protected $entityName = 'CirclicalUser\Entity\Authentication';
 
@@ -27,4 +29,16 @@ class AuthenticationMapper extends AbstractDoctrineMapper
         return $this->getRepository()->findOneBy(['user_id' => $userId]);
     }
 
+    /**
+     * @param $userId
+     * @param $username
+     * @param $hash
+     * @param $rawKey
+     *
+     * @return AuthenticationRecordInterface
+     */
+    public function create($userId, $username, $hash, $rawKey) : AuthenticationRecordInterface
+    {
+        return new Authentication($userId, $username, $hash, $rawKey);
+    }
 }

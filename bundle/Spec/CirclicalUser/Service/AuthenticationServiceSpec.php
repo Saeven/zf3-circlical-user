@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Authentication;
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
 use CirclicalUser\Exception\EmailUsernameTakenException;
@@ -353,17 +354,21 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(NoSuchUserException::class)->during('resetPassword', [$user5, 'efg']);
     }
 
-    public function it_can_create_new_auth_records($authenticationMapper, User $user5 )
+    public function it_can_create_new_auth_records($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth)
     {
+        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getUsername()->willReturn('email');
+        $newAuth->getUserId()->willReturn(5);
         $user5->getId()->willReturn(5);
-        $authenticationMapper->save(Argument::type(Authentication::class))->shouldBeCalled();
-        $this->create($user5, 'userC', 'abcd')->shouldBeAnInstanceOf(Authentication::class);
+        $authenticationMapper->save(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
+        $authenticationMapper->create(Argument::type('integer'), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
+        $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
     }
 
     public function it_wont_overwrite_existing_auth_on_create($authenticationMapper, User $user5)
     {
         $user5->getId()->willReturn(5);
-        $this->shouldThrow(UsernameTakenException::class)->during('create', [$user5, 'userA', 'abcd']);
+        $this->shouldThrow(UsernameTakenException::class)->during('create', [$user5, 'userA', 'razorblades']);
     }
 
     public function it_wont_create_auth_when_email_usernames_belong_to_user_records($authenticationMapper, User $user5)
@@ -371,13 +376,13 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
         $user5->getId()->willReturn(5);
         $user5->getEmail()->willReturn('alex@circlical.com');
-        $this->shouldThrow(EmailUsernameTakenException::class)->during('create', [$user5, 'alex@circlical.com', 'abcd']);
+        $this->shouldThrow(EmailUsernameTakenException::class)->during('create', [$user5, 'alex@circlical.com', 'pepperspray']);
     }
 
     public function it_does_not_permit_mismatched_emails( User $user6)
     {
         $user6->getEmail()->willReturn('a@b.com');
-        $this->shouldThrow(MismatchedEmailsException::class)->during('create', [$user6, 'b@b.com', 'abcd']);
+        $this->shouldThrow(MismatchedEmailsException::class)->during('create', [$user6, 'b@b.com', 'alphabet']);
     }
 
     public function it_can_clear_identity()

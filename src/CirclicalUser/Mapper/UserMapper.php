@@ -3,6 +3,7 @@
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Provider\UserInterface as User;
+use CirclicalUser\Provider\UserProviderInterface;
 
 /**
  * Class UserMapper
@@ -12,7 +13,7 @@ use CirclicalUser\Provider\UserInterface as User;
  *
  * @package CirclicalUser\Mapper
  */
-class UserMapper extends AbstractDoctrineMapper
+class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
 {
     protected $entityName;
 

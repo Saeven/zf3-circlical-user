@@ -5,7 +5,7 @@ suites:
         src_path: src
         spec_path: bundle
 extensions:
-  - PhpSpec\Extension\CodeCoverageExtension
+#  - PhpSpec\Extension\CodeCoverageExtension
 code_coverage:
   whitelist:
    - src

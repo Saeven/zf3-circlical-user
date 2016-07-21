@@ -14,6 +14,7 @@ use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserAuthenticationLogMapper;
 use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
@@ -30,6 +31,7 @@ return [
                 'role' => RoleMapper::class,
                 'rules' => [
                     'group' => GroupPermissionMapper::class,
+                    'user' => UserPermissionMapper::class,
                 ],
             ],
         ],

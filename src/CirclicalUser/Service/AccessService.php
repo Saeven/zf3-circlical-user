@@ -5,7 +5,6 @@ namespace CirclicalUser\Service;
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
-use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
@@ -17,7 +16,7 @@ use CirclicalUser\Provider\ResourceInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
-use phpDocumentor\Reflection\Types\Resource;
+use CirclicalUser\Provider\UserProviderInterface;
 
 
 class AccessService
@@ -29,7 +28,7 @@ class AccessService
      */
     private $user;
 
-    private $userMapper;
+    private $userProvider;
 
     private $controllerDefaults;
 
@@ -46,9 +45,9 @@ class AccessService
 
     public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
                                 GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider,
-                                UserMapper $userMapper)
+                                UserProviderInterface $userProvider)
     {
-        $this->userMapper = $userMapper;
+        $this->userProvider = $userProvider;
         $this->roleProvider = $roleProvider;
         $this->groupPermissions = $groupPermissionProvider;
         $this->userPermissions = $userPermissionProvider;
@@ -209,7 +208,7 @@ class AccessService
 
         $this->user->addRole($role);
         $this->userRoles[] = $roleName;
-        $this->userMapper->update($this->user);
+        $this->userProvider->update($this->user);
     }
 
 
