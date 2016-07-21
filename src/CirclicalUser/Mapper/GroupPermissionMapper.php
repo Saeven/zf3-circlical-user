@@ -10,7 +10,7 @@ use CirclicalUser\Provider\RoleInterface;
 
 class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermissionProviderInterface
 {
-    protected $entityName = 'CirclicalUser\Entity\ActionRule';
+    protected $entityName = 'CirclicalUser\Entity\GroupPermission';
 
     /**
      * @param $string
