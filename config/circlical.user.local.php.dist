@@ -50,7 +50,7 @@ return [
                 // Implements
                 //
 
-                'auth' => \CirclicalUser\Mapper\AuthenticationMapper::class,
+//                'auth' => \CirclicalUser\Mapper\AuthenticationMapper::class,
 
 
                 //
@@ -58,14 +58,14 @@ return [
                 // Implements CirclicalUser\Provider\UserProviderInterface
                 //
 
-                'user' => \CirclicalUser\Mapper\UserMapper::class,
+//                'user' => \CirclicalUser\Mapper\UserMapper::class,
 
                 //
                 // Role mapper
                 // Implements CirclicalUser\Provider\RoleProvider
                 //
 
-                'role' => \CirclicalUser\Mapper\RoleMapper::class,
+//                'role' => \CirclicalUser\Mapper\RoleMapper::class,
 
 
                 // Authentication mapper
@@ -79,13 +79,13 @@ return [
                     // Implements \CirclicalUser\Provider\GroupPermissionProviderInterface
                     //
 
-                    'group' => \CirclicalUser\Mapper\GroupPermissionMapper::class,
+//                    'group' => \CirclicalUser\Mapper\GroupPermissionMapper::class,
 
                     //
                     // User permission mapper
                     // Implements \CirclicalUser\Provider\UserPermissionProviderInterface
 
-                    'user' => \CirclicalUser\Mapper\UserPermissionMapper::class,
+//                    'user' => \CirclicalUser\Mapper\UserPermissionMapper::class,
 
                 ],
             ],

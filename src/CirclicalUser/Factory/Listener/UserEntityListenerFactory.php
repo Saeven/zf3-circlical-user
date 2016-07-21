@@ -22,7 +22,7 @@ class UserEntityListenerFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $config = $serviceLocator->get('config');
-        $config = $config['circlical']['user'];
+        $config = $config['circlical']['user']['doctrine'];
 
         if (!isset($config['entity'])) {
             throw new \Exception("You must specify the user Entity that CirclicalUser will use!");
