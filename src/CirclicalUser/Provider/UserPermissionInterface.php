@@ -19,6 +19,8 @@ interface UserPermissionInterface
 
     public function getUser();
 
+    public function can($actionName) : bool;
+
     public function getActions() : array;
 
     public function addAction($action);

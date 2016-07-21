@@ -23,7 +23,7 @@ interface RoleProviderInterface
      *
      * @param $name
      *
-     * @return mixed
+     * @return RoleInterface
      */
     public function getRoleWithName($name);
 

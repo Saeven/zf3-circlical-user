@@ -101,4 +101,13 @@ class GroupPermission implements GroupPermissionInterface
         }
         $this->actions = array_diff($this->actions, [$action]);
     }
+
+    public function can($actionName) : bool
+    {
+        if (!$this->actions) {
+            return false;
+        }
+
+        return in_array($actionName, $this->actions);
+    }
 }

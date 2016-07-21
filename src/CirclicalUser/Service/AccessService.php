@@ -3,8 +3,10 @@
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
+use CirclicalUser\Exception\ExistingAccessException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
+use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
@@ -271,7 +273,7 @@ class AccessService
      *
      * @param ResourceInterface|string $resource
      *
-     * @return array
+     * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
     public function getGroupPermissions($resource) : array
@@ -335,19 +337,29 @@ class AccessService
      */
     public function isAllowed($resource, $action) : bool
     {
-        $actions = $this->getGroupPermissions($resource);
+        $groupPermissions = $this->getGroupPermissions($resource);
 
         // check roles first
-        foreach ($actions as $actionRule) {
-            if (in_array($action, $actionRule->getActions())) {
-                if ($actionRule->getRole() && $this->hasRole($actionRule->getRole())) {
-                    return true;
-                }
+        foreach ($groupPermissions as $groupPermission) {
+            if ($groupPermission->can($action) && $this->hasRole($groupPermission->getRole())) {
+                return true;
             }
         }
 
         if ($this->user) {
             return $this->isAllowedUser($resource, $action);
+        }
+
+        return false;
+    }
+
+    public function isAllowedByResourceClass($resourceClass, $action) : bool
+    {
+        $actions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
+        foreach ($actions as $groupPermission) {
+            if ($groupPermission->can($action)) {
+                return true;
+            }
         }
 
         return false;
@@ -366,15 +378,9 @@ class AccessService
      */
     public function isAllowedUser($resource, $action) : bool
     {
-        $actionRule = $this->getUserPermission($resource);
+        $permission = $this->getUserPermission($resource);
 
-        if ($actionRule) {
-            if (in_array($action, $actionRule->getActions())) {
-                return true;
-            }
-        }
-
-        return false;
+        return $permission && $permission->can($action);
     }
 
 
@@ -386,19 +392,63 @@ class AccessService
      *
      * @return array Array of IDs whose class was $resourceClass
      */
-    public function listAllowedByClass($resourceClass, $action) : array
+    public function listAllowedByClass($resourceClass, $action = "") : array
     {
         $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         $permitted = [];
         foreach ($permissions as $permission) {
-            if (in_array($action, $permission->getActions())) {
-                $permitted[] = $permission->getId();
+            if (!$action || $permission->can($action)) {
+                $permitted[] = $permission->getResourceId();
             }
         }
 
         return array_unique($permitted);
     }
 
+
+    /**
+     * Give a role, access to a specific resource
+     *
+     * @param RoleInterface     $role
+     * @param ResourceInterface $resource
+     * @param string            $action
+     *
+     * @throws ExistingAccessException
+     */
+    public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, $action)
+    {
+        $resourcePermissions = $this->getGroupPermissions($resource);
+        $matchedPermission = null;
+
+        //
+        // 1. Check to see if the role, or its parents already have access.  Don't pollute the database.
+        //
+        $examinedRole = $role;
+        while ($examinedRole) {
+            foreach ($resourcePermissions as $permission) {
+                if ($role == $permission->getRole()) {
+                    $matchedPermission = $permission;
+                }
+
+                if ($permission->can($action)) {
+                    throw new ExistingAccessException($role, $resource, $action, $permission->getRole()->getName());
+                }
+            }
+            $examinedRole = $examinedRole->getParent();
+        }
+
+        //
+        // 2. Give access
+        //
+        if (!$matchedPermission) {
+            $newPermission = $this->groupPermissions->create($role, $resource->getClass(), $resource->getId(), [$action]);
+            $this->groupPermissions->save($newPermission);
+        } else {
+            $matchedPermission->addAction($action);
+            $this->groupPermissions->update($matchedPermission);
+
+        }
+    }
 
     /**
      * Grant a user, string (simple) or ResourceInterface permissions.  The action whose permission is being granted,
@@ -416,31 +466,36 @@ class AccessService
      */
     public function grantUserAccess($resource, $action)
     {
-        $resourceRule = $this->getUserPermission($resource);
+        $permission = $this->getUserPermission($resource);
+
+        // already have permission? get out
+        if ($this->isAllowed($resource, $action)) {
+            return;
+        }
 
         // make sure we can work with this
-        if ($resourceRule) {
-            if (!($resourceRule instanceof UserPermissionInterface)) {
-                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($resourceRule));
+        if ($permission) {
+            if (!($permission instanceof UserPermissionInterface)) {
+                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($permission));
             }
         }
 
-        /** @var UserPermissionInterface $resourceRule */
-        if ($resourceRule) {
-            if (in_array($action, $resourceRule->getActions())) {
+        /** @var UserPermissionInterface $permission */
+        if ($permission) {
+            if ($permission->can($action)) {
                 return;
             }
-            $resourceRule->addAction($action);
-            $this->userPermissions->update($resourceRule);
+            $permission->addAction($action);
+            $this->userPermissions->update($permission);
         } else {
             $isString = is_string($resource);
-            $resourceRule = $this->userPermissions->create(
+            $permission = $this->userPermissions->create(
                 $this->user,
                 $isString ? 'string' : $resource->getClass(),
                 $isString ? $resource : $resource->getId(),
                 [$action]
             );
-            $this->userPermissions->save($resourceRule);
+            $this->userPermissions->save($permission);
         }
     }
 

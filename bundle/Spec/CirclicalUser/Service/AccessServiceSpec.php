@@ -48,6 +48,8 @@ class AccessServiceSpec extends ObjectBehavior
         $rule1->getRole()->willReturn($userRole);
         $rule1->getResourceClass()->willReturn('string');
         $rule1->getResourceId()->willReturn('beer');
+        $rule1->can(Argument::type('string'))->willReturn(false);
+        $rule1->can('consume')->willReturn(true);
 
         /*
          * Rule 2: Admins can pour beer
@@ -56,6 +58,8 @@ class AccessServiceSpec extends ObjectBehavior
         $rule2->getRole()->willReturn($adminRole);
         $rule2->getResourceClass()->willReturn('string');
         $rule2->getResourceId()->willReturn('beer');
+        $rule2->can(Argument::type('string'))->willReturn(false);
+        $rule2->can('pour')->willReturn(true);
 
         /*
          * Rule 3: Guests can look beer
@@ -64,6 +68,8 @@ class AccessServiceSpec extends ObjectBehavior
         $rule3->getRole()->willReturn(null);
         $rule3->getResourceClass()->willReturn('string');
         $rule3->getResourceId()->willReturn('beer');
+        $rule3->can(Argument::type('string'))->willReturn(false);
+        $rule3->can('look')->willReturn(true);
 
         /*
          * Rule 4: Admin user can choose beer
@@ -72,17 +78,23 @@ class AccessServiceSpec extends ObjectBehavior
         $userRule1->getResourceClass()->willReturn('string');
         $userRule1->getResourceId()->willReturn('beer');
         $userRule1->getUser()->willReturn($admin);
+        $userRule1->can(Argument::type('string'))->willReturn(false);
+        $userRule1->can('buy')->willReturn(true);
 
         $userRule2->getActions()->willReturn(['buy']);
         $userRule2->getResourceClass()->willReturn('string');
         $userRule2->getResourceId()->willReturn('beer');
         $userRule2->getUser()->willReturn($user);
+        $userRule2->can(Argument::type('string'))->willReturn(false);
+        $userRule2->can('buy')->willReturn(true);
 
         $userRule3->getActions()->willReturn(['bar']);
         $userRule3->getResourceClass()->willReturn('ResourceObject');
         $userRule3->getResourceId()->willReturn('1234');
         $userRule3->getUser()->willReturn($user);
         $userRule3->addAction('foo')->willReturn(null);
+        $userRule3->can(Argument::type('string'))->willReturn(false);
+        $userRule3->can('bar')->willReturn(true);
 
         $resourceObject->getClass()->willReturn("ResourceObject");
         $resourceObject->getId()->willReturn("1234");
@@ -91,6 +103,8 @@ class AccessServiceSpec extends ObjectBehavior
         $groupActionRule->getResourceId()->willReturn("1234");
         $groupActionRule->getRole()->willReturn('user');
         $groupActionRule->getActions()->willReturn(['bar']);
+        $groupActionRule->can(Argument::type('string'))->willReturn(false);
+        $groupActionRule->can('bar')->willReturn(true);
 
         $userRules->getUserPermission(Argument::type('string'), Argument::any())->willReturn(null);
         $userRules->getUserPermission('beer', $admin)->willReturn($userRule1);
@@ -98,6 +112,7 @@ class AccessServiceSpec extends ObjectBehavior
         $userRules->save($userRule2)->willReturn(null);
         $userRules->getResourceUserPermission($resourceObject, $user)->willReturn($userRule3);
         $userRules->update(Argument::any())->willReturn(null);
+
 
         $groupRules->getPermissions('beer')->willReturn([$rule1, $rule2, $rule3]);
         $groupRules->getResourcePermissions($resourceObject)->willReturn([$groupActionRule]);

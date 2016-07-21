@@ -26,11 +26,16 @@ interface GroupPermissionProviderInterface
     /**
      * @param ResourceInterface $resource
      *
-     * @return array|GroupPermissionInterface[]
+     * @return GroupPermissionInterface[]
      */
     public function getResourcePermissions(ResourceInterface $resource) : array;
 
 
+    /**
+     * @param $resourceClass
+     *
+     * @return GroupPermissionInterface[]
+     */
     public function getResourcePermissionsByClass($resourceClass) : array;
 
 
