@@ -24,15 +24,16 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
      *
      * @return array
      */
-    public function getUserPermission($string, UserInterface $user) : array
+    public function getUserPermission($string, UserInterface $user)
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
-            ->where('r.resource_class = "string" AND r.resource_id=:resourceId')
+            ->where('r.resource_class = "string" AND r.resource_id=:resourceId AND r.user=:user')
             ->setParameter('resourceId', $string)
+            ->setParameter('user', $user)
             ->getQuery();
 
-        return $query->getResult();
+        return $query->getOneOrNullResult();
     }
 
     /**
@@ -43,16 +44,17 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
      *
      * @return array
      */
-    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user) : array
+    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user)
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
-            ->where('r.resource_class = :resourceClass AND r.resource_id=:resourceId')
+            ->where('r.resource_class = :resourceClass AND r.resource_id=:resourceId AND r.user=:user')
             ->setParameter('resourceClass', $resource->getClass())
             ->setParameter('resourceId', $resource->getId())
+            ->setParameter('user', $user)
             ->getQuery();
 
-        return $query->getResult();
+        return $query->getOneOrNullResult();
     }
 
     /**
