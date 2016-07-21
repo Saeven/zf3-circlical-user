@@ -2,7 +2,9 @@
 
 namespace CirclicalUser;
 
+use CirclicalUser\Controller\CliController;
 use CirclicalUser\Factory\AbstractDoctrineMapperFactory;
+use CirclicalUser\Factory\Controller\CliControllerFactory;
 use CirclicalUser\Factory\Listener\AccessListenerFactory;
 use CirclicalUser\Factory\Listener\UserEntityListenerFactory;
 use CirclicalUser\Factory\Mapper\UserMapperFactory;
@@ -89,6 +91,38 @@ return [
         'abstract_factories' => [
             AbstractDoctrineMapperFactory::class,
         ],
+    ],
 
+    'controllers' => [
+        'factories' => [
+            CliController::class => CliControllerFactory::class,
+        ],
+    ],
+
+    'console' => [
+        'router' => [
+            'routes' => [
+
+                'circlical-role-grant' => [
+                    'options' => [
+                        'route' => 'grant resource-role <roleName> <resourceClass> <resourceId> <verb>',
+                        'defaults' => [
+                            'controller' => CliController::class,
+                            'action' => 'grant-resource-role',
+                        ],
+                    ],
+                ],
+
+                'circlical-user-grant' => [
+                    'options' => [
+                        'route' => 'grant resource-user <userEmail> <resourceClass> <resourceId> <verb>',
+                        'defaults' => [
+                            'controller' => CliController::class,
+                            'action' => 'grant-resource-user',
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ],
 ];
