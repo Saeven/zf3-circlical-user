@@ -31,6 +31,9 @@ interface GroupPermissionProviderInterface
     public function getResourcePermissions(ResourceInterface $resource) : array;
 
 
+    public function getResourcePermissionsByClass($resourceClass) : array;
+
+
     public function update($rule);
 
 

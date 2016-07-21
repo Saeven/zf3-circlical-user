@@ -236,6 +236,7 @@ class AccessService
 
         if (!$this->user) {
             $this->userRoles = [];
+
             return;
         }
 
@@ -375,6 +376,29 @@ class AccessService
 
         return false;
     }
+
+
+    /**
+     * List allowed resource IDs by class
+     *
+     * @param $resourceClass
+     * @param $action
+     *
+     * @return array Array of IDs whose class was $resourceClass
+     */
+    public function listAllowedByClass($resourceClass, $action) : array
+    {
+        $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
+        $permitted = [];
+        foreach ($permissions as $permission) {
+            if (in_array($action, $permission->getActions())) {
+                $permitted[] = $permission->getId();
+            }
+        }
+
+        return array_unique($permitted);
+    }
+
 
     /**
      * Grant a user, string (simple) or ResourceInterface permissions.  The action whose permission is being granted,

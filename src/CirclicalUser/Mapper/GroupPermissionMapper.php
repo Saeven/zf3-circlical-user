@@ -45,6 +45,22 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
         return $query->getResult();
     }
 
+    /**
+     * @param $resourceClass
+     *
+     * @return array
+     */
+    public function getResourcePermissionsByClass($resourceClass) : array
+    {
+        $query = $this->getRepository()->createQueryBuilder('r')
+            ->select('r')
+            ->where('r.resource_class = :resourceClass')
+            ->setParameter('resourceClass', $resourceClass)
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
     public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupPermissionInterface
     {
         return new GroupPermission(
