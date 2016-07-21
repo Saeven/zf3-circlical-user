@@ -10,9 +10,9 @@ This will install the library and all required parts.
      
 You'll need to roll three providers of your own:
 
-* A Role provider that implements [RoleProviderInterface](src/CirclicalUser/Provider/RoleProviderInterface). See [RoleMapper](src/CirclicalUser/Mapper/RoleMapper) for a sample implementation.
-* A Group Permission provider that implements [GroupPermissionProviderInterface](src/CirclicalUser/Provider/GroupPermissionProviderInterface). See [GroupPermissionMapper](src/CirclicalUser/Mapper/GroupPermissionMapper) for a sample implementation.
-* A User Permission provider that implements [UserPermissionProviderInterface](src/CirclicalUser/Provider/UserPermissionProviderInterface). See [UserPermissionMapper](src/CirclicalUser/Mapper/GroupPermissionMapper) for a sample implementation.
+* A Role provider that implements [RoleProviderInterface](src/CirclicalUser/Provider/RoleProviderInterface.php). See [RoleMapper](src/CirclicalUser/Mapper/RoleMapper.php) for a sample implementation.
+* A Group Permission provider that implements [GroupPermissionProviderInterface](src/CirclicalUser/Provider/GroupPermissionProviderInterface.php). See [GroupPermissionMapper](src/CirclicalUser/Mapper/GroupPermissionMapper.php) for a sample implementation.
+* A User Permission provider that implements [UserPermissionProviderInterface](src/CirclicalUser/Provider/UserPermissionProviderInterface.php). See [UserPermissionMapper](src/CirclicalUser/Mapper/GroupPermissionMapper.php) for a sample implementation.
 
 These will get plugged into the library using existing factories.  Don't forget to create factories of your own, as required.
 
@@ -22,7 +22,7 @@ These will get plugged into the library using existing factories.  Don't forget 
  - Copy `/vendor/saeven/zf3-circlical-user/config/circlical.user/local.php.dist` into your global autoload folder, remove
 the dist extension so that Zend Framework picks it up
  - Substitute the 'providers/user' config key, with your own User entity
- - Make your User entity implement [UserInterface](src/CirclicalUser/Provider/UserInterface)
+ - Make your User entity implement [UserInterface](src/CirclicalUser/Provider/UserInterface.php)
  - Change 'providers/role' to be the class name of your Role provider
  - Change 'providers/rules/group' and 'providers/rules/user' to the class names of your Group and User Permission providers, respectively.
  - Add CirclicalUser to your `application.config.php` (effectively, loading the module)
