@@ -62,17 +62,24 @@ class AccessListener implements ListenerAggregateInterface
         $app->getEventManager()->triggerEvent($event);
     }
 
-    public function onDispatchError(Event $event)
+    public function onDispatchError(MvcEvent $event)
     {
         switch ($event->getError()) {
 
             case AccessService::ACCESS_DENIED:
-                $viewModel = new ViewModel();
+
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                    $viewModel = new JsonModel();
+                } else {
+                    $viewModel = new ViewModel();
+                    $viewModel->setTemplate('user/403');
+                }
+
+
                 $viewModel->setVariables($event->getParams());
-                $viewModel->setTemplate('user/403');
+
                 $response = $event->getResponse() ?: new Response();
                 $response->setStatusCode(403);
-                //$event->getViewModel()->addChild($viewModel);
                 $event->setViewModel($viewModel);
                 $event->setResponse($response);
                 break;

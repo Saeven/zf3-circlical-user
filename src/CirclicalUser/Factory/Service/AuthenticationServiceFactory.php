@@ -15,8 +15,8 @@ class AuthenticationServiceFactory implements FactoryInterface
         $config = $serviceLocator->get('config');
         $userConfig = $config['circlical']['user'];
 
-        $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
-        $authMapper = $userConfig['providers']['auth'] ?? AuthenticationMapper::class;
+        $userProvider = isset($userConfig['providers']['user']) ? $userConfig['providers']['user'] : UserMapper::class;
+        $authMapper = isset($userConfig['providers']['auth']) ? $userConfig['providers']['auth'] : AuthenticationMapper::class;
 
         return new AuthenticationService(
             $serviceLocator->get($authMapper),
