@@ -8,7 +8,7 @@ This will install the library and all required parts.
      
 ### Configuration
 
- - Copy [/vendor/saeven/zf3-circlical-user/config/circlical.user/local.php.dist](src/CirclicalUser/config/circlical.user.local.php.dist) into your global autoload folder, remove
+ - Copy [/vendor/saeven/zf3-circlical-user/config/circlical.user.local.php.dist](src/CirclicalUser/config/circlical.user.local.php.dist) into your global autoload folder, remove
 the dist extension so that Zend Framework picks it up
  - Substitute the 'providers/user' config key, with your own User entity
  - Make your User entity implement [UserInterface](src/CirclicalUser/Provider/UserInterface.php)
