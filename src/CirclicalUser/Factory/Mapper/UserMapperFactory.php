@@ -21,20 +21,23 @@ class UserMapperFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $config = $serviceLocator->get('config');
-        $config = $config['circlical']['user']['providers'];
-        if (!isset($config['user'])) {
+        $config = $config['circlical']['user'];
+
+        if (!isset($config['doctrine']['entity'])) {
             throw new ConfigurationException("No user provider is defined.  Did you copy the dist config over to your project?");
         }
 
-        if (!class_exists($config['user'])) {
-            throw new ConfigurationException("The user entity defined does not exist: " . $config['user']);
+        $entityClass = $config['doctrine']['entity'];
+
+        if (!class_exists($entityClass)) {
+            throw new ConfigurationException("The user entity defined does not exist: $entityClass");
         }
 
-        if (!in_array(UserInterface::class, class_implements($config['user']))) {
+        if (!in_array(UserInterface::class, class_implements($entityClass))) {
             throw new ConfigurationException("The user entity must implement " . UserInterface::class);
         }
 
-        $mapper = new UserMapper($config['user']);
+        $mapper = new UserMapper($entityClass);
         $mapper->setEntityManager($serviceLocator->get('doctrine.entitymanager.orm_default'));
 
         return $mapper;
