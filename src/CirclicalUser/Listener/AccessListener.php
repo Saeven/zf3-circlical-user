@@ -3,11 +3,11 @@
 namespace CirclicalUser\Listener;
 
 use CirclicalUser\Service\AccessService;
-use Zend\EventManager\Event;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
+use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 class AccessListener implements ListenerAggregateInterface
