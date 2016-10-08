@@ -12,7 +12,7 @@ class UserMapperFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
         $config = $config['circlical']['user'];
 
         if (!isset($config['doctrine']['entity'])) {
@@ -30,7 +30,7 @@ class UserMapperFactory implements FactoryInterface
         }
 
         $mapper = new UserMapper($entityClass);
-        $mapper->setEntityManager($serviceLocator->get('doctrine.entitymanager.orm_default'));
+        $mapper->setEntityManager($container->get('doctrine.entitymanager.orm_default'));
 
         return $mapper;
     }
