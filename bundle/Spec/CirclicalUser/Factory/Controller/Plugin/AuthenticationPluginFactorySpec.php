@@ -16,12 +16,11 @@ class AuthenticationPluginFactorySpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory');
     }
 
-    function it_supports_factory_interface(PluginManager $pluginLocator, ServiceManager $serviceLocator, AuthenticationService $authenticationService, AccessService $accessService )
+    function it_supports_factory_interface(ServiceManager $serviceLocator, AuthenticationService $authenticationService, AccessService $accessService)
     {
         $serviceLocator->get(AuthenticationService::class)->willReturn($authenticationService);
         $serviceLocator->get(AccessService::class)->willReturn($accessService);
-        $pluginLocator->getServiceLocator()->willReturn($serviceLocator);
 
-        $this->createService($pluginLocator)->shouldBeAnInstanceOf(AuthenticationPlugin::class);
+        $this->__invoke($serviceLocator, AuthenticationPlugin::class)->shouldBeAnInstanceOf(AuthenticationPlugin::class);
     }
 }

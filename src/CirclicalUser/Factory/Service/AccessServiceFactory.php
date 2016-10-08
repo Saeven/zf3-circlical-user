@@ -7,15 +7,32 @@ use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
-use Zend\ServiceManager\FactoryInterface;
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use CirclicalUser\Service\AuthenticationService;
 
 class AccessServiceFactory implements FactoryInterface
 {
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    /**
+     * Create an object
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     *
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
         $guards = $userConfig['guards'];
 
@@ -26,13 +43,13 @@ class AccessServiceFactory implements FactoryInterface
 
         $accessService = new AccessService(
             $guards,
-            $serviceLocator->get($roleProvider),
-            $serviceLocator->get($groupRuleProvider),
-            $serviceLocator->get($userRuleProvider),
-            $serviceLocator->get($userProvider)
+            $container->get($roleProvider),
+            $container->get($groupRuleProvider),
+            $container->get($userRuleProvider),
+            $container->get($userProvider)
         );
 
-        $authenticationService = $serviceLocator->get(AuthenticationService::class);
+        $authenticationService = $container->get(AuthenticationService::class);
         $user = $authenticationService->getIdentity();
 
         if ($user) {

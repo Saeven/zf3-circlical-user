@@ -17,6 +17,6 @@ class AccessListenerFactorySpec extends ObjectBehavior
     function it_supports_factory_interface(ServiceManager $serviceLocator, AccessService $accessService)
     {
         $serviceLocator->get(AccessService::class)->willReturn($accessService);
-        $this->createService($serviceLocator)->shouldBeAnInstanceOf(AccessListener::class);
+        $this->__invoke($serviceLocator, AccessListener::class)->shouldBeAnInstanceOf(AccessListener::class);
     }
 }

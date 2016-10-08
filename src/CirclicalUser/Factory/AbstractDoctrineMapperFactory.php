@@ -2,42 +2,50 @@
 
 namespace CirclicalUser\Factory;
 
-use Zend\ServiceManager\AbstractFactoryInterface;
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
 {
-    
-    
+
+
     /**
      * Determine if we can create a service with name
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param                         $name
-     * @param                         $requestedName
+     * @param ContainerInterface|ServiceLocatorInterface $serviceLocator
+     * @param string                                     $requestedName
      *
      * @return bool
+     * @internal param $name
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function canCreate(ContainerInterface $serviceLocator, $requestedName)
     {
         return strstr($requestedName, '\\Mapper\\') != null;
-        
     }
-    
+
+
     /**
-     * Create service with name
+     * Create an object
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param                         $name
-     * @param                         $requestedName
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
      *
-     * @return mixed
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $mapper = new $requestedName;
-        $mapper->setEntityManager($serviceLocator->get('doctrine.entitymanager.orm_default'));
-        
+        $mapper->setEntityManager($container->get('doctrine.entitymanager.orm_default'));
+
         return $mapper;
     }
 }

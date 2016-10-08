@@ -66,7 +66,7 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(UserPermissionProviderInterface::class)->willReturn($userActionRuleMapper);
         $serviceManager->get(AuthenticationService::class)->willReturn($authenticationService);
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
-        $this->createService($serviceManager)->shouldBeAnInstanceOf(AccessService::class);
+        $this->__invoke($serviceManager, AccessService::class)->shouldBeAnInstanceOf(AccessService::class);
     }
 
     function it_creates_its_service_with_user_identity(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper,
@@ -117,6 +117,6 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(UserPermissionProviderInterface::class)->willReturn($userActionRuleMapper);
         $serviceManager->get(AuthenticationService::class)->willReturn($authenticationService);
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
-        $this->createService($serviceManager)->shouldBeAnInstanceOf(AccessService::class);
+        $this->__invoke($serviceManager, AccessService::class)->shouldBeAnInstanceOf(AccessService::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Factory\Service;
 
 use CirclicalUser\Mapper\AuthenticationMapper;
+use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
@@ -58,7 +59,7 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(AuthenticationMapper::class)->willReturn($authenticationMapper);
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
 
-        $this->createService($serviceManager)->shouldBeAnInstanceOf(AuthenticationService::class);
+        $this->__invoke($serviceManager, AuthenticationService::class)->shouldBeAnInstanceOf(AuthenticationService::class);
 
     }
 }
