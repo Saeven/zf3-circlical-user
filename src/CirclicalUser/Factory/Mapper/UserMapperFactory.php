@@ -5,20 +5,12 @@ namespace CirclicalUser\Factory\Mapper;
 use CirclicalUser\Exception\ConfigurationException;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\UserInterface;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class UserMapperFactory implements FactoryInterface
 {
-    /**
-     * Create service
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     *
-     * @return mixed
-     * @throws ConfigurationException
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $serviceLocator->get('config');
         $config = $config['circlical']['user'];

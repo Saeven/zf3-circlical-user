@@ -8,23 +8,14 @@ use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class CliControllerFactory implements FactoryInterface
 {
-
-    /**
-     * Create service
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     *
-     * @return mixed
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $serviceLocator = $serviceLocator->getServiceLocator();
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
 
         $userProvider = isset($userConfig['providers']['user']) ? $userConfig['providers']['user'] : UserMapper::class;
@@ -33,11 +24,11 @@ class CliControllerFactory implements FactoryInterface
         $userRuleProvider = isset($userConfig['providers']['rule']['user']) ? $userConfig['providers']['rule']['user'] : UserPermissionMapper::class;
 
         return new CliController(
-            $serviceLocator->get($userProvider),
-            $serviceLocator->get($roleProvider),
-            $serviceLocator->get($groupRuleProvider),
-            $serviceLocator->get($userRuleProvider),
-            $serviceLocator->get(AccessService::class)
+            $container->get($userProvider),
+            $container->get($roleProvider),
+            $container->get($groupRuleProvider),
+            $container->get($userRuleProvider),
+            $container->get(AccessService::class)
         );
     }
 }

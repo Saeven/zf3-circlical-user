@@ -2,26 +2,16 @@
 
 namespace CirclicalUser\Factory\Listener;
 
-use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
-use CirclicalUser\Service\AccessService;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class UserEntityListenerFactory implements FactoryInterface
 {
 
-    /**
-     * Create service
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
         $config = $config['circlical']['user']['doctrine'];
 
         if (!isset($config['entity'])) {
