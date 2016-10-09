@@ -46,38 +46,6 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
 
 
     /**
-     * Get all users with a particular company ID
-     *
-     * @param $companyId
-     *
-     * @return User[]
-     */
-    public function getUsersInCompany($companyId)
-    {
-        return $this->getRepository()->findBy(['company_id' => $companyId]);
-    }
-
-    /**
-     * Find users whose first names or last names start with a given substring
-     *
-     * @param $startWith
-     *
-     * @return mixed
-     */
-    public function getUsersLike($startWith)
-    {
-        $query = $this->getRepository()
-            ->createQueryBuilder('u')
-            ->select('u.id, u.first_name, u.last_name')
-            ->where('u.first_name LIKE :search OR u.last_name LIKE :search')
-            ->setParameter('search', "{$startWith}%")
-            ->orderBy('u.last_name')
-            ->getQuery();
-
-        return $query->getArrayResult();
-    }
-
-    /**
      * Fetch a list of all users
      *
      * @return mixed
