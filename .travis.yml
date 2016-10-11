@@ -18,3 +18,5 @@ before_install:
 before_script: composer install --prefer-source --no-interaction
 
 script: vendor/bin/phpspec --config=phpspec.yml run
+
+after_script: vendor/bin/codacycoverage clover build/coverage.xml

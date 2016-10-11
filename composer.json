@@ -37,7 +37,8 @@
   },
   "require-dev": {
     "phpspec/phpspec": "@stable",
-    "henrikbjorn/phpspec-code-coverage": "@stable"
+    "henrikbjorn/phpspec-code-coverage": "@stable",
+    "codacy/coverage": "dev-master"
   },
   "autoload": {
     "psr-0": {
