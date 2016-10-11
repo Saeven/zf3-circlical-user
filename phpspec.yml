@@ -5,13 +5,12 @@ suites:
         src_path: src
         spec_path: bundle
 extensions:
-#  - PhpSpec\Extension\CodeCoverageExtension
-code_coverage:
-  whitelist:
-   - src
-  format:
-   - html
-   - clover
-  output:
-   html: build/coverage
-   clover: build/coverage.xml
+  PhpSpecCodeCoverage\CodeCoverageExtension:
+    format:
+      - html
+      - clover
+    output:
+      html: build/coverage
+      clover: build/coverage.xml
+    whitelist:
+     - src

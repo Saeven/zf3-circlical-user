@@ -4,6 +4,7 @@ namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\GuardConfigurationException;
+use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
 use CirclicalUser\Mapper\GroupPermissionMapper;
 use CirclicalUser\Mapper\RoleMapper;
@@ -26,7 +27,7 @@ class AccessServiceSpec extends ObjectBehavior
                  User $user, User $admin,
                  GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
                  UserPermissionInterface $userRule1, UserPermissionInterface $userRule2, UserPermissionInterface $userRule3,
-                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule, UserMapper $userMapper)
+                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule, UserMapper $userMapper, User $someObject)
     {
 
         $userRole = new Role();
@@ -39,7 +40,9 @@ class AccessServiceSpec extends ObjectBehavior
         $adminRole->setParent($userRole);
 
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
+        $roleMapper->getRoleWithName(Argument::any())->willReturn(null);
         $roleMapper->getRoleWithName('admin')->willReturn($adminRole);
+
 
         /*
          * Rule 1: Users can consume beer
@@ -113,9 +116,13 @@ class AccessServiceSpec extends ObjectBehavior
         $userRules->getResourceUserPermission($resourceObject, $user)->willReturn($userRule3);
         $userRules->update(Argument::any())->willReturn(null);
 
+        // to test a case, where a user implementation returns complete garbage
+        $userRules->getUserPermission('badresult', $user)->willReturn($someObject);
+
 
         $groupRules->getPermissions('beer')->willReturn([$rule1, $rule2, $rule3]);
         $groupRules->getResourcePermissions($resourceObject)->willReturn([$groupActionRule]);
+        $groupRules->getResourcePermissionsByClass('ResourceObject')->willReturn([$groupActionRule]);
 
 
         $config = [
@@ -250,6 +257,24 @@ class AccessServiceSpec extends ObjectBehavior
         $roles->shouldNotContain('admin');
     }
 
+    function it_dies_when_you_add_roles_to_nobody()
+    {
+        $this->shouldThrow(UserRequiredException::class)->during('addRoleByName', ['admin']);
+    }
+
+    function it_bails_if_you_try_to_add_roles_already_added($admin, $roleMapper)
+    {
+        $this->setUser($admin);
+        $roleMapper->getRoleWithName('admin')->shouldNotBeCalled();
+        $this->addRoleByName('admin');
+    }
+
+    function it_bails_if_you_try_to_add_roles_that_dont_exist($admin)
+    {
+        $this->setUser($admin);
+        $this->shouldThrow(InvalidRoleException::class)->during('addRoleByName', ['whatisthis']);
+    }
+
     function it_performs_user_module_access($user)
     {
         $this->setUser($user);
@@ -382,6 +407,12 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantUserAccess($resourceObject, 'foo');
     }
 
+//    function it_handles_bad_user_permission_provider_implementations($user)
+//    {
+//        $this->setUser($user);
+//        $this->grantUserAccess('badresult', 'foo');
+//    }
+
     function it_throws_exceptions_when_group_actions_are_requested_for_bad_resources()
     {
         $this->shouldThrow(UnknownResourceTypeException::class)->during('getGroupPermissions', [null]);
@@ -397,4 +428,12 @@ class AccessServiceSpec extends ObjectBehavior
         $this->setUser($user);
         $this->shouldThrow(UnknownResourceTypeException::class)->during('getUserPermission', [null]);
     }
+
+    function it_returns_allowed_rules_by_class($user, $groupActionRule)
+    {
+        // 1234, is the ID of the sole mocked object whose class is ResourceObject
+        $this->setUser($user);
+        $this->listAllowedByClass('ResourceObject')->shouldContain("1234");
+    }
+
 }
