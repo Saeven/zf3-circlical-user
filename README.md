@@ -26,9 +26,6 @@ properly done with PHP's new password functions.
 [Feedback always solicited on r/php.](https://www.reddit.com/r/PHP/comments/4r84jn/need_reviews_of_cookiebased_authentication_service/).
 If you are a paranoid fellow like me, this library should serve well!
 
-> Right now, I am waiting for Doctrine-ORM to move to the latest Zend-MVC.
-> When that's done, I will promptly upgrade this package.
-
 This library works on a deny-first basis.  Everything defined by its parts below, are 'allow' grants.
 
 ## User Authentication
