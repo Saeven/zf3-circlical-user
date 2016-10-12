@@ -41,8 +41,8 @@
     "codacy/coverage": "dev-master"
   },
   "autoload": {
-    "psr-0": {
-      "CirclicalUser\\": "src"
+    "psr-4": {
+      "CirclicalUser\\": "src/CirclicalUser"
     }
   }
 }
