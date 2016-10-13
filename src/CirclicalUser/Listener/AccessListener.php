@@ -31,9 +31,8 @@ class AccessListener implements ListenerAggregateInterface
     public function detach(EventManagerInterface $events)
     {
         foreach ($this->listeners as $index => $listener) {
-            if ($events->detach($listener)) {
-                unset($this->listeners[$index]);
-            }
+            $events->detach($listener);
+            unset($this->listeners[$index]);
         }
     }
 

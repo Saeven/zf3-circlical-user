@@ -14,3 +14,7 @@ extensions:
       clover: build/coverage.xml
     whitelist:
      - src
+    blacklist:
+     - src/CirclicalUser/Mapper
+     - src/CirclicalUser/Entity
+     - src/CirclicalUser/Exception

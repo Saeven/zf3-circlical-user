@@ -12,6 +12,7 @@ use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
+use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\UserRequiredException;
@@ -436,4 +437,23 @@ class AccessServiceSpec extends ObjectBehavior
         $this->listAllowedByClass('ResourceObject')->shouldContain("1234");
     }
 
+    function it_can_check_actions_by_resource_class($user)
+    {
+        $this->setUser($user);
+        $this->isAllowedByResourceClass('ResourceObject', 'bar')->shouldBe(true);
+    }
+
+    function it_can_check_declined_actions_by_resource_class($user)
+    {
+        $this->setUser($user);
+        $this->isAllowedByResourceClass('ResourceObject', 'fizzbuzz')->shouldBe(false);
+    }
+
+    /**
+     * Give a role, access to a resource
+     */
+    function it_can_grant_access_to_roles(RoleInterface $roleInterface)
+    {
+
+    }
 }
