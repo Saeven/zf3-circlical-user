@@ -21,28 +21,27 @@
       "role": "Paper Stapler"
     }
   ],
-  "minimum-stability": "dev",
   "require": {
     "php": "^7.0.0",
-    "zendframework/zend-eventmanager": "^3.0.1",
-    "zendframework/zend-servicemanager": "^3.0.1",
-    "zendframework/zend-mvc": "^3.0.1@stable",
-    "zendframework/zend-console": "@stable",
-    "zendframework/zend-view": "@stable",
-    "zendframework/zend-http": "@stable",
-    "doctrine/doctrine-orm-module": "@stable",
-    "doctrine/doctrine-module": "@stable",
-    "doctrine/orm": "@stable",
-    "paragonie/halite": "2.1.2"
+    "zendframework/zend-eventmanager": "^3.0",
+    "zendframework/zend-servicemanager": "^3.0",
+    "zendframework/zend-mvc": "^3.0",
+    "zendframework/zend-console": "^2.6",
+    "zendframework/zend-view": "^2.8",
+    "zendframework/zend-http": "^2.5",
+    "doctrine/doctrine-orm-module": "^1.1",
+    "doctrine/doctrine-module": "^1.2",
+    "doctrine/orm": "^2.5",
+    "paragonie/halite": "^2.1"
   },
   "require-dev": {
-    "phpspec/phpspec": "@stable",
-    "henrikbjorn/phpspec-code-coverage": "@stable",
-    "codacy/coverage": "dev-master"
+    "phpspec/phpspec": "^3.1",
+    "henrikbjorn/phpspec-code-coverage": "^3.0",
+    "codacy/coverage": "^1.0"
   },
   "autoload": {
-    "psr-0": {
-      "CirclicalUser\\": "src"
+    "psr-4": {
+      "CirclicalUser\\": "src/CirclicalUser"
     }
   }
 }
