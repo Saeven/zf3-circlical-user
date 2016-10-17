@@ -28,7 +28,6 @@ class Module
         $strategy->attach( $eventManager );
 
 
-//        $sharedManager->attach('*', 'user.authenticate', function ($authEvent) use ($serviceManager) {
 //            try {
 //                $remote = new RemoteAddress;
 //                $remote->setUseProxy(true);

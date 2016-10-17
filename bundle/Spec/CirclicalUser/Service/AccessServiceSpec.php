@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
+use CirclicalUser\Exception\ExistingAccessException;
 use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
@@ -43,6 +44,7 @@ class AccessServiceSpec extends ObjectBehavior
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
         $roleMapper->getRoleWithName(Argument::any())->willReturn(null);
         $roleMapper->getRoleWithName('admin')->willReturn($adminRole);
+        $roleMapper->getRoleWithName('user')->willReturn($userRole);
 
 
         /*
@@ -105,7 +107,7 @@ class AccessServiceSpec extends ObjectBehavior
 
         $groupActionRule->getResourceClass()->willReturn("ResourceObject");
         $groupActionRule->getResourceId()->willReturn("1234");
-        $groupActionRule->getRole()->willReturn('user');
+        $groupActionRule->getRole()->willReturn($userRole);
         $groupActionRule->getActions()->willReturn(['bar']);
         $groupActionRule->can(Argument::type('string'))->willReturn(false);
         $groupActionRule->can('bar')->willReturn(true);
@@ -452,8 +454,17 @@ class AccessServiceSpec extends ObjectBehavior
     /**
      * Give a role, access to a resource
      */
-    function it_can_grant_access_to_roles(RoleInterface $roleInterface)
+    function it_can_grant_access_to_roles_by_appending_actions($resourceObject, $groupRules, $groupActionRule)
     {
+        $role = $this->getRoleWithName('user');
+        $groupRules->update(Argument::any())->shouldBeCalled();
+        $groupActionRule->addAction('foo')->shouldBeCalled();
+        $this->grantRoleAccess($role, $resourceObject, 'foo');
+    }
 
+    function it_wont_grant_permissions_we_already_have($resourceObject, $groupRules)
+    {
+        $role = $this->getRoleWithName('user');
+        $this->shouldThrow(ExistingAccessException::class)->during('grantRoleAccess', [$role, $resourceObject, 'bar']);
     }
 }

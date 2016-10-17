@@ -100,7 +100,7 @@ class AccessService
      *
      * @return bool
      */
-    public function canAccessController($controllerName) : bool
+    public function canAccessController($controllerName): bool
     {
         if (!isset($this->controllerDefaults[$controllerName])) {
             return false;
@@ -132,7 +132,7 @@ class AccessService
      *
      * @return bool
      */
-    public function canAccessAction($controllerName, $action) : bool
+    public function canAccessAction($controllerName, $action): bool
     {
         if (isset($this->actions[$controllerName][$action])) {
             if (!$this->actions[$controllerName][$action]) {
@@ -159,7 +159,7 @@ class AccessService
      * @return bool True if the role fits, false if there is no user or the role is not accessible in the hierarchy
      *              of existing user roles.
      */
-    public function hasRoleWithName($role) : bool
+    public function hasRoleWithName($role): bool
     {
         $this->compileUserRoles();
 
@@ -175,9 +175,22 @@ class AccessService
      *
      * @return bool
      */
-    public function hasRole(RoleInterface $role) : bool
+    public function hasRole(RoleInterface $role): bool
     {
         return $this->hasRoleWithName($role->getName());
+    }
+
+
+    /**
+     * Proxy method, for convenience
+     *
+     * @param $roleName
+     *
+     * @return RoleInterface
+     */
+    public function getRoleWithName($roleName)
+    {
+        return $this->roleProvider->getRoleWithName($roleName);
     }
 
 
@@ -220,7 +233,7 @@ class AccessService
      *
      * @return array
      */
-    public function getRoles() : array
+    public function getRoles(): array
     {
         $this->compileUserRoles();
 
@@ -276,7 +289,7 @@ class AccessService
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
-    public function getGroupPermissions($resource) : array
+    public function getGroupPermissions($resource): array
     {
         if ($resource instanceof ResourceInterface) {
             return $this->groupPermissions->getResourcePermissions($resource);
@@ -335,7 +348,7 @@ class AccessService
      *
      * @return bool
      */
-    public function isAllowed($resource, $action) : bool
+    public function isAllowed($resource, $action): bool
     {
         $groupPermissions = $this->getGroupPermissions($resource);
 
@@ -353,7 +366,7 @@ class AccessService
         return false;
     }
 
-    public function isAllowedByResourceClass($resourceClass, $action) : bool
+    public function isAllowedByResourceClass($resourceClass, $action): bool
     {
         $actions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         foreach ($actions as $groupPermission) {
@@ -376,7 +389,7 @@ class AccessService
      *
      * @return bool
      */
-    public function isAllowedUser($resource, $action) : bool
+    public function isAllowedUser($resource, $action): bool
     {
         $permission = $this->getUserPermission($resource);
 
@@ -392,7 +405,7 @@ class AccessService
      *
      * @return array Array of IDs whose class was $resourceClass
      */
-    public function listAllowedByClass($resourceClass, $action = "") : array
+    public function listAllowedByClass($resourceClass, $action = ""): array
     {
         $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         $permitted = [];
