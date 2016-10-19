@@ -42,11 +42,19 @@ class AccessListener implements ListenerAggregateInterface
         $controllerName = $route->getParam('controller');
         $actionName = $route->getParam('action');
 
-        if ($this->accessService->canAccessAction($controllerName, $actionName)) {
+        if (!$this->accessService->requiresAuthentication($controllerName, $actionName)) {
             return;
         }
 
-        $event->setError(AccessService::ACCESS_DENIED);
+        if ($this->accessService->hasUser()) {
+            if ($this->accessService->canAccessAction($controllerName, $actionName)) {
+                return;
+            }
+            $event->setError(AccessService::ACCESS_DENIED);
+        } else {
+            $event->setError(AccessService::ACCESS_UNAUTHORIZED);
+        }
+
         $event->setParam('route', $route->getMatchedRouteName());
         $event->setParam('controller', $controllerName);
         $event->setParam('action', $actionName);
@@ -63,28 +71,32 @@ class AccessListener implements ListenerAggregateInterface
 
     public function onDispatchError(MvcEvent $event)
     {
+
         switch ($event->getError()) {
 
             case AccessService::ACCESS_DENIED:
-
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-                    $viewModel = new JsonModel();
-                } else {
-                    $viewModel = new ViewModel();
-                    $viewModel->setTemplate('user/403');
-                }
-
-
-                $viewModel->setVariables($event->getParams());
-
-                $response = $event->getResponse() ?: new Response();
-                $response->setStatusCode(403);
-                $event->setViewModel($viewModel);
-                $event->setResponse($response);
+                $statusCode = 403;
                 break;
+            case AccessService::ACCESS_UNAUTHORIZED:
+                $statusCode = 401;
+                break;
+
             default:
                 // do nothing if this is a different kind of error we should not trap
                 return;
         }
+
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $viewModel = new JsonModel();
+        } else {
+            $viewModel = new ViewModel();
+            $viewModel->setTemplate('user/' . $statusCode);
+        }
+
+        $viewModel->setVariables($event->getParams());
+        $response = $event->getResponse() ?: new Response();
+        $response->setStatusCode($statusCode);
+        $event->setViewModel($viewModel);
+        $event->setResponse($response);
     }
 }

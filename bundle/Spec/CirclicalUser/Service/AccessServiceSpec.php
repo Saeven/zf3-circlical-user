@@ -147,6 +147,9 @@ class AccessServiceSpec extends ObjectBehavior
                     ],
                     'Foo\Controller\FreeForAll' => [
                         'default' => [],
+                        'actions' => [
+                            'get-name' => ['user'],
+                        ],
                     ],
                 ],
             ],
@@ -466,5 +469,20 @@ class AccessServiceSpec extends ObjectBehavior
     {
         $role = $this->getRoleWithName('user');
         $this->shouldThrow(ExistingAccessException::class)->during('grantRoleAccess', [$role, $resourceObject, 'bar']);
+    }
+
+    function it_can_report_that_permissions_are_required_1()
+    {
+        $this->requiresAuthentication('Foo\Controller\ThisController', 'foo')->shouldBe(true);
+    }
+
+    function it_can_report_that_permissions_are_required_2()
+    {
+        $this->requiresAuthentication('Foo\Controller\FreeForAll', 'get-name')->shouldBe(true);
+    }
+
+    function it_can_report_that_permissions_are_required_3()
+    {
+        $this->requiresAuthentication('Foo\Controller\FreeForAll', 'bar')->shouldBe(false);
     }
 }

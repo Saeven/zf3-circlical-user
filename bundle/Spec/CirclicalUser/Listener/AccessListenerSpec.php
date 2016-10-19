@@ -49,8 +49,10 @@ class AccessListenerSpec extends ObjectBehavior
         $this->detach($events);
     }
 
-    public function it_can_permit_access_based_on_controller(MvcEvent $event, RouteMatch $match)
+    public function it_can_permit_access_based_on_controller(MvcEvent $event, RouteMatch $match, $accessService)
     {
+        $accessService->requiresAuthentication(self::CONTROLLER_INDEX, 'index')->willReturn(true);
+        $accessService->hasUser()->willReturn(true);
         $match->getParam('controller')->willReturn(self::CONTROLLER_INDEX);
         $match->getParam('action')->willReturn('index');
         $event->getRouteMatch()->willReturn($match);
@@ -59,6 +61,9 @@ class AccessListenerSpec extends ObjectBehavior
 
     public function it_can_deny_access_based_on_controller(MvcEvent $event, RouteMatch $match, EventManagerInterface $eventManager, Application $application, $accessService)
     {
+
+        $accessService->requiresAuthentication(self::CONTROLLER_ADMIN, 'index')->willReturn(true);
+        $accessService->hasUser()->willReturn(true);
 
         $application->getEventManager()->willReturn($eventManager);
 
@@ -83,6 +88,8 @@ class AccessListenerSpec extends ObjectBehavior
 
     public function it_can_deny_access_based_on_controller_and_set_roles(MvcEvent $event, RouteMatch $match, EventManagerInterface $eventManager, Application $application, $accessService)
     {
+        $accessService->requiresAuthentication(self::CONTROLLER_ADMIN, 'index')->willReturn(true);
+        $accessService->hasUser()->willReturn(true);
 
         $application->getEventManager()->willReturn($eventManager);
 
@@ -140,5 +147,33 @@ class AccessListenerSpec extends ObjectBehavior
         $event->getError()->willReturn(MvcEvent::EVENT_RENDER_ERROR);
         $event->setResponse(Argument::any())->shouldNotBeCalled();
         $this->onDispatchError($event);
+    }
+
+    /**
+     * Valid route but with no login with no login
+     */
+    public function it_dispatches_unauthorized(MvcEvent $event, RouteMatch $match, EventManagerInterface $eventManager, Application $application, $accessService)
+    {
+        $application->getEventManager()->willReturn($eventManager);
+        $accessService->requiresAuthentication(self::CONTROLLER_ADMIN, 'index')->willReturn(true);
+        $accessService->hasUser()->willReturn(false);
+
+        $event->getTarget()->willReturn($application);
+        $match->getParam('controller')->willReturn(self::CONTROLLER_ADMIN);
+        $match->getParam('action')->willReturn('index');
+        $match->getMatchedRouteName()->willReturn('admin');
+        $event->getRouteMatch()->willReturn($match);
+        $accessService->getRoles()->willReturn([]);
+
+        $eventManager->triggerEvent($event)->shouldBeCalled();
+        $event->setError(AccessService::ACCESS_UNAUTHORIZED)->shouldBeCalled();
+        $event->setParam('route', 'admin')->shouldBeCalled();
+        $event->setParam('controller', self::CONTROLLER_ADMIN)->shouldBeCalled();
+        $event->setParam('action', 'index')->shouldBeCalled();
+        $event->setParam('roles', 'none')->shouldBeCalled();
+        $event->setName(MvcEvent::EVENT_DISPATCH_ERROR)->shouldBeCalled();
+
+
+        $this->verifyAccess($event);
     }
 }
