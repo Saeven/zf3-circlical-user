@@ -28,7 +28,8 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
-            ->where('r.resource_class = "string" AND r.resource_id=:resourceId AND r.user=:user')
+            ->where('r.resource_class = :resourceClass AND r.resource_id=:resourceId AND r.user=:user')
+            ->setParameter('resourceClass', 'string')
             ->setParameter('resourceId', $string)
             ->setParameter('user', $user)
             ->getQuery();
