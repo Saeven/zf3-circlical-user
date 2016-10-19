@@ -4,6 +4,7 @@ namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\ExistingAccessException;
+use CirclicalUser\Exception\GuardExpectedException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
 use CirclicalUser\Provider\GroupPermissionInterface;
@@ -24,6 +25,8 @@ use CirclicalUser\Provider\UserProviderInterface;
 class AccessService
 {
     const ACCESS_DENIED = 'ACL_ACCESS_DENIED';
+
+    const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
 
     /**
      * @var  UserInterface
@@ -92,6 +95,11 @@ class AccessService
         $this->user = $user;
     }
 
+    public function hasUser(): bool
+    {
+        return $this->user != null;
+    }
+
     /**
      * Check the guard configuration to see if the current user (or guest) can access a specific controller.
      * Critical distinction: this method does not invoke action rules, only roles.
@@ -100,7 +108,7 @@ class AccessService
      *
      * @return bool
      */
-    public function canAccessController($controllerName): bool
+    public function canAccessController(string $controllerName): bool
     {
         if (!isset($this->controllerDefaults[$controllerName])) {
             return false;
@@ -132,7 +140,7 @@ class AccessService
      *
      * @return bool
      */
-    public function canAccessAction($controllerName, $action): bool
+    public function canAccessAction(string $controllerName, string $action): bool
     {
         if (isset($this->actions[$controllerName][$action])) {
             if (!$this->actions[$controllerName][$action]) {
@@ -151,6 +159,39 @@ class AccessService
         return $this->canAccessController($controllerName);
     }
 
+
+    /**
+     * Cursory check to see if authentication is required for a controller/action pair.  Assumes
+     * that a guard exists, for the controller/action being queried.  Note that this method qualifies
+     * the route, and not the user & route relationship.
+     *
+     * @param string $controllerName
+     * @param string $action
+     *
+     * @return bool
+     * @throws GuardExpectedException
+     */
+    public function requiresAuthentication(string $controllerName, string $action): bool
+    {
+        if (isset($this->actions[$controllerName][$action])) {
+            if (!$this->actions[$controllerName][$action]) {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (isset($this->controllerDefaults[$controllerName])) {
+            if (!$this->controllerDefaults[$controllerName]) {
+                return false;
+            }
+
+            return true;
+        }
+
+        throw new GuardExpectedException($controllerName);
+    }
+
     /**
      * Check if the current user has a given role.
      *
@@ -159,7 +200,7 @@ class AccessService
      * @return bool True if the role fits, false if there is no user or the role is not accessible in the hierarchy
      *              of existing user roles.
      */
-    public function hasRoleWithName($role): bool
+    public function hasRoleWithName(string $role): bool
     {
         $this->compileUserRoles();
 
@@ -188,7 +229,7 @@ class AccessService
      *
      * @return RoleInterface
      */
-    public function getRoleWithName($roleName)
+    public function getRoleWithName(string $roleName)
     {
         return $this->roleProvider->getRoleWithName($roleName);
     }
@@ -203,7 +244,7 @@ class AccessService
      * @throws UserRequiredException
      * @internal param $roleId
      */
-    public function addRoleByName($roleName)
+    public function addRoleByName(string $roleName)
     {
         if (!$this->user) {
             throw new UserRequiredException();
@@ -348,7 +389,7 @@ class AccessService
      *
      * @return bool
      */
-    public function isAllowed($resource, $action): bool
+    public function isAllowed($resource, string $action): bool
     {
         $groupPermissions = $this->getGroupPermissions($resource);
 
@@ -389,7 +430,7 @@ class AccessService
      *
      * @return bool
      */
-    public function isAllowedUser($resource, $action): bool
+    public function isAllowedUser($resource, string $action): bool
     {
         $permission = $this->getUserPermission($resource);
 
@@ -405,7 +446,7 @@ class AccessService
      *
      * @return array Array of IDs whose class was $resourceClass
      */
-    public function listAllowedByClass($resourceClass, $action = ""): array
+    public function listAllowedByClass($resourceClass, string $action = ""): array
     {
         $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         $permitted = [];
@@ -428,7 +469,7 @@ class AccessService
      *
      * @throws ExistingAccessException
      */
-    public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, $action)
+    public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, string $action)
     {
         $resourcePermissions = $this->getGroupPermissions($resource);
         $matchedPermission = null;
@@ -477,7 +518,7 @@ class AccessService
      *
      * @throws PermissionExpectedException
      */
-    public function grantUserAccess($resource, $action)
+    public function grantUserAccess($resource, string $action)
     {
         $permission = $this->getUserPermission($resource);
 
@@ -520,7 +561,7 @@ class AccessService
      *
      * @throws PermissionExpectedException
      */
-    public function revokeUserAccess($resource, $action)
+    public function revokeUserAccess($resource, string $action)
     {
         $resourceRule = $this->getUserPermission($resource);
 
