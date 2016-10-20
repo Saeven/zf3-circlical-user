@@ -21,7 +21,8 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
-            ->where('r.resource_class = "string" AND r.resource_id=:resourceId')
+            ->where('r.resource_class = :resourceClass AND r.resource_id=:resourceId')
+            ->setParameter('resourceClass', 'string')
             ->setParameter('resourceId', $string)
             ->getQuery();
 
