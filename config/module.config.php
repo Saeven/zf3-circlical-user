@@ -9,6 +9,7 @@ use CirclicalUser\Factory\Listener\AccessListenerFactory;
 use CirclicalUser\Factory\Listener\UserEntityListenerFactory;
 use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
+use CirclicalUser\Factory\Strategy\RedirectStrategyFactory;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
 use CirclicalUser\Mapper\GroupPermissionMapper;
@@ -20,6 +21,7 @@ use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
+use CirclicalUser\Strategy\RedirectStrategy;
 
 return [
 
@@ -86,6 +88,7 @@ return [
             AccessListener::class => AccessListenerFactory::class,
             UserEntityListener::class => UserEntityListenerFactory::class,
             UserMapper::class => UserMapperFactory::class,
+            RedirectStrategy::class => RedirectStrategyFactory::class,
         ],
 
         'abstract_factories' => [

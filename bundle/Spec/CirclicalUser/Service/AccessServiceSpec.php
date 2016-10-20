@@ -5,6 +5,7 @@ namespace Spec\CirclicalUser\Service;
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\ExistingAccessException;
 use CirclicalUser\Exception\GuardConfigurationException;
+use CirclicalUser\Exception\GuardExpectedException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
 use CirclicalUser\Mapper\GroupPermissionMapper;
@@ -319,6 +320,16 @@ class AccessServiceSpec extends ObjectBehavior
         $this->canAccessAction('Foo\Controller\AdminController', 'superodd')->shouldBe(true);
     }
 
+    function it_reports_authless_overrides_as_not_needing_authentication()
+    {
+        $this->requiresAuthentication('Foo\Controller\AdminController', 'superodd')->shouldBe(false);
+    }
+
+    function it_throws_exceptions_for_authentication_checks_for_bad_config()
+    {
+        $this->shouldThrow(GuardExpectedException::class)->during('requiresAuthentication', ['foo', 'bar']);
+    }
+
     function it_permits_rigorous_actions($admin)
     {
         $this->setUser($admin);
@@ -484,5 +495,16 @@ class AccessServiceSpec extends ObjectBehavior
     function it_can_report_that_permissions_are_required_3()
     {
         $this->requiresAuthentication('Foo\Controller\FreeForAll', 'bar')->shouldBe(false);
+    }
+
+    function it_reports_that_it_has_users($user)
+    {
+        $this->setUser($user);
+        $this->hasUser()->shouldBe(true);
+    }
+
+    function it_reports_that_it_has_no_users()
+    {
+        $this->hasUser()->shouldBe(false);
     }
 }

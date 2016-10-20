@@ -35,6 +35,29 @@ return [
 
 
             /*
+             * When a user tries to access a page gated by auth, or rights - what do we do with them?
+             * This user module provides a simple 'Redirect' strategy, but you can also roll your own
+             */
+
+             'deny_strategy' => [
+
+                /*
+                 * The strategy provider, that implements CirclicalUser\Provider\DenyStrategyInterface
+                 */
+//                'class' => \CirclicalUser\Strategy\RedirectStrategy::class,
+
+                /*
+                 * Options specifically required by RedirectStrategy.  You would probably comment this out if you were
+                 * to roll your own.
+                 */
+//                'options' => [
+//                    'controller' => \Application\Controller\LoginController::class,
+//                    'action' => 'index',
+//                ]
+             ],
+
+
+            /*
              * Advanced Config:
              *
              * If you aren't using Doctrine, you have to uncomment and specify your providers below.

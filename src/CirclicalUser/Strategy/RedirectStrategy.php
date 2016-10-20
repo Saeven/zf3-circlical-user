@@ -1,0 +1,54 @@
+<?php
+
+namespace CirclicalUser\Strategy;
+
+use CirclicalUser\Provider\DenyStrategyInterface;
+use CirclicalUser\Service\AccessService;
+use Zend\Mvc\MvcEvent;
+use Zend\Router\RouteMatch;
+
+/**
+ * Class RedirectStrategy
+ * @package CirclicalUser\Strategy
+ *
+ * Show the user to a login form if the request is not an XHTTP request, and the gate occurs because no user is
+ * logged in.  Do not interject if they are logged in, yet don't have necessary rights.
+ */
+class RedirectStrategy implements DenyStrategyInterface
+{
+    /**
+     * The controller that dispatch should invoke
+     * @var string
+     */
+    private $controllerClass;
+
+    /**
+     * This ^ controller's action
+     * @var string
+     */
+    private $action;
+
+
+    public function __construct(string $controllerClass, string $action)
+    {
+        $this->controllerClass = $controllerClass;
+        $this->action = $action;
+    }
+
+    public function handle(MvcEvent $event, string $eventError): bool
+    {
+        if ($eventError == AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            $app = $event->getTarget();
+            $event->getResponse()->setStatusCode(403);
+            $event->setRouteMatch(new RouteMatch([
+                'controller' => $this->controllerClass,
+                'action' => $this->action,
+            ]));
+
+            return true;
+        }
+
+        return false;
+    }
+
+}

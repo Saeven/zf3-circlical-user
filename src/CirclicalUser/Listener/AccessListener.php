@@ -2,24 +2,31 @@
 
 namespace CirclicalUser\Listener;
 
+use Application\Controller\IndexController;
+use Application\Controller\LoginController;
 use CirclicalUser\Service\AccessService;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
+use Zend\Router\RouteMatch;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 class AccessListener implements ListenerAggregateInterface
 {
+
     private $accessService;
 
     protected $listeners;
 
-    public function __construct(AccessService $accessService)
+    private $accessDeniedStrategy;
+
+    public function __construct(AccessService $accessService, $accessDeniedStrategy = null)
     {
         $this->listeners = [];
         $this->accessService = $accessService;
+        $this->accessDeniedStrategy = $accessDeniedStrategy;
     }
 
     public function attach(EventManagerInterface $events, $priority = 100)
@@ -46,18 +53,27 @@ class AccessListener implements ListenerAggregateInterface
             return;
         }
 
+        $eventError = null;
         if ($this->accessService->hasUser()) {
             if ($this->accessService->canAccessAction($controllerName, $actionName)) {
                 return;
             }
-            $event->setError(AccessService::ACCESS_DENIED);
+            $eventError = AccessService::ACCESS_DENIED;
         } else {
-            $event->setError(AccessService::ACCESS_UNAUTHORIZED);
+            $eventError = AccessService::ACCESS_UNAUTHORIZED;
         }
 
+        if ($this->accessDeniedStrategy != null) {
+            if ($this->accessDeniedStrategy->handle($event, $eventError)) {
+                return;
+            }
+        }
+
+        $event->setError($eventError);
         $event->setParam('route', $route->getMatchedRouteName());
         $event->setParam('controller', $controllerName);
         $event->setParam('action', $actionName);
+
         if ($roles = $this->accessService->getRoles()) {
             $event->setParam('roles', implode(',', $roles));
         } else {
