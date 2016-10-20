@@ -1,0 +1,53 @@
+{{ doctype() }}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href="/assets/head_application.css" media="screen" rel="stylesheet" type="text/css">
+</head>
+<body>
+<style type="text/css">
+    body {
+        background: url('/assets/images/403_sad_robot.png') right bottom no-repeat #232525;
+    }
+
+    h1.error_type {
+        color: #3A5D8D;
+        font-size: 12em;
+    }
+
+    hr {
+        color: #BABABA;
+    }
+
+    span.error {
+        color: white;
+    }
+
+    span.roles {
+        color: #CC7831;
+    }
+</style>
+
+<div class="container" style="text-align:right;">
+
+    <div class="col-xs-2"></div>
+    <div class="col-xs-8">
+        <h1 class="error_type">401</h1>
+        <hr>
+        <label class="pull-left label label-info">route</label>
+        <span class="error">{{ route }}</span>
+        <hr>
+        <label class="pull-left label label-info">controller</label>
+        <span class="error">{{ controller }}</span>
+        <hr>
+        <label class="pull-left label label-info">action</label>
+        <span class="error">{{ action }}</span>
+        <hr>
+        <label class="pull-left label label-info">roles</label>
+        <span class="roles">{{ roles }}</span>
+        <hr>
+    </div>
+    <div class="col-xs-2"></div>
+</div>
+</body>
+</html>
