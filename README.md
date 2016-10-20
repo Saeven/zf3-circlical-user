@@ -5,13 +5,14 @@
 [![Latest Stable Version](https://poser.pugx.org/saeven/zf3-circlical-user/v/stable)](https://packagist.org/packages/saeven/zf3-circlical-user)
 [![Total Downloads](https://poser.pugx.org/saeven/zf3-circlical-user/downloads)](https://packagist.org/packages/saeven/zf3-circlical-user)
 
-Plug and play system for:
+Plug and play authentication, roles, resource, and action control for Zend Framework 3.
+
+Quickly Installs:
 
 - cookie based authentication (using halite and its authenticated encryption)
 - role-based access control (RBAC) with guards at the controller and action level
 - user-based access control to complement RBAC 
-- resource-based permissions, giving you 'resource' and 'verb' control at the role and user level, e.g. 
-(all administrators can 'add' a server, only Pete can 'delete')
+- resource-based permissions, giving you 'resource' and 'verb' control at the role and user level, e.g. (all administrators can 'add' a server, only Pete can 'delete')
 
 ### Missive
 
@@ -33,7 +34,7 @@ This library works on a deny-first basis.  Everything defined by its parts below
 The module provides full identity/auth management, starting at the user-level.  A design goal was to connect this to 
 registration or login processes with little more than one-liners.
 
-##### Login
+#### Login
 
 Validate your submitted Login form, and then execute this to get your user through the door:
        
@@ -42,17 +43,36 @@ Validate your submitted Login form, and then execute this to get your user throu
 Successful authentication, will drop cookies that satisfy subsequent identity retrieval.
      
      
-##### Logout
+#### Logout
     
 Trash cookies and regenerate the session key for that user, using this command:
     
      $this->auth()->clearIdentity();
+
+
+## Pluggable Deny Strategy
+
+Someone trying to do something they shouldn't? It's easy to control what happens with a pluggable DenyStrategy.  Create a class
+that implements DenyStrategyInterface and plug it into your config.  This module comes with a default **RedirectStrategy** that will
+send users to a login page, if the problem was that there was no auth, and it wasn't an XHTTP request.  Easy to use, you'd
+configure it like so:
+
+    'deny_strategy' => [
+
+        'class' => \CirclicalUser\Strategy\RedirectStrategy::class,
+
+        'options' => [
+            'controller' => \Application\Controller\LoginController::class,
+            'action' => 'index',
+        ],
+    ],
+
+Writing your own should be very simple, see provided tests.
      
      
-##### During User Creation
+## User Creation
      
-You need to create a distinct authentication record for each user.  You should be able to plug this 
- very simply into your user service to get the job done:
+Your app needs to be modified, to create a distinct authentication record for each user.  You can add the tap into your Registration process very simply:
      
      $this->auth()->create( $user, $usernameOrEmail, $password ); // controller helper
 
