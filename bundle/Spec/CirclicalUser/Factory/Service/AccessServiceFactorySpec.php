@@ -119,4 +119,35 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
         $this->__invoke($serviceManager, AccessService::class)->shouldBeAnInstanceOf(AccessService::class);
     }
+
+
+    function it_should_not_panic_when_guards_are_not_defined(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper,
+                                                             UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, User $user, UserMapper $userMapper)
+    {
+        $config = [
+            'circlical' => [
+                'user' => [
+                    'providers' => [
+                        'role' => RoleMapper::class,
+                        'rule' => [
+                            'group' => GroupPermissionProviderInterface::class,
+                            'user' => UserPermissionProviderInterface::class,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $user->getId()->willReturn(1);
+        $authenticationService->getIdentity()->willReturn($user);
+
+        $serviceManager->get('config')->willReturn($config);
+        $serviceManager->get(RoleMapper::class)->willReturn($roleMapper);
+        $serviceManager->get(GroupPermissionProviderInterface::class)->willReturn($ruleMapper);
+        $serviceManager->get(UserPermissionProviderInterface::class)->willReturn($userActionRuleMapper);
+        $serviceManager->get(AuthenticationService::class)->willReturn($authenticationService);
+        $serviceManager->get(UserMapper::class)->willReturn($userMapper);
+
+        $this->shouldThrow(\Exception::class)->during('__invoke', [$serviceManager, AccessService::class]);
+    }
 }

@@ -27,8 +27,7 @@ use Prophecy\Argument;
 class AccessServiceSpec extends ObjectBehavior
 {
     function let(RoleProviderInterface $roleMapper, GroupPermissionProviderInterface $groupRules, UserPermissionProviderInterface $userRules,
-                 User $user, User $admin,
-                 GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
+                 User $user, User $admin, GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
                  UserPermissionInterface $userRule1, UserPermissionInterface $userRule2, UserPermissionInterface $userRule3,
                  ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule, UserMapper $userMapper, User $someObject)
     {
