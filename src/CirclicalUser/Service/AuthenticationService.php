@@ -42,6 +42,12 @@ class AuthenticationService
      */
     const COOKIE_VERIFY_B = '_sessionc';
 
+
+    /**
+     * Prefix for hash cookies, mmm.
+     */
+    const COOKIE_HASH_PREFIX = '__cu';
+
     /**
      * Stores the user identity after having been authenticated.
      *
@@ -98,7 +104,7 @@ class AuthenticationService
      * Check to see if a user is logged in
      * @return bool
      */
-    public function hasIdentity() : bool
+    public function hasIdentity(): bool
     {
         return $this->getIdentity() != null;
     }
@@ -126,7 +132,7 @@ class AuthenticationService
      * @throws BadPasswordException Thrown when the password doesn't work
      * @throws NoSuchUserException Thrown when the user can't be identified
      */
-    public function authenticate($username, $password) : User
+    public function authenticate($username, $password): User
     {
         $auth = $this->authenticationProvider->findByUsername($username);
         $user = null;
@@ -178,7 +184,7 @@ class AuthenticationService
      * @throws NoSuchUserException Thrown when the user's authentication records couldn't be found
      * @throws UsernameTakenException
      */
-    public function changeUsername(User $user, $newUsername) : AuthenticationRecordInterface
+    public function changeUsername(User $user, $newUsername): AuthenticationRecordInterface
     {
         /** @var AuthenticationRecordInterface $auth */
         $auth = $this->authenticationProvider->findByUserId($user->getId());
@@ -228,7 +234,7 @@ class AuthenticationService
         // 2 - Set the cookie with random name, that contains a verification hash, that's a function of the switching session key
         //
         $this->setCookie(
-            $hashCookieName,
+            self::COOKIE_HASH_PREFIX . $hashCookieName,
             $hashCookieContents
         );
 
@@ -320,25 +326,27 @@ class AuthenticationService
             $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey);
 
             if (strpos($userTuple, ':') === false) {
-                return null;
+                throw new \Exception();
             }
 
             // paranoid, make sure we have everything we need
-            @list($cookieUserId, $hashCookieName) = @explode(":", $userTuple, 2);
-            if (!isset($cookieUserId) || !isset($hashCookieName) || !is_numeric($cookieUserId) || !trim($hashCookieName)) {
-                return null;
+            @list($cookieUserId, $hashCookieSuffix) = @explode(":", $userTuple, 2);
+            if (!isset($cookieUserId) || !isset($hashCookieSuffix) || !is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
+                throw new \Exception();
             }
 
             /** @var AuthenticationRecordInterface $auth */
             if (!($auth = $this->authenticationProvider->findByUserId($cookieUserId))) {
-                return null;
+                throw new \Exception();
             }
+
+            $hashCookieName = self::COOKIE_HASH_PREFIX . $hashCookieSuffix;
 
             //
             // 2. Check the hashCookie for corroborating data
             //
             if (!isset($_COOKIE[$hashCookieName])) {
-                return null;
+                throw new \Exception();
             }
 
             $userKey = new EncryptionKey($auth->getSessionKey());
@@ -348,7 +356,7 @@ class AuthenticationService
             );
 
             if (!$hashPass) {
-                return null;
+                throw new \Exception();
             }
 
             //
@@ -356,18 +364,23 @@ class AuthenticationService
             //
             $hashedCookieContents = Crypto::decrypt(base64_decode($_COOKIE[$hashCookieName]), $userKey);
             if (!substr_count($hashedCookieContents, ':') == 2) {
-                return null;
+                throw new \Exception();
             }
 
             list(, $hashedUserId, $hashedUsername) = explode(':', $hashedCookieContents);
             if ($hashedUserId != $cookieUserId) {
-                return null;
+                throw new \Exception();
             }
 
             if ($hashedUsername != $auth->getUsername()) {
-                return null;
+                throw new \Exception();
             }
 
+            $this->purgeHashCookies($hashCookieName);
+
+            //
+            // 4. Cookies check out - it's up to the user provider now
+            //
             $user = $this->userProvider->getUser($auth->getUserId());
             if ($user) {
                 $this->setIdentity($user);
@@ -376,10 +389,25 @@ class AuthenticationService
             }
 
         } catch (\Exception $x) {
-
+            $this->purgeHashCookies();
         }
 
         return null;
+    }
+
+    /**
+     * Remove all hash cookies, potentially saving one
+     *
+     * @param string|null $skipCookie
+     */
+    private function purgeHashCookies(string $skipCookie = null)
+    {
+        $sp = session_get_cookie_params();
+        foreach ($_COOKIE as $cookieName => $value) {
+            if ($cookieName != $skipCookie && strpos($cookieName, self::COOKIE_HASH_PREFIX) !== false) {
+                setcookie($cookieName, null, null, '/', $sp['domain'], false, true);
+            }
+        }
     }
 
 
@@ -417,7 +445,7 @@ class AuthenticationService
      * @throws MismatchedEmailsException
      * @throws UsernameTakenException
      */
-    public function create(User $user, $username, $password) : AuthenticationRecordInterface
+    public function create(User $user, $username, $password): AuthenticationRecordInterface
     {
         if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
@@ -458,7 +486,7 @@ class AuthenticationService
      *
      * @return AuthenticationRecordInterface
      */
-    private function resetAuthenticationKey(AuthenticationRecordInterface $auth) : AuthenticationRecordInterface
+    private function resetAuthenticationKey(AuthenticationRecordInterface $auth): AuthenticationRecordInterface
     {
         $key = KeyFactory::generateEncryptionKey();
         $auth->setSessionKey($key->getRawKeyMaterial());
