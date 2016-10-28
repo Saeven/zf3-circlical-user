@@ -101,16 +101,18 @@ Configuring guards is very simple.  Your module's config would look like so:
             'user' => [
                 'guards' => [
                     'ModuleName' => [
-                        \Application\Controller\IndexController::class => [
-                            'default' => [], // anyone can access
-                        ],
-                        \Application\Controller\MemberController::class => [
-                            'default' => ['user'], // specific role access
-                        ],
-                        \Application\Controller\AdminController::class => [
-                            'default' => ['admin'],
-                            'actions' => [  // action-level guards
-                                'list' => [ 'user' ], // role 'user' can access 'listAction' on AdminController
+                        "controllers" => [
+                            \Application\Controller\IndexController::class => [
+                                'default' => [], // anyone can access
+                            ],
+                            \Application\Controller\MemberController::class => [
+                                'default' => ['user'], // specific role access
+                            ],
+                            \Application\Controller\AdminController::class => [
+                                'default' => ['admin'],
+                                'actions' => [  // action-level guards
+                                    'list' => [ 'user' ], // role 'user' can access 'listAction' on AdminController
+                                ],
                             ],
                         ],
                     ],
