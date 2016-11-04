@@ -151,6 +151,13 @@ class AccessServiceSpec extends ObjectBehavior
                             'get-name' => ['user'],
                         ],
                     ],
+                    'Foo\Controller\IndexController' => [
+                        'default' => ['user'],
+                        'actions' => [
+                            'home' => [],
+                            'login' => [],
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -341,6 +348,12 @@ class AccessServiceSpec extends ObjectBehavior
         $this->canAccessAction('Foo\Controller\ThisController', 'userList')->shouldBe(false);
     }
 
+    function it_allows_action_overrides()
+    {
+        $this->canAccessAction('Foo\Controller\IndexController', 'home')->shouldBe(true);
+        $this->canAccessAction('Foo\Controller\IndexController', 'login')->shouldBe(true);
+    }
+
     function it_returns_roles_when_no_user_is_set()
     {
         $this->getRoles()->shouldHaveCount(0);
@@ -423,12 +436,6 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantUserAccess($resourceObject, 'foo');
     }
 
-//    function it_handles_bad_user_permission_provider_implementations($user)
-//    {
-//        $this->setUser($user);
-//        $this->grantUserAccess('badresult', 'foo');
-//    }
-
     function it_throws_exceptions_when_group_actions_are_requested_for_bad_resources()
     {
         $this->shouldThrow(UnknownResourceTypeException::class)->during('getGroupPermissions', [null]);
@@ -506,4 +513,5 @@ class AccessServiceSpec extends ObjectBehavior
     {
         $this->hasUser()->shouldBe(false);
     }
+
 }
