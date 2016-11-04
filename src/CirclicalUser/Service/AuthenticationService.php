@@ -439,13 +439,14 @@ class AuthenticationService
      * @param User   $user
      * @param string $username
      * @param string $password
+     * @param bool   $autoLogin
      *
      * @return AuthenticationRecordInterface
      * @throws EmailUsernameTakenException
      * @throws MismatchedEmailsException
      * @throws UsernameTakenException
      */
-    public function create(User $user, $username, $password): AuthenticationRecordInterface
+    public function create(User $user, $username, $password, $autoLogin = true): AuthenticationRecordInterface
     {
         if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
@@ -473,8 +474,11 @@ class AuthenticationService
 
         $this->authenticationProvider->save($auth);
         $this->setSessionCookies($auth);
-        $this->setIdentity($user);
-
+        
+        if($autoLogin) {
+            $this->setIdentity($user);
+        }
+        
         return $auth;
     }
 

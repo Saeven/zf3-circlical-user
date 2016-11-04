@@ -61,10 +61,11 @@ class AuthenticationPlugin extends AbstractPlugin
      * @param User   $user
      * @param string $username Can be an email address or username, should be validated prior
      * @param string $password
+     * @param bool   $autoLogin Provides the option to disable auto login after user is created
      */
-    public function create(User $user, $username, $password)
+    public function create(User $user, $username, $password, $autoLogin = true)
     {
-        $this->authenticationService->create($user, $username, $password);
+        $this->authenticationService->create($user, $username, $password, $autoLogin);
     }
 
     public function isAllowed($resource, $action)
