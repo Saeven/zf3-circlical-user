@@ -434,7 +434,8 @@ class AuthenticationService
 
 
     /**
-     * Register a new user into the auth tables, and, log them in
+     * Register a new user into the auth tables, and, log them in. Essentially calls registerAuthenticationRecord
+     * and then stores the necessary cookies and identity into the service.
      *
      * @param User   $user
      * @param string $username
@@ -445,7 +446,30 @@ class AuthenticationService
      * @throws MismatchedEmailsException
      * @throws UsernameTakenException
      */
-    public function create(User $user, $username, $password): AuthenticationRecordInterface
+    public function create(User $user, string $username, string $password): AuthenticationRecordInterface
+    {
+        $auth = $this->registerAuthenticationRecord($user, $username, $password);
+        $this->setSessionCookies($auth);
+        $this->setIdentity($user);
+
+        return $auth;
+    }
+
+
+    /**
+     * Very similar to create, except that it won't log the user in.  This was created to satisfy circumstances where
+     * you are creating users from an admin panel for example.  This function is also used by create.
+     *
+     * @param User   $user
+     * @param string $username
+     * @param string $password
+     *
+     * @return AuthenticationRecordInterface
+     * @throws EmailUsernameTakenException
+     * @throws MismatchedEmailsException
+     * @throws UsernameTakenException
+     */
+    public function registerAuthenticationRecord(User $user, string $username, string $password): AuthenticationRecordInterface
     {
         if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
@@ -470,10 +494,7 @@ class AuthenticationService
             $hash,
             KeyFactory::generateEncryptionKey()->getRawKeyMaterial()
         );
-
         $this->authenticationProvider->save($auth);
-        $this->setSessionCookies($auth);
-        $this->setIdentity($user);
 
         return $auth;
     }
