@@ -70,16 +70,27 @@ configure it like so:
 Writing your own should be very simple, see provided tests.
      
      
-## User Creation
+## Creating Access For Your Users
      
-Your app needs to be modified, to create a distinct authentication record for each user.  You can add the tap into your Registration process very simply:
+Your app needs to be modified to create a distinct auth record for each user.  It's very simple.
+
+
+#### create & authenticate
+During user registration routines, you probably want to create the records and also log them in.  To accomplish this, you can use the helper or the 'create' method
+on AccessService.
+
+From a Controller, you can use the auth plugin:
      
-     $this->auth()->create( $user, $usernameOrEmail, $password ); // controller helper
+     $this->auth()->create(User $user, string $usernameOrEmail, string $password); // controller helper
 
-or
+or, the AuthenticationService:
 
-    $container->get(AccessService::class)->create($user, $usernameOrEmail, $password );
+    $container->get(AuthenticationService::class)->create($user, $usernameOrEmail, $password);
     
+#### create only    
+Otherwise, if you simply want to create a user auth record but not log them in, use:
+
+    $container->get(AuthenticationService::class)->registerAuthenticationRecord(User $user, string $username, string $password)
 
 
 ## Roles
