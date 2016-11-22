@@ -455,6 +455,21 @@ class AuthenticationService
         return $auth;
     }
 
+    /**
+     * Removes a user
+     *
+     * @param User $user
+     *
+     * @throws NoSuchUserException
+     */
+    public function remove(User $user) {
+        $authentication = $this->authenticationProvider->findByUserId($user->getId());
+        if ($authentication == null) {
+            throw new NoSuchUserException();
+        }
+        $this->authenticationProvider->delete($authentication);
+    }
+
 
     /**
      * Very similar to create, except that it won't log the user in.  This was created to satisfy circumstances where
