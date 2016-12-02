@@ -3,6 +3,7 @@
 namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Authentication;
+use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
@@ -381,6 +382,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_does_not_permit_mismatched_emails(User $user6)
     {
+        $user6->getId()->willReturn(1);
         $user6->getEmail()->willReturn('a@b.com');
         $this->shouldThrow(MismatchedEmailsException::class)->during('create', [$user6, 'b@b.com', 'alphabet']);
     }
@@ -390,5 +392,11 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->authenticate('userA', 'abc');
         $this->clearIdentity();
         $this->getIdentity()->shouldBe(null);
+    }
+
+    public function it_requires_that_users_have_id_during_creation(User $otherUser)
+    {
+        $otherUser->getId()->willReturn(null);
+        $this->shouldThrow(PersistedUserRequiredException::class)->during('create', [$otherUser, 'whoami', 'nobody']);
     }
 }

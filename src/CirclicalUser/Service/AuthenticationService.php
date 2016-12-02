@@ -3,6 +3,7 @@
 namespace CirclicalUser\Service;
 
 
+use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Provider\AuthenticationProviderInterface;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
@@ -442,9 +443,7 @@ class AuthenticationService
      * @param string $password
      *
      * @return AuthenticationRecordInterface
-     * @throws EmailUsernameTakenException
-     * @throws MismatchedEmailsException
-     * @throws UsernameTakenException
+     * @throws PersistedUserRequiredException
      */
     public function create(User $user, string $username, string $password): AuthenticationRecordInterface
     {
@@ -467,10 +466,15 @@ class AuthenticationService
      * @return AuthenticationRecordInterface
      * @throws EmailUsernameTakenException
      * @throws MismatchedEmailsException
+     * @throws PersistedUserRequiredException
      * @throws UsernameTakenException
      */
     public function registerAuthenticationRecord(User $user, string $username, string $password): AuthenticationRecordInterface
     {
+        if (!$user->getId()) {
+            throw new PersistedUserRequiredException("Your user must have an ID before you can create auth records with it");
+        }
+
         if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
         }
