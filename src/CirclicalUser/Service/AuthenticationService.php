@@ -433,6 +433,26 @@ class AuthenticationService
         $this->authenticationProvider->update($auth);
     }
 
+    /**
+     * Validate user password
+     *
+     * @param User   $user     The user to validate password for
+     * @param string $password Cleartext password that'w will be verified
+     *
+     * @return bool
+     *
+     * @throws NoSuchUserException
+     */
+    public function verifyPassword(User $user, $password)
+    {
+        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        if (!$auth) {
+            throw new NoSuchUserException();
+        }
+
+        return password_verify($password, $auth->getHash());
+    }
+
 
     /**
      * Register a new user into the auth tables, and, log them in. Essentially calls registerAuthenticationRecord
