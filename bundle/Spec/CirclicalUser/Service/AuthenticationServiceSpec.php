@@ -139,6 +139,22 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(UsernameTakenException::class)->during('changeUsername', [$user1, 'orphan']);
     }
 
+    public function it_verify_user_password($authenticationMapper, $userMapper, $user)
+    {
+        $this->verifyPassword($user, 'abc')->shouldBe(true);
+    }
+
+    public function it_failed_verify_bad_user_password($authenticationMapper, $userMapper, $user)
+    {
+        $this->verifyPassword($user, 'xyz')->shouldBe(false);
+    }
+
+    public function it_fails_verify_non_existing_user($authenticationMapper, $userMapper, User $user4)
+    {
+        $user4->getId()->willReturn(4);
+        $this->shouldThrow(NoSuchUserException::class)->during('verifyPassword', [$user4, 'abc']);
+    }
+
     public function it_returns_authenticated_identities()
     {
         $this->authenticate('userA', 'abc');
