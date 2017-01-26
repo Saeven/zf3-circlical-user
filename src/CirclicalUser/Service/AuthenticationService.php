@@ -443,7 +443,7 @@ class AuthenticationService
      *
      * @throws NoSuchUserException
      */
-    public function verifyPassword(User $user, $password)
+    public function verifyPassword(User $user, string $password): bool
     {
         $auth = $this->authenticationProvider->findByUserId($user->getId());
         if (!$auth) {
