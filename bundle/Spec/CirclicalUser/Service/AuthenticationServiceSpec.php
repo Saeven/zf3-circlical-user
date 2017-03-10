@@ -4,6 +4,7 @@ namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Authentication;
 use CirclicalUser\Exception\PersistedUserRequiredException;
+use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
@@ -14,6 +15,7 @@ use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AuthenticationService;
+use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
@@ -414,5 +416,31 @@ class AuthenticationServiceSpec extends ObjectBehavior
     {
         $otherUser->getId()->willReturn(null);
         $this->shouldThrow(PersistedUserRequiredException::class)->during('create', [$otherUser, 'whoami', 'nobody']);
+    }
+
+    public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper)
+    {
+        $this->beConstructedWith($authenticationMapper, $userMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc());
+
+        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getUsername()->willReturn('email');
+        $newAuth->getUserId()->willReturn(5);
+        $user5->getId()->willReturn(5);
+
+        $authenticationMapper->save(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
+        $authenticationMapper->create(Argument::type('integer'), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
+        $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
+    }
+
+    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper)
+    {
+        $this->beConstructedWith($authenticationMapper, $userMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc());
+
+        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getUsername()->willReturn('email');
+        $newAuth->getUserId()->willReturn(5);
+        $user5->getId()->willReturn(5);
+
+        $this->shouldThrow(WeakPasswordException::class)->during('create', [$user5, 'userC', '123456']);
     }
 }

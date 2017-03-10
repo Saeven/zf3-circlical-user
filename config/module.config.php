@@ -21,6 +21,7 @@ use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
+use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use CirclicalUser\Strategy\RedirectStrategy;
 
 return [
@@ -38,6 +39,7 @@ return [
                     'user' => UserPermissionMapper::class,
                 ],
             ],
+            //'password_strength_checker' => Passwdqc::class,
         ],
     ],
 

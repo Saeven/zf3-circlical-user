@@ -69,6 +69,12 @@ configure it like so:
     ],
 
 Writing your own should be very simple, see provided tests.
+
+## Pluggable Password Strength Checker
+
+You can use the built-in support for [paragonie/passwdqc](https://github.com/paragonie/passwdqc) by uncommenting the password_strength_checker config key. You can also roll your own if you have more complex needs; uncomment the key and specify your own implementation of [PasswordCheckerInterface](src/CirclicalUser/Provider/PasswordCheckerInterface.php). This will cause the
+password input routines to throw WeakPasswordExceptions when weak input is received.
+
      
      
 ## Creating Access For Your Users

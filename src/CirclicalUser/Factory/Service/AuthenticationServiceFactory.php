@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Factory\Service;
 
+use CirclicalUser\Provider\PasswordCheckerInterface;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -31,15 +32,25 @@ class AuthenticationServiceFactory implements FactoryInterface
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
 
-        $userProvider = isset($userConfig['providers']['user']) ? $userConfig['providers']['user'] : UserMapper::class;
-        $authMapper = isset($userConfig['providers']['auth']) ? $userConfig['providers']['auth'] : AuthenticationMapper::class;
+        $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
+        $authMapper = $userConfig['providers']['auth'] ?? AuthenticationMapper::class;
+        $passwordChecker = null;
+
+        if( !empty( $userConfig['password_strength_checker'] ) ){
+            $checkerImplementation = new $userConfig['password_strength_checker'];
+            if( $checkerImplementation instanceof PasswordCheckerInterface ){
+                $passwordChecker = $checkerImplementation;
+            }
+        }
+
 
         return new AuthenticationService(
             $container->get($authMapper),
             $container->get($userProvider),
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
-            false
+            false,
+            $passwordChecker
         );
     }
 }
