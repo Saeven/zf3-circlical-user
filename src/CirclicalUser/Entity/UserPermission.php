@@ -2,7 +2,6 @@
 
 namespace CirclicalUser\Entity;
 
-use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,7 +39,7 @@ class UserPermission implements UserPermissionInterface
 
 
     /**
-     * @var Role
+     * @var UserInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */

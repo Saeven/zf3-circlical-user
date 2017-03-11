@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Factory\Service;
 
+use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
@@ -31,26 +32,32 @@ class AuthenticationServiceFactory implements FactoryInterface
     {
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
-
         $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
         $authMapper = $userConfig['providers']['auth'] ?? AuthenticationMapper::class;
-        $passwordChecker = null;
+        $resetTokenProvider = null;
 
-        if( !empty( $userConfig['password_strength_checker'] ) ){
+        if (isset($userConfig['auth']['password_reset_tokens']['enabled'])) {
+            $resetTokenProvider = $userConfig['providers']['reset'] ?? UserResetTokenMapper::class;
+        }
+
+        $passwordChecker = null;
+        if (!empty($userConfig['password_strength_checker'])) {
             $checkerImplementation = new $userConfig['password_strength_checker'];
-            if( $checkerImplementation instanceof PasswordCheckerInterface ){
+            if ($checkerImplementation instanceof PasswordCheckerInterface) {
                 $passwordChecker = $checkerImplementation;
             }
         }
 
-
         return new AuthenticationService(
             $container->get($authMapper),
             $container->get($userProvider),
+            $resetTokenProvider ? $container->get($resetTokenProvider) : null,
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
             false,
-            $passwordChecker
+            $passwordChecker,
+            $userConfig['password_reset_tokens']['validate_fingerprint'] ?? true,
+            $userConfig['password_reset_tokens']['validate_ip'] ?? false
         );
     }
 }

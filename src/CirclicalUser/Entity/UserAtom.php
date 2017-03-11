@@ -18,7 +18,7 @@ class UserAtom
      * @ORM\Id
      * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true})
      */
-    protected $user_id;
+    private $user_id;
 
 
     /**
@@ -26,14 +26,14 @@ class UserAtom
      * @ORM\Id
      * @ORM\Column(type="string", length=255, name="`key`")
      */
-    protected $key;
+    private $key;
 
 
     /**
      * @var string
      * @ORM\Column(type="string", length=255, name="`value`")
      */
-    protected $value;
+    private $value;
 
     /**
      * @return int

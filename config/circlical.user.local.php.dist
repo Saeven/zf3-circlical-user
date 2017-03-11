@@ -16,8 +16,16 @@ return [
 
 
             /*
-             * These parameters are used whether you use Doctrine or no.  They tell the authentication service
-             * how to behave.
+             * You can uncomment this to enforce password strength using the Paragon passwdqc implementation.
+             * Install the required library with "composer require paragonie/passwdqc", see composer.json for more
+             *
+             * This will cause the storage and reset flows to throw WeakPasswordExceptions if weak input is passed in.
+             */
+            //'password_strength_checker' => \CirclicalUser\Service\PasswordChecker\Passwdqc::class,
+
+
+            /*
+             * Authentication service configuration
              */
             'auth' => [
 
@@ -31,6 +39,30 @@ return [
                  * Destroy auth cookies when the session ends? (cookie lifespan of 0)
                  */
                 'transient' => false,
+
+
+                /*
+                 * Forgot password functionality
+                 */
+                'password_reset_tokens' => [
+
+                    /*
+                     * However you slice it, forgotten password functionality is a back-door; it's unfortunately often necessary. If you set this to 'true',
+                     * you will need to configure a reset provider.
+                     */
+                    'enabled' => false,
+
+                    /*
+                     * Validate browser fingerprints during the token verification process
+                     */
+                    'validate_fingerprint' => true,
+
+                    /*
+                     * Make sure that the request IP matches the verification IP
+                     */
+                    'validate_ip' => false,
+
+                ],
             ],
 
 

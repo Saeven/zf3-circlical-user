@@ -13,6 +13,7 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
 
     /**
      * @param $username
+     *
      * @return null|Authentication
      */
     public function findByUsername($username)
@@ -22,6 +23,7 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
 
     /**
      * @param $userId
+     *
      * @return null|Authentication
      */
     public function findByUserId($userId)
@@ -37,7 +39,7 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
      *
      * @return AuthenticationRecordInterface
      */
-    public function create($userId, $username, $hash, $rawKey) : AuthenticationRecordInterface
+    public function create($userId, $username, $hash, $rawKey): AuthenticationRecordInterface
     {
         return new Authentication($userId, $username, $hash, $rawKey);
     }

@@ -21,26 +21,26 @@ class UserAuthenticationLog
      * @ORM\Column(type="integer", options={"unsigned"=true})
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    private $id;
 
 
     /**
      * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true});
      */
-    protected $user_id;
+    private $user_id;
 
     /**
      * @ORM\Column(type="datetime", nullable=false)
      */
-    protected $auth_time;
+    private $auth_time;
 
     /**
      * @ORM\Column(type="string", nullable=true, length=16, options={"fixed"=true});
      */
-    protected $ip_address;
+    private $ip_address;
 
 
-    public function __construct( $id, \DateTimeImmutable $time, $ip_address )
+    public function __construct($id, \DateTimeImmutable $time, $ip_address)
     {
         $this->id = $id;
         $this->auth_time = $time;

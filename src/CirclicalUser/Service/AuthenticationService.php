@@ -3,7 +3,11 @@
 namespace CirclicalUser\Service;
 
 
+use CirclicalUser\Entity\UserResetToken;
+use CirclicalUser\Exception\InvalidResetTokenException;
+use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
+use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
 use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Provider\AuthenticationProviderInterface;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
@@ -16,9 +20,11 @@ use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Provider\UserProviderInterface;
+use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
+use Zend\Http\PhpEnvironment\RemoteAddress;
 
 
 /**
@@ -89,17 +95,42 @@ class AuthenticationService
      */
     private $passwordChecker;
 
+
+    /**
+     * @var UserResetTokenProviderInterface
+     */
+    private $resetTokenProvider;
+
+
+    /**
+     * @var boolean
+     * If password reset is enabled, do we validate the browser fingerprint?
+     */
+    private $validateFingerprint;
+
+
+    /**
+     * @var boolean
+     * If password reset is enabled, do we validate the user IP address?
+     */
+    private $validateIp;
+
+
     /**
      * AuthenticationService constructor.
      *
      * @param AuthenticationProviderInterface $authenticationProvider
      * @param UserProviderInterface           $userProvider
+     * @param UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
      * @param string                          $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
      * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
      * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
      * @param PasswordCheckerInterface        $passwordChecker     Optional, a password checker implementation
+     * @param                                 $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
+     * @param                                 $validateIp          If password reset is enabled, do we validate the user IP address?
      */
-    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, string $systemEncryptionKey, bool $transient, bool $secure, $passwordChecker = null)
+    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $resetTokenProvider,
+                                string $systemEncryptionKey, bool $transient, bool $secure, $passwordChecker, $validateFingerprint, $validateIp)
     {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
@@ -107,6 +138,9 @@ class AuthenticationService
         $this->transient = $transient;
         $this->secure = $secure;
         $this->passwordChecker = $passwordChecker;
+        $this->resetTokenProvider = $resetTokenProvider;
+        $this->validateFingerprint = $validateFingerprint;
+        $this->validateIp = $validateIp;
     }
 
     /**
@@ -377,11 +411,11 @@ class AuthenticationService
             }
 
             list(, $hashedUserId, $hashedUsername) = explode(':', $hashedCookieContents);
-            if ($hashedUserId != $cookieUserId) {
+            if ($hashedUserId !== $cookieUserId) {
                 throw new \Exception();
             }
 
-            if ($hashedUsername != $auth->getUsername()) {
+            if ($hashedUsername !== $auth->getUsername()) {
                 throw new \Exception();
             }
 
@@ -580,6 +614,79 @@ class AuthenticationService
         }
 
         $this->identity = null;
+    }
+
+    /**
+     * Forgot-password mechanisms are a potential back door; but they're needed.  This only takes care
+     * of hash generation.
+     *
+     * @param User $user
+     *
+     * @return string
+     * @throws NoSuchUserException
+     * @throws PasswordResetProhibitedException
+     * @throws TooManyRecoveryAttemptsException
+     */
+    public function createRecoveryToken(User $user): UserResetToken
+    {
+        if (!$this->resetTokenProvider) {
+            throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
+        }
+
+        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        if (!$auth) {
+            throw new NoSuchUserException();
+        }
+
+        if ($this->resetTokenProvider->getRequestCount($auth) > 5) {
+            throw new TooManyRecoveryAttemptsException();
+        }
+
+        $remote = new RemoteAddress();
+        $remote->setUseProxy(true);
+        $token = new UserResetToken($auth, $remote->getIpAddress());
+        $this->resetTokenProvider->save($token);
+
+        return $token;
+    }
+
+
+    /**
+     * @param User   $user
+     * @param int    $tokenId
+     * @param string $token
+     * @param string $newPassword
+     *
+     * @throws InvalidResetTokenException
+     * @throws NoSuchUserException
+     * @throws PasswordResetProhibitedException
+     */
+    public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword)
+    {
+        if (!$this->resetTokenProvider) {
+            throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
+        }
+
+        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        if (!$auth) {
+            throw new NoSuchUserException();
+        }
+
+        $remote = new RemoteAddress();
+        $remote->setUseProxy(true);
+
+        $resetToken = $this->resetTokenProvider->get($tokenId);
+        if (!$resetToken) {
+            throw new InvalidResetTokenException();
+        }
+
+        if (!$resetToken->isValid($auth, $token, $remote->getIpAddress(), $this->validateFingerprint, $this->validateIp)) {
+            throw new InvalidResetTokenException();
+        }
+
+        $this->resetPassword($user, $newPassword);
+        $resetToken->setStatus(UserResetTokenProviderInterface::STATUS_USED);
+        $this->resetTokenProvider->update($resetToken);
     }
 
 }

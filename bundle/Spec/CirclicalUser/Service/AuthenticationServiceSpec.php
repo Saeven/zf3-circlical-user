@@ -3,8 +3,13 @@
 namespace Spec\CirclicalUser\Service;
 
 use CirclicalUser\Entity\Authentication;
+use CirclicalUser\Entity\UserResetToken;
+use CirclicalUser\Exception\InvalidResetTokenException;
+use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
+use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
 use CirclicalUser\Exception\WeakPasswordException;
+use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
@@ -14,6 +19,7 @@ use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use ParagonIE\Halite\KeyFactory;
@@ -28,7 +34,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     private $systemEncryptionKey;
     private $authenticationData;
 
-    public function let(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user)
+    public function let(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user, UserResetTokenMapper $tokenMapper)
     {
         $hash = password_hash('abc', PASSWORD_DEFAULT);
         $key = KeyFactory::generateEncryptionKey();
@@ -54,7 +60,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userMapper->getUser(1)->willReturn($user);
 
         $this->systemEncryptionKey = KeyFactory::generateEncryptionKey();
-        $this->beConstructedWith($authenticationMapper, $userMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false);
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
     }
 
     public function it_is_initializable()
@@ -418,9 +424,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(PersistedUserRequiredException::class)->during('create', [$otherUser, 'whoami', 'nobody']);
     }
 
-    public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper)
+    public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc());
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
         $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -432,9 +438,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
     }
 
-    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper)
+    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc());
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
         $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -443,4 +449,65 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
         $this->shouldThrow(WeakPasswordException::class)->during('create', [$user5, 'userC', '123456']);
     }
+
+    public function it_creates_forgot_password_hashes(User $user, $tokenMapper)
+    {
+        $tokenMapper->getRequestCount($this->authenticationData)->willReturn(0);
+        $tokenMapper->save(Argument::any())->shouldBeCalled();
+        $this->createRecoveryToken($user)->shouldBeAnInstanceOf(UserResetToken::class);
+    }
+
+    public function it_will_refuse_to_accept_too_many_forgot_password_requests(User $user, $tokenMapper)
+    {
+        $tokenMapper->getRequestCount($this->authenticationData)->willReturn(50);
+        $this->shouldThrow(TooManyRecoveryAttemptsException::class)->during('createRecoveryToken', [$user]);
+    }
+
+    public function it_wont_create_recovery_tokens_for_authless_users(User $who)
+    {
+        $who->getId()->willReturn(789);
+        $this->shouldThrow(NoSuchUserException::class)->during('createRecoveryToken', [$who]);
+    }
+
+    public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $tokenMapper, $user)
+    {
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
+    }
+
+    public function it_bails_on_password_changes_if_no_provider_is_set($authenticationMapper, $userMapper, $tokenMapper, $user)
+    {
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
+    }
+
+    public function it_bails_on_password_changes_for_authless_users(User $who)
+    {
+        $who->getId()->willReturn(789);
+        $this->shouldThrow(NoSuchUserException::class)->during('changePasswordWithRecoveryToken', [$who, 123, 'string', 'string']);
+    }
+
+    public function it_bails_on_password_changes_with_bad_reset_token_ids($user, $tokenMapper)
+    {
+        $tokenMapper->get(123)->willReturn(null);
+        $this->shouldThrow(InvalidResetTokenException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
+    }
+
+    public function it_modifies_storage_when_password_changes_succeed(User $user, UserResetToken $token, $tokenMapper)
+    {
+        $token->isValid(Argument::any(), Argument::any(), Argument::any(), true, true)->willReturn(true);
+        $tokenMapper->get(1)->willReturn($token);
+        $token->setStatus(UserResetTokenProviderInterface::STATUS_USED)->shouldBeCalled();
+        $tokenMapper->update($token)->shouldBeCalled();
+        $this->changePasswordWithRecoveryToken($user, 1, 'tokenstring', 'newpassword');
+    }
+
+    public function it_throws_exceptions_when_tokens_are_invalid(User $user, UserResetToken $token, $tokenMapper)
+    {
+        $token->isValid(Argument::any(), Argument::any(), Argument::any(), true, true)->willReturn(false);
+        $tokenMapper->get(1)->willReturn($token);
+        $this->shouldThrow(InvalidResetTokenException::class)->during('changePasswordWithRecoveryToken', [$user, 1, 'tokenstring', 'newpassword']);
+    }
+
+
 }

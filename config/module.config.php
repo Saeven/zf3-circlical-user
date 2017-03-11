@@ -18,10 +18,10 @@ use CirclicalUser\Mapper\UserAuthenticationLogMapper;
 use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
+use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
-use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use CirclicalUser\Strategy\RedirectStrategy;
 
 return [
@@ -38,8 +38,8 @@ return [
                     'group' => GroupPermissionMapper::class,
                     'user' => UserPermissionMapper::class,
                 ],
+                'reset' => UserResetTokenMapper::class,
             ],
-            //'password_strength_checker' => Passwdqc::class,
         ],
     ],
 

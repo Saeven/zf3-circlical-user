@@ -11,12 +11,12 @@ use Zend\ServiceManager\ServiceManager;
 
 class AuthenticationServiceFactorySpec extends ObjectBehavior
 {
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType('CirclicalUser\Factory\Service\AuthenticationServiceFactory');
     }
 
-    function it_creates_its_service(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
+    public function it_creates_its_service(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
     {
 
         $config = [
