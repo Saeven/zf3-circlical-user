@@ -34,6 +34,7 @@ class UserResetToken implements UserResetTokenInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Authentication")
+     * @ORM\JoinColumn(name="auth_user_id", referencedColumnName="user_id")
      */
     private $authentication;
 
@@ -71,7 +72,7 @@ class UserResetToken implements UserResetTokenInterface
         $this->authentication = $authentication;
         $this->request_time = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $this->request_ip_address = $requestingIpAddress;
-        $this->status = UserResetTokenProviderInterface::STATUS_UNUSED;
+        $this->status = UserResetTokenInterface::STATUS_UNUSED;
 
         $fingerprint = $this->getFingerprint();
 
@@ -101,7 +102,7 @@ class UserResetToken implements UserResetTokenInterface
 
     public function setStatus(int $status)
     {
-        if (!in_array($status, [UserResetTokenProviderInterface::STATUS_UNUSED, UserResetTokenProviderInterface::STATUS_INVALID, UserResetTokenProviderInterface::STATUS_USED])) {
+        if (!in_array($status, [UserResetTokenInterface::STATUS_UNUSED, UserResetTokenInterface::STATUS_INVALID, UserResetTokenInterface::STATUS_USED], true)) {
             throw new \InvalidArgumentException("An invalid status is being set!");
         }
         $this->status = $status;

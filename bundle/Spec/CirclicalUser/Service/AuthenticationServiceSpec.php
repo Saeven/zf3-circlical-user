@@ -19,6 +19,7 @@ use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Passwdqc;
@@ -453,6 +454,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_creates_forgot_password_hashes(User $user, $tokenMapper)
     {
         $tokenMapper->getRequestCount($this->authenticationData)->willReturn(0);
+        $tokenMapper->invalidateUnusedTokens($this->authenticationData)->shouldBeCalled();
         $tokenMapper->save(Argument::any())->shouldBeCalled();
         $this->createRecoveryToken($user)->shouldBeAnInstanceOf(UserResetToken::class);
     }
@@ -497,7 +499,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     {
         $token->isValid(Argument::any(), Argument::any(), Argument::any(), true, true)->willReturn(true);
         $tokenMapper->get(1)->willReturn($token);
-        $token->setStatus(UserResetTokenProviderInterface::STATUS_USED)->shouldBeCalled();
+        $token->setStatus(UserResetTokenInterface::STATUS_USED)->shouldBeCalled();
         $tokenMapper->update($token)->shouldBeCalled();
         $this->changePasswordWithRecoveryToken($user, 1, 'tokenstring', 'newpassword');
     }

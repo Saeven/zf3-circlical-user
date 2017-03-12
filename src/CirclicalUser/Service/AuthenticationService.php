@@ -20,6 +20,7 @@ use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Provider\UserProviderInterface;
+use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
@@ -622,7 +623,7 @@ class AuthenticationService
      *
      * @param User $user
      *
-     * @return string
+     * @return UserResetToken
      * @throws NoSuchUserException
      * @throws PasswordResetProhibitedException
      * @throws TooManyRecoveryAttemptsException
@@ -642,6 +643,8 @@ class AuthenticationService
             throw new TooManyRecoveryAttemptsException();
         }
 
+        $this->resetTokenProvider->invalidateUnusedTokens($auth);
+
         $remote = new RemoteAddress();
         $remote->setUseProxy(true);
         $token = new UserResetToken($auth, $remote->getIpAddress());
@@ -660,6 +663,7 @@ class AuthenticationService
      * @throws InvalidResetTokenException
      * @throws NoSuchUserException
      * @throws PasswordResetProhibitedException
+     * @throws \CirclicalUser\Exception\WeakPasswordException
      */
     public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword)
     {
@@ -685,7 +689,7 @@ class AuthenticationService
         }
 
         $this->resetPassword($user, $newPassword);
-        $resetToken->setStatus(UserResetTokenProviderInterface::STATUS_USED);
+        $resetToken->setStatus(UserResetTokenInterface::STATUS_USED);
         $this->resetTokenProvider->update($resetToken);
     }
 

@@ -4,6 +4,8 @@ namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
+use CirclicalUser\Provider\UserInterface;
+use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
 
 
@@ -49,6 +51,27 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
      */
     public function get(int $tokenId)
     {
-        return $this->getRepository()->findOneBy(['id' => $tokenId, 'status' => UserResetTokenProviderInterface::STATUS_UNUSED]);
+        return $this->getRepository()->findOneBy(['id' => $tokenId, 'status' => UserResetTokenInterface::STATUS_UNUSED]);
+    }
+
+    /**
+     * Modify previously created tokens that are not used, so that their status is invalid. There should only be one
+     * valid token at any time.
+     *
+     * @param AuthenticationRecordInterface $authenticationRecord
+     *
+     * @return mixed
+     */
+    public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord)
+    {
+        $query = $this->getRepository()->createQueryBuilder('r')
+            ->update()
+            ->set('r.status', UserResetTokenInterface::STATUS_INVALID)
+            ->where('r.authentication = :authentication')
+            ->andWhere('r.status', UserResetTokenInterface::STATUS_UNUSED)
+            ->setParameter('authentication', $authenticationRecord)
+            ->getQuery();
+
+        $query->execute();
     }
 }

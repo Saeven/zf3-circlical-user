@@ -6,14 +6,6 @@ use CirclicalUser\Entity\UserResetToken;
 
 interface UserResetTokenProviderInterface
 {
-
-    const STATUS_UNUSED = 0;
-
-    const STATUS_INVALID = 9;
-
-    const STATUS_USED = 1;
-
-
     /**
      * Persist
      *
@@ -51,4 +43,15 @@ interface UserResetTokenProviderInterface
      * @return UserResetTokenInterface
      */
     public function get(int $tokenId);
+
+
+    /**
+     * Modify previously created tokens that are not used, so that their status is invalid. There should only be one
+     * valid token at any time.
+     *
+     * @param AuthenticationRecordInterface $authenticationRecord
+     *
+     * @return mixed
+     */
+    public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord);
 }
