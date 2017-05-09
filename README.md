@@ -108,7 +108,7 @@ Roles are used to restrict access to **controllers**, **actions**, or **resource
 
 ## Guards
 
-Guards are conditions on **controllers** or **actions** that examine **group** or **user** privileges to permit/decline 
+Guards are conditions on **controllers** & **actions** -- or **middleware** -- that examine **group** or **user** privileges to permit/decline 
 attempted access.  It works very similarly to [BjyAuthorize](https://github.com/bjyoungblood/BjyAuthorize) 
 (a great module I used for years).
 
@@ -139,6 +139,24 @@ Configuring guards is very simple.  Your module's config would look like so:
         ],
      ];   
 
+If you are defining access for [middleware route definitions](https://docs.zendframework.com/zend-mvc/middleware/#mapping-routes-to-middleware), then you don't need to configure the 'actions' section above.  Further, the Module is then ignored, so you can
+place your middleware handler's class in any module; example:
+
+     return [
+        'circlical' => [
+            'user' => [
+                'guards' => [
+                    'Middleware' => [
+                        "controllers" => [
+                            \Application\Middleware\MiddlewareHandler::class => [
+                                'default' => [], // anyone can access
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+     ];  
 
 ## Resources & Permissions
 

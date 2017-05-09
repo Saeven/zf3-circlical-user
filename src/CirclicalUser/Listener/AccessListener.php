@@ -48,10 +48,36 @@ class AccessListener implements ListenerAggregateInterface
         $route = $event->getRouteMatch();
         $controllerName = $route->getParam('controller');
         $actionName = $route->getParam('action');
+        $middleware = $route->getParam('middleware');
 
-        if (!$this->accessService->requiresAuthentication($controllerName, $actionName)) {
-            return;
+        // support for zend-mvc's middleware definitions which do not pass controllers or actions
+        if ($controllerName && $actionName) {
+            if (!$this->accessService->requiresAuthentication($controllerName, $actionName)) {
+                return;
+            }
+        } else if ($middleware) {
+            // zend-mvc supports both string and array definitions for middleware
+            if (is_string($middleware)) {
+                $middleware = [$middleware];
+            }
+
+            // check all middleware handlers to ascertain access
+            $requiresAuthentication = false;
+            foreach ($middleware as $middlewareHandler) {
+                if (!$this->accessService->canAccessController($middlewareHandler)) {
+                    $requiresAuthentication = true;
+                    $controllerName = $middlewareHandler;
+                }
+            }
+
+            if (!$requiresAuthentication) {
+                return;
+            }
+
+        } else {
+            throw new \LogicException('A controller and action, or middleware are required to verify access!');
         }
+
 
         $eventError = null;
         if ($this->accessService->hasUser()) {
@@ -63,7 +89,7 @@ class AccessListener implements ListenerAggregateInterface
             $eventError = AccessService::ACCESS_UNAUTHORIZED;
         }
 
-        if ($this->accessDeniedStrategy != null) {
+        if ($this->accessDeniedStrategy !== null) {
             if ($this->accessDeniedStrategy->handle($event, $eventError)) {
                 return;
             }
@@ -72,7 +98,7 @@ class AccessListener implements ListenerAggregateInterface
         $event->setError($eventError);
         $event->setParam('route', $route->getMatchedRouteName());
         $event->setParam('controller', $controllerName);
-        $event->setParam('action', $actionName);
+        $event->setParam('action', $actionName ?? 'none');
 
         if ($roles = $this->accessService->getRoles()) {
             $event->setParam('roles', implode(',', $roles));
@@ -102,7 +128,7 @@ class AccessListener implements ListenerAggregateInterface
                 return;
         }
 
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
             $viewModel = new JsonModel();
         } else {
             $viewModel = new ViewModel();

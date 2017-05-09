@@ -19,6 +19,9 @@ class AccessListenerSpec extends ObjectBehavior
     const CONTROLLER_INDEX = '\Namespace\Controller\IndexController';
     const CONTROLLER_ADMIN = '\Namespace\Controller\AdminController';
 
+    const CONTROLLER_MIDDLEWARE_1 = '\Namespace\Controller\MiddlewareInterface1';
+    const CONTROLLER_MIDDLEWARE_2 = '\Namespace\Controller\MiddlewareInterface2';
+
     function it_is_initializable()
     {
         $this->shouldHaveType(AccessListener::class);
@@ -55,6 +58,7 @@ class AccessListenerSpec extends ObjectBehavior
         $accessService->hasUser()->willReturn(true);
         $match->getParam('controller')->willReturn(self::CONTROLLER_INDEX);
         $match->getParam('action')->willReturn('index');
+        $match->getParam('middleware')->willReturn(null);
         $event->getRouteMatch()->willReturn($match);
         $this->verifyAccess($event);
     }
@@ -70,6 +74,7 @@ class AccessListenerSpec extends ObjectBehavior
         $event->getTarget()->willReturn($application);
         $match->getParam('controller')->willReturn(self::CONTROLLER_ADMIN);
         $match->getParam('action')->willReturn('index');
+        $match->getParam('middleware')->willReturn(null);
         $match->getMatchedRouteName()->willReturn('admin');
         $event->getRouteMatch()->willReturn($match);
         $accessService->getRoles()->willReturn([]);
@@ -96,6 +101,7 @@ class AccessListenerSpec extends ObjectBehavior
         $event->getTarget()->willReturn($application);
         $match->getParam('controller')->willReturn(self::CONTROLLER_ADMIN);
         $match->getParam('action')->willReturn('index');
+        $match->getParam('middleware')->willReturn(null);
         $match->getMatchedRouteName()->willReturn('admin');
         $event->getRouteMatch()->willReturn($match);
         $accessService->getRoles()->willReturn(['user']);
@@ -161,6 +167,7 @@ class AccessListenerSpec extends ObjectBehavior
         $event->getTarget()->willReturn($application);
         $match->getParam('controller')->willReturn(self::CONTROLLER_ADMIN);
         $match->getParam('action')->willReturn('index');
+        $match->getParam('middleware')->willReturn(null);
         $match->getMatchedRouteName()->willReturn('admin');
         $event->getRouteMatch()->willReturn($match);
         $accessService->getRoles()->willReturn([]);
@@ -173,6 +180,77 @@ class AccessListenerSpec extends ObjectBehavior
         $event->setParam('roles', 'none')->shouldBeCalled();
         $event->setName(MvcEvent::EVENT_DISPATCH_ERROR)->shouldBeCalled();
 
+
+        $this->verifyAccess($event);
+    }
+
+    /**
+     * zend-mvc recently added middleware support to routing; controllers and actions are not passed in, so we
+     * have to examine the middleware param on the routematch to see if we should grant access
+     *
+     * @param \PhpSpec\Wrapper\Collaborator|MvcEvent              $event
+     * @param \PhpSpec\Wrapper\Collaborator|RouteMatch            $match
+     * @param \PhpSpec\Wrapper\Collaborator|EventManagerInterface $eventManager
+     * @param \PhpSpec\Wrapper\Collaborator|Application           $application
+     * @param \PhpSpec\Wrapper\Collaborator                       $accessService
+     */
+    public function it_denies_unauthorized_mvc_middleware_string_requests(MvcEvent $event, RouteMatch $match, EventManagerInterface $eventManager, Application $application, $accessService)
+    {
+        $application->getEventManager()->willReturn($eventManager);
+        $accessService->canAccessController(self::CONTROLLER_MIDDLEWARE_1)->willReturn(false);
+        $accessService->hasUser()->willReturn(false);
+
+        $event->getTarget()->willReturn($application);
+        $match->getParam('controller')->willReturn(null);
+        $match->getParam('action')->willReturn(null);
+        $match->getParam('middleware')->willReturn(self::CONTROLLER_MIDDLEWARE_1);
+        $match->getMatchedRouteName()->willReturn('middleware-test');
+        $event->getRouteMatch()->willReturn($match);
+        $accessService->getRoles()->willReturn([]);
+
+        $eventManager->triggerEvent($event)->shouldBeCalled();
+        $event->setError(AccessService::ACCESS_UNAUTHORIZED)->shouldBeCalled();
+        $event->setParam('route', 'middleware-test')->shouldBeCalled();
+        $event->setParam('controller', self::CONTROLLER_MIDDLEWARE_1)->shouldBeCalled();
+        $event->setParam('action', 'none')->shouldBeCalled();
+        $event->setParam('roles', 'none')->shouldBeCalled();
+        $event->setName(MvcEvent::EVENT_DISPATCH_ERROR)->shouldBeCalled();
+
+        $this->verifyAccess($event);
+    }
+
+    /**
+     * As of zend-mvc 3.1.0, middleware definitions can also be defined as arrays.  Similar to the previous test, but with
+     * an array structure as middleware route definition.
+     *
+     * @param \PhpSpec\Wrapper\Collaborator|MvcEvent              $event
+     * @param \PhpSpec\Wrapper\Collaborator|RouteMatch            $match
+     * @param \PhpSpec\Wrapper\Collaborator|EventManagerInterface $eventManager
+     * @param \PhpSpec\Wrapper\Collaborator|Application           $application
+     * @param \PhpSpec\Wrapper\Collaborator                       $accessService
+     */
+    public function it_denies_unauthorized_mvc_middleware_array_requests(MvcEvent $event, RouteMatch $match, EventManagerInterface $eventManager, Application $application, $accessService)
+    {
+        $application->getEventManager()->willReturn($eventManager);
+        $accessService->canAccessController(self::CONTROLLER_MIDDLEWARE_1)->willReturn(true);
+        $accessService->canAccessController(self::CONTROLLER_MIDDLEWARE_2)->willReturn(false);
+        $accessService->hasUser()->willReturn(false);
+
+        $event->getTarget()->willReturn($application);
+        $match->getParam('controller')->willReturn(null);
+        $match->getParam('action')->willReturn(null);
+        $match->getParam('middleware')->willReturn([self::CONTROLLER_MIDDLEWARE_1, self::CONTROLLER_MIDDLEWARE_2]);
+        $match->getMatchedRouteName()->willReturn('middleware-test');
+        $event->getRouteMatch()->willReturn($match);
+        $accessService->getRoles()->willReturn([]);
+
+        $eventManager->triggerEvent($event)->shouldBeCalled();
+        $event->setError(AccessService::ACCESS_UNAUTHORIZED)->shouldBeCalled();
+        $event->setParam('route', 'middleware-test')->shouldBeCalled();
+        $event->setParam('controller', self::CONTROLLER_MIDDLEWARE_2)->shouldBeCalled();
+        $event->setParam('action', 'none')->shouldBeCalled();
+        $event->setParam('roles', 'none')->shouldBeCalled();
+        $event->setName(MvcEvent::EVENT_DISPATCH_ERROR)->shouldBeCalled();
 
         $this->verifyAccess($event);
     }
