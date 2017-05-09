@@ -41,7 +41,11 @@
     "paragonie/passwdqc": "dev-master"
   },
   "suggest":{
-    "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details."
+    "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
+    "zendframework/zend-diactoros": "Recommended to support middleware guards.",
+    "zendframework/zend-psr7bridge": "Recommended to support middleware guards.",
+    "zendframework/zend-stratigility": "Recommended to support middleware guards.",
+    "http-interop/http-middleware": "Recommended to support middleware guards."
   },
   "autoload": {
     "psr-4": {
