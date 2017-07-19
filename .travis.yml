@@ -1,22 +1,30 @@
 language: php
 
+dist: trusty
+sudo: required
+
 php:
-  - 7.0
-  - 7.1
+  - "7.0"
+  - "7.1"
 
 before_install:
-- sudo apt-get update
-- sudo apt-get install make build-essential automake php5-dev php-pear
-- git clone git://github.com/jedisct1/libsodium.git
-- cd libsodium
-- ./autogen.sh
-- ./configure && make check
-- sudo make install
-- cd ..
-- pecl install libsodium
+  - sudo apt-get update
+  - sudo apt-get install make build-essential automake php5-dev php-pear
+  - git clone git://github.com/jedisct1/libsodium.git
+  - cd libsodium
+  - ./autogen.sh
+  - ./configure && make check
+  - sudo make install
+  - cd ..
+  - pecl install libsodium
 
-before_script: composer install --prefer-source --no-interaction
+before_script:
+  - php --version
+  - php -i | grep libsodium
+  - composer install --prefer-source --no-interaction
 
-script: vendor/bin/phpspec --config=phpspec.yml run
+script:
+  - vendor/bin/phpspec --config=phpspec.yml run
 
-after_script: vendor/bin/codacycoverage clover build/coverage.xml
+after_script:
+  - vendor/bin/codacycoverage clover build/coverage.xml
