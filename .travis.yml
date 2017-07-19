@@ -20,7 +20,6 @@ before_install:
 
 before_script:
   - php --version
-  - php -i | grep libsodium
   - composer install --prefer-source --no-interaction
 
 script:
