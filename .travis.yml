@@ -8,8 +8,6 @@ php:
   - 7.1
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y php-pear software-properties-common
   - sudo bash -c "LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php"
   - sudo apt-get update
   - sudo apt-get install -y libsodium-dev
