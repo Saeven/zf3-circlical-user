@@ -6,10 +6,10 @@ php:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install php-pear -y
-  - sudo add-apt-repository ppa:ondrej/php -y
-  - sudo apt-get update -q
-  - sudo apt-get install libsodium-dev -y
+  - sudo apt-get install -y php-pear software-properties-common
+  - sudo bash -c "LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php"
+  - sudo apt-get update
+  - sudo apt-get install -y libsodium-dev
 
 before_script:
   - pecl install libsodium
