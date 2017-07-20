@@ -65,12 +65,16 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
     public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord)
     {
         $query = $this->getRepository()->createQueryBuilder('r')
-            ->update('')
+            ->update()
             ->set('r.status', UserResetTokenInterface::STATUS_INVALID)
             ->where('r.authentication = :authentication')
             ->andWhere('r.status = :status_unused')
-            ->setParameter('authentication', $authenticationRecord)
-            ->setParameter('status_unused', UserResetTokenInterface::STATUS_UNUSED)
+            ->setParameters(
+                [
+                    'authentication' => $authenticationRecord,
+                    'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
+                ]
+            )
             ->getQuery();
 
         $query->execute();
