@@ -31,7 +31,7 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
         $fiveMinutesAgo->modify('-5 minutes');
 
         $query = $this->getRepository()->createQueryBuilder('r')
-            ->select('COUNT(*) AS total')
+            ->select('COUNT(r.id) AS total')
             ->where('r.authentication = :authentication')
             ->andWhere('r.request_time > :since')
             ->setParameter('authentication', $authenticationRecord)
@@ -68,8 +68,13 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
             ->update()
             ->set('r.status', UserResetTokenInterface::STATUS_INVALID)
             ->where('r.authentication = :authentication')
-            ->andWhere('r.status', UserResetTokenInterface::STATUS_UNUSED)
-            ->setParameter('authentication', $authenticationRecord)
+            ->andWhere('r.status = :status_unused')
+            ->setParameters(
+                [
+                    'authentication' => $authenticationRecord,
+                    'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
+                ]
+            )
             ->getQuery();
 
         $query->execute();

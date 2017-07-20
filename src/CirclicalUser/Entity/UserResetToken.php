@@ -41,7 +41,7 @@ class UserResetToken implements UserResetTokenInterface
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=2048)
      */
     private $token;
 
@@ -100,6 +100,11 @@ class UserResetToken implements UserResetTokenInterface
         return $this->token;
     }
 
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
     public function setStatus(int $status)
     {
         if (!in_array($status, [UserResetTokenInterface::STATUS_UNUSED, UserResetTokenInterface::STATUS_INVALID, UserResetTokenInterface::STATUS_USED], true)) {
@@ -110,6 +115,7 @@ class UserResetToken implements UserResetTokenInterface
 
     public function isValid(AuthenticationRecordInterface $authenticationRecord, string $checkToken, string $requestingIpAddress, bool $validateFingerprint, bool $validateIp): bool
     {
+
         if ($this->token !== $checkToken) {
             return false;
         }
@@ -146,7 +152,7 @@ class UserResetToken implements UserResetTokenInterface
             }
         }
 
-        return false;
+        return true;
 
     }
 }
