@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Controller\Plugin;
 
+use CirclicalUser\Exception\UserRequiredException;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
@@ -45,6 +46,21 @@ class AuthenticationPlugin extends AbstractPlugin
     public function getIdentity()
     {
         return $this->authenticationService->getIdentity();
+    }
+
+    /**
+     * Get a user identity, or else!
+     * @return User|null
+     * @throws UserRequiredException
+     */
+    public function requireIdentity()
+    {
+        $user = $this->authenticationService->getIdentity();
+        if (!$user) {
+            throw new UserRequiredException();
+        }
+
+        return $user;
     }
 
     /**
