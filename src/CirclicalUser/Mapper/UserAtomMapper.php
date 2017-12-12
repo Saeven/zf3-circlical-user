@@ -15,7 +15,7 @@ use CirclicalUser\Entity\UserAtom;
  */
 class UserAtomMapper extends AbstractDoctrineMapper
 {
-    protected $entityName = 'CirclicalUser\Entity\UserAtom';
+    protected $entityName = UserAtom::class;
 
     /**
      * Get an atomic piece of user data
@@ -42,6 +42,8 @@ class UserAtomMapper extends AbstractDoctrineMapper
      * @param User $user
      * @param      $key
      * @param      $value
+     *
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function setAtom(User $user, $key, $value)
     {
@@ -55,5 +57,19 @@ class UserAtomMapper extends AbstractDoctrineMapper
         $stmt->bindParam(3, $value);
         $stmt->execute();
     }
+
+    /**
+     * Key-value pair search.
+     *
+     * @param string $key
+     * @param string $value
+     *
+     * @return array
+     */
+    public function search(string $key, string $value)
+    {
+        return $this->getRepository()->findBy(['key' => $key, 'value' => $value]);
+    }
+
 
 }

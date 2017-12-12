@@ -32,7 +32,7 @@
     "doctrine/doctrine-orm-module": "^1.1",
     "doctrine/doctrine-module": "^1.2",
     "doctrine/orm": "^2.5",
-    "paragonie/halite": "^2.1"
+    "paragonie/halite": "^3.3"
   },
   "require-dev": {
     "phpspec/phpspec": "^3.1",

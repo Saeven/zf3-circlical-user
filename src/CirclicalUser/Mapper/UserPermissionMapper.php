@@ -14,7 +14,7 @@ use CirclicalUser\Provider\UserInterface;
  */
 class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermissionProviderInterface
 {
-    protected $entityName = 'CirclicalUser\Entity\UserPermission';
+    protected $entityName = UserPermission::class;
 
     /**
      * Get any user-level, string (simple) permissions that are configured in the database.
@@ -23,6 +23,7 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
      * @param UserInterface $user
      *
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getUserPermission($string, UserInterface $user)
     {
@@ -44,6 +45,7 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
      * @param UserInterface     $user
      *
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user)
     {

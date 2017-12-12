@@ -24,6 +24,8 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
      * @param AuthenticationRecordInterface $authenticationRecord
      *
      * @return int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getRequestCount(AuthenticationRecordInterface $authenticationRecord): int
     {

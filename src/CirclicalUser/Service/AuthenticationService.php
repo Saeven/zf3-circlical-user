@@ -22,6 +22,8 @@ use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Provider\UserProviderInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
+use ParagonIE\Halite\Alerts\InvalidKey;
+use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
@@ -135,7 +137,7 @@ class AuthenticationService
     {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
-        $this->systemEncryptionKey = $systemEncryptionKey;
+        $this->systemEncryptionKey = new HiddenString($systemEncryptionKey);
         $this->transient = $transient;
         $this->secure = $secure;
         $this->passwordChecker = $passwordChecker;
@@ -261,10 +263,11 @@ class AuthenticationService
     private function setSessionCookies(AuthenticationRecordInterface $authentication)
     {
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
-        $userKey = new EncryptionKey($authentication->getSessionKey());
-        $hashCookieName = hash_hmac('sha256', $authentication->getSessionKey() . $authentication->getUsername(), $systemKey);
-        $userTuple = base64_encode(Crypto::encrypt($authentication->getUserId() . ':' . $hashCookieName, $systemKey));
-        $hashCookieContents = base64_encode(Crypto::encrypt(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername(), $userKey));
+        $sessionKey = new HiddenString($authentication->getSessionKey());
+        $userKey = new EncryptionKey($sessionKey);
+        $hashCookieName = hash_hmac('sha256', $sessionKey . $authentication->getUsername(), $systemKey);
+        $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
+        $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername()), $userKey));
 
         //
         // 1 - Set the cookie that contains the user ID, and hash cookie name
@@ -393,7 +396,7 @@ class AuthenticationService
                 throw new \Exception();
             }
 
-            $userKey = new EncryptionKey($auth->getSessionKey());
+            $userKey = new EncryptionKey(new HiddenString($auth->getSessionKey()));
             $hashPass = hash_equals(
                 hash_hmac('sha256', $_COOKIE[$hashCookieName], $userKey),
                 $_COOKIE[self::COOKIE_VERIFY_B]
