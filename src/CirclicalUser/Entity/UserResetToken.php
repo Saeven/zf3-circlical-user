@@ -9,6 +9,7 @@ use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use Doctrine\ORM\Mapping as ORM;
+use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
 
@@ -76,12 +77,12 @@ class UserResetToken implements UserResetTokenInterface
 
         $fingerprint = $this->getFingerprint();
 
-        $key = new EncryptionKey($authentication->getSessionKey());
-        $this->token = base64_encode(Crypto::encrypt(json_encode([
+        $key = new EncryptionKey(new HiddenString($authentication->getSessionKey()));
+        $this->token = base64_encode(Crypto::encrypt(new HiddenString(json_encode([
             'fingerprint' => $fingerprint,
             'timestamp' => $this->request_time->format('U'),
             'userId' => $authentication->getUserId(),
-        ]), $key));
+        ])), $key));
     }
 
     public function getFingerprint(): string
@@ -126,7 +127,7 @@ class UserResetToken implements UserResetTokenInterface
 
         try {
             $encryptedJson = @base64_decode($checkToken);
-            $key = new EncryptionKey($authenticationRecord->getSessionKey());
+            $key = new EncryptionKey(new HiddenString($authenticationRecord->getSessionKey()));
             $jsonString = Crypto::decrypt($encryptedJson, $key);
         } catch (\Exception $x) {
             throw new InvalidResetTokenException();
