@@ -2,6 +2,7 @@
 
 namespace Spec\CirclicalUser\Controller\Plugin;
 
+use CirclicalUser\Exception\UserRequiredException;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
@@ -48,5 +49,17 @@ class AuthenticationPluginSpec extends ObjectBehavior
     {
         $authenticationService->create($newUser, 'userA', '123')->shouldBeCalled();
         $this->create($newUser, 'userA', '123');
+    }
+
+    public function it_fails_on_require_when_there_is_no_auth(AuthenticationService $authenticationService)
+    {
+        $authenticationService->getIdentity()->willReturn(null);
+        $this->shouldThrow(UserRequiredException::class)->during('requireIdentity');
+    }
+
+    public function it_succeeds_on_require_when_there_is_auth(AuthenticationService $authenticationService, User $user)
+    {
+        $authenticationService->getIdentity()->willReturn($user);
+        $this->requireIdentity()->shouldBe($user);
     }
 }

@@ -69,12 +69,10 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
             ->set('r.status', UserResetTokenInterface::STATUS_INVALID)
             ->where('r.authentication = :authentication')
             ->andWhere('r.status = :status_unused')
-            ->setParameters(
-                [
-                    'authentication' => $authenticationRecord,
-                    'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
-                ]
-            )
+            ->setParameters([
+                'authentication' => $authenticationRecord,
+                'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
+            ])
             ->getQuery();
 
         $query->execute();
