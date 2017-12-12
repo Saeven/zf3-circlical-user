@@ -8,8 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
  * CirclicalUser\Entity\UserAtom
  *
  * @ORM\Entity
- * @ORM\Table(name="users_atoms")
- *
+ * @ORM\Table(name="users_atoms",indexes={
+ *    @ORM\Index(name="lookup_idx", columns={"key", "value"}),
+ * });
  */
 class UserAtom
 {

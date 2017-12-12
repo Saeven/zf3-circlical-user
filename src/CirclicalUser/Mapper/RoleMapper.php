@@ -5,6 +5,7 @@ namespace CirclicalUser\Mapper;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Provider\UserInterface;
+use CirclicalUser\Entity\Role;
 
 /**
  * Class RoleMapper
@@ -15,7 +16,7 @@ use CirclicalUser\Provider\UserInterface;
  */
 class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
 {
-    protected $entityName = 'CirclicalUser\Entity\Role';
+    protected $entityName = Role::class;
 
     public function getAllRoles() : array
     {

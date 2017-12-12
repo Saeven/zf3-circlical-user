@@ -10,8 +10,10 @@ namespace CirclicalUser\Mapper;
  *
  * @package CirclicalUser\Mapper
  */
+use CirclicalUser\Entity\UserAuthenticationLog;
+
 class UserAuthenticationLogMapper extends AbstractDoctrineMapper
 {
-    protected $entityName = 'CirclicalUser\Entity\UserAuthenticationLog';
+    protected $entityName = UserAuthenticationLog::class;
 
 }

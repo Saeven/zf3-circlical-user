@@ -9,7 +9,7 @@ use CirclicalUser\Provider\AuthenticationRecordInterface;
 
 class AuthenticationMapper extends AbstractDoctrineMapper implements AuthenticationProviderInterface
 {
-    protected $entityName = 'CirclicalUser\Entity\Authentication';
+    protected $entityName = Authentication::class;
 
     /**
      * @param $username
