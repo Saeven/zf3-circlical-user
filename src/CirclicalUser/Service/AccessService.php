@@ -332,6 +332,10 @@ class AccessService
      */
     public function getGroupPermissions($resource): array
     {
+        if ($resource === null) {
+            throw new UnknownResourceTypeException('NULL');
+        }
+
         if ($resource instanceof ResourceInterface) {
             return $this->groupPermissions->getResourcePermissions($resource);
         }
@@ -362,6 +366,10 @@ class AccessService
     {
         if (!$this->user) {
             throw new UserRequiredException();
+        }
+
+        if ($resource === null) {
+            throw new UnknownResourceTypeException('NULL');
         }
 
         if ($resource instanceof ResourceInterface) {
