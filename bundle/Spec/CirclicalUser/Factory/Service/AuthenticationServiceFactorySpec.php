@@ -6,6 +6,7 @@ use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AuthenticationService;
+use CirclicalUser\Service\CookieNameProvider\StandardCookieNameProvider;
 use PhpSpec\ObjectBehavior;
 use Zend\ServiceManager\ServiceManager;
 
@@ -16,7 +17,7 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
         $this->shouldHaveType('CirclicalUser\Factory\Service\AuthenticationServiceFactory');
     }
 
-    public function it_creates_its_service(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
+    public function it_creates_its_service(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper, StandardCookieNameProvider $cookieNameProvider)
     {
 
         $config = [
@@ -58,6 +59,7 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
         $serviceManager->get('config')->willReturn($config);
         $serviceManager->get(AuthenticationMapper::class)->willReturn($authenticationMapper);
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
+        $serviceManager->get(StandardCookieNameProvider::class)->willReturn($cookieNameProvider);
 
         $this->__invoke($serviceManager, AuthenticationService::class)->shouldBeAnInstanceOf(AuthenticationService::class);
 

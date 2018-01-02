@@ -22,6 +22,7 @@ use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
+use CirclicalUser\Service\CookieNameProvider\StandardCookieNameProvider;
 use CirclicalUser\Strategy\RedirectStrategy;
 
 return [
@@ -82,6 +83,7 @@ return [
 
         'invokables' => [
             UserAuthenticationLogMapper::class => UserAuthenticationLogMapper::class,
+            StandardCookieNameProvider::class => StandardCookieNameProvider::class,
         ],
 
         'factories' => [

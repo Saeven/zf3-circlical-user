@@ -4,8 +4,10 @@ namespace CirclicalUser\Factory\Service;
 
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
+use CirclicalUser\Service\CookieNameProvider\StandardCookieNameProvider;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Psr\Container\ContainerExceptionInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -26,7 +28,7 @@ class AuthenticationServiceFactory implements FactoryInterface
      * @throws ServiceNotFoundException if unable to resolve the service.
      * @throws ServiceNotCreatedException if an exception is raised when
      *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @throws ContainerExceptionInterface if any other error occurs
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -34,6 +36,7 @@ class AuthenticationServiceFactory implements FactoryInterface
         $userConfig = $config['circlical']['user'];
         $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
         $authMapper = $userConfig['providers']['auth'] ?? AuthenticationMapper::class;
+        $cookieNamesProvider = $userConfig['providers']['cookie_names'] ?? StandardCookieNameProvider::class;
         $resetTokenProvider = null;
 
         if (isset($userConfig['auth']['password_reset_tokens']['enabled'])) {
@@ -52,6 +55,7 @@ class AuthenticationServiceFactory implements FactoryInterface
             $container->get($authMapper),
             $container->get($userProvider),
             $resetTokenProvider ? $container->get($resetTokenProvider) : null,
+            $container->get($cookieNamesProvider),
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
             false,

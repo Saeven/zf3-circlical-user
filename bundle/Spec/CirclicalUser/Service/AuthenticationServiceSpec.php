@@ -22,6 +22,7 @@ use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use CirclicalUser\Service\AuthenticationService;
+use CirclicalUser\Service\CookieNameProvider\StandardCookieNameProvider;
 use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
@@ -35,11 +36,15 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     private $systemEncryptionKey;
     private $authenticationData;
+    private $standardCookieNameProvider;
 
     public function let(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user, UserResetTokenMapper $tokenMapper)
     {
         $hash = password_hash('abc', PASSWORD_DEFAULT);
         $key = KeyFactory::generateEncryptionKey();
+
+        $standardCookieNameProvider = new StandardCookieNameProvider();
+        $this->standardCookieNameProvider = $standardCookieNameProvider;
 
         $authenticationData = new Authentication(1, 'userA', $hash, $key->getRawKeyMaterial());
         $this->authenticationData = $authenticationData;
@@ -62,7 +67,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userMapper->getUser(1)->willReturn($user);
 
         $this->systemEncryptionKey = KeyFactory::generateEncryptionKey();
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $standardCookieNameProvider, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
     }
 
     public function it_is_initializable()
@@ -181,10 +186,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = $hashCookieContents;
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = $hashCookieContents;
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBeAnInstanceOf(User::class);
     }
@@ -197,10 +202,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = 'g14gdf';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = 'g14gdf';
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBe(null);
     }
@@ -213,10 +218,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString('tanqueray'), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = 'g14gdf';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = 'g14gdf';
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBe(null);
     }
@@ -229,10 +234,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString('A' . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = 'g14gdf';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = 'g14gdf';
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBe(null);
     }
@@ -245,10 +250,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString(15234 . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = 'g14gdf';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = 'g14gdf';
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBe(null);
     }
@@ -261,10 +266,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = 'g14gdf';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = 'g14gdf';
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $this->getIdentity()->shouldBe(null);
     }
@@ -291,10 +296,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
         $cookies = [
-            AuthenticationService::COOKIE_USER => $userTuple,
-            AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName => $hashCookieContents,
-            AuthenticationService::COOKIE_VERIFY_A => hash_hmac('sha256', $userTuple, $systemKey),
-            AuthenticationService::COOKIE_VERIFY_B => hash_hmac('sha256', $hashCookieContents, $userKey),
+            $this->standardCookieNameProvider->getUserCookieName() => $userTuple,
+            $this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName => $hashCookieContents,
+            $this->standardCookieNameProvider->getVerificationCookieName() => hash_hmac('sha256', $userTuple, $systemKey),
+            $this->standardCookieNameProvider->getRedundancyCookieName() => hash_hmac('sha256', $hashCookieContents, $userKey),
         ];
 
         $cookieTypes = array_keys($cookies);
@@ -325,10 +330,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = $hashCookieContents;
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey) . 'a';
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey);
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = $hashCookieContents;
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey) . 'a';
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey);
 
         $authenticationMapper->findByUserId(Argument::any())->shouldNotBeCalled();
         $this->getIdentity()->shouldBe(null);
@@ -342,10 +347,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = $hashCookieContents;
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey) . 'b';
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = $hashCookieContents;
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey) . 'b';
 
         $userMapper->getUser(Argument::any())->shouldNotBeCalled();
         $this->getIdentity()->shouldBe(null);
@@ -359,10 +364,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . 2 . ':' . $this->authenticationData->getUsername()), $userKey));
 
-        $_COOKIE[AuthenticationService::COOKIE_USER] = $userTuple;
-        $_COOKIE[AuthenticationService::COOKIE_HASH_PREFIX . $hashCookieName] = $hashCookieContents;
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_A] = hash_hmac('sha256', $userTuple, $systemKey);
-        $_COOKIE[AuthenticationService::COOKIE_VERIFY_B] = hash_hmac('sha256', $hashCookieContents, $userKey) . 'b';
+        $_COOKIE[$this->standardCookieNameProvider->getUserCookieName()] = $userTuple;
+        $_COOKIE[$this->standardCookieNameProvider->getHashPrefixCookieName() . $hashCookieName] = $hashCookieContents;
+        $_COOKIE[$this->standardCookieNameProvider->getVerificationCookieName()] = hash_hmac('sha256', $userTuple, $systemKey);
+        $_COOKIE[$this->standardCookieNameProvider->getRedundancyCookieName()] = hash_hmac('sha256', $hashCookieContents, $userKey) . 'b';
 
         $userMapper->getUser(Argument::any())->shouldNotBeCalled();
         $this->getIdentity()->shouldBe(null);
@@ -428,7 +433,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->standardCookieNameProvider, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
         $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -442,7 +447,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->standardCookieNameProvider, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
         $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -474,13 +479,13 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $tokenMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->standardCookieNameProvider, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
     }
 
     public function it_bails_on_password_changes_if_no_provider_is_set($authenticationMapper, $userMapper, $tokenMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->standardCookieNameProvider, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }
 

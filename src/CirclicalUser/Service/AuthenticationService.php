@@ -11,6 +11,7 @@ use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
 use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Provider\AuthenticationProviderInterface;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
+use CirclicalUser\Provider\CookieNameProviderInterface;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
@@ -39,27 +40,6 @@ use Zend\Http\PhpEnvironment\RemoteAddress;
  */
 class AuthenticationService
 {
-    /**
-     * User cookie, which is verified by COOKIE_VERIFY_A, and contains the name of a randomly generated cookie
-     */
-    const COOKIE_USER = '_sessiona';
-
-    /**
-     * SHA256 hmac combination that verifies COOKIE_VERIFY_A
-     */
-    const COOKIE_VERIFY_A = '_sessionb';
-
-    /**
-     * SHA256 hmac combination that verifies a randomly generated cookie
-     */
-    const COOKIE_VERIFY_B = '_sessionc';
-
-
-    /**
-     * Prefix for hash cookies, mmm.
-     */
-    const COOKIE_HASH_PREFIX = '__cu';
-
     /**
      * Stores the user identity after having been authenticated.
      *
@@ -118,6 +98,11 @@ class AuthenticationService
      */
     private $validateIp;
 
+    /**
+     * @var CookieNameProviderInterface $cookieNameProvider
+     */
+    private $cookieNameProvider;
+
 
     /**
      * AuthenticationService constructor.
@@ -125,6 +110,7 @@ class AuthenticationService
      * @param AuthenticationProviderInterface $authenticationProvider
      * @param UserProviderInterface           $userProvider
      * @param UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
+     * @param CookieNameProviderInterface     $cookieNameProvider
      * @param string                          $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
      * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
      * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
@@ -132,8 +118,9 @@ class AuthenticationService
      * @param                                 $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
      * @param                                 $validateIp          If password reset is enabled, do we validate the user IP address?
      */
-    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $resetTokenProvider,
-                                string $systemEncryptionKey, bool $transient, bool $secure, $passwordChecker, $validateFingerprint, $validateIp)
+    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider,
+                                $resetTokenProvider, CookieNameProviderInterface $cookieNameProvider, string $systemEncryptionKey,
+                                bool $transient, bool $secure, $passwordChecker, $validateFingerprint, $validateIp)
     {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
@@ -144,6 +131,7 @@ class AuthenticationService
         $this->resetTokenProvider = $resetTokenProvider;
         $this->validateFingerprint = $validateFingerprint;
         $this->validateIp = $validateIp;
+        $this->cookieNameProvider = $cookieNameProvider;
     }
 
     /**
@@ -273,7 +261,7 @@ class AuthenticationService
         // 1 - Set the cookie that contains the user ID, and hash cookie name
         //
         $this->setCookie(
-            self::COOKIE_USER,
+            $this->cookieNameProvider->getUserCookieName(),
             $userTuple
         );
 
@@ -281,7 +269,7 @@ class AuthenticationService
         // 2 - Set the cookie with random name, that contains a verification hash, that's a function of the switching session key
         //
         $this->setCookie(
-            self::COOKIE_HASH_PREFIX . $hashCookieName,
+            $this->cookieNameProvider->getHashPrefixCookieName() . $hashCookieName,
             $hashCookieContents
         );
 
@@ -289,7 +277,7 @@ class AuthenticationService
         // 3 - Set the sign cookie, that acts as a safeguard against tampering
         //
         $this->setCookie(
-            self::COOKIE_VERIFY_A,
+            $this->cookieNameProvider->getVerificationCookieName(),
             hash_hmac('sha256', $userTuple, $systemKey)
         );
 
@@ -297,7 +285,7 @@ class AuthenticationService
         // 4 - Set a sign cookie for the hashCookie's values
         //
         $this->setCookie(
-            self::COOKIE_VERIFY_B,
+            $this->cookieNameProvider->getRedundancyCookieName(),
             hash_hmac('sha256', $hashCookieContents, $userKey)
         );
     }
@@ -329,9 +317,9 @@ class AuthenticationService
      *
      * Some notes:
      *
-     *  - COOKIE_VERIFY_A is a do-not-decrypt check of COOKIE_USER
-     *  - COOKIE_VERIFY_B is a do-not-decrypt check of the random-named-cookie specified by COOKIE_USER
-     *  - COOKIE_USER has its contents encrypted by the system key
+     *  - CookieNameProviderInterface::getVerificationCookieName() is a do-not-decrypt check of CookieNameProviderInterface::getUserCookieName()
+     *  - CookieNameProviderInferface::getRedundancyCookieName() is a do-not-decrypt check of the random-named-cookie specified by CookieNameProviderInterface::getUserCookieName()
+     *  - CookieNameProviderInterface::getUserCookieName() has its contents encrypted by the system key
      *  - the random-named-cookie has its contents encrypted by the user key
      *
      * @see self::setSessionCookies
@@ -343,18 +331,18 @@ class AuthenticationService
             return $this->identity;
         }
 
-        if (!isset($_COOKIE[self::COOKIE_VERIFY_A])) {
+        if (!isset($_COOKIE[$this->cookieNameProvider->getVerificationCookieName()])) {
             return null;
         }
 
-        if (!isset($_COOKIE[self::COOKIE_USER])) {
+        if (!isset($_COOKIE[$this->cookieNameProvider->getUserCookieName()])) {
             return null;
         }
 
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
-        $verificationCookie = $_COOKIE[self::COOKIE_VERIFY_A];
+        $verificationCookie = $_COOKIE[$this->cookieNameProvider->getVerificationCookieName()];
         $hashPass = hash_equals(
-            hash_hmac('sha256', $_COOKIE[self::COOKIE_USER], $systemKey),
+            hash_hmac('sha256', $_COOKIE[$this->cookieNameProvider->getUserCookieName()], $systemKey),
             $verificationCookie
         );
 
@@ -370,7 +358,7 @@ class AuthenticationService
         //
         try {
 
-            $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey);
+            $userTuple = Crypto::decrypt(base64_decode($_COOKIE[$this->cookieNameProvider->getUserCookieName()]), $systemKey);
 
             if (strpos($userTuple, ':') === false) {
                 throw new \Exception();
@@ -387,7 +375,7 @@ class AuthenticationService
                 throw new \Exception();
             }
 
-            $hashCookieName = self::COOKIE_HASH_PREFIX . $hashCookieSuffix;
+            $hashCookieName = $this->cookieNameProvider->getHashPrefixCookieName() . $hashCookieSuffix;
 
             //
             // 2. Check the hashCookie for corroborating data
@@ -399,7 +387,7 @@ class AuthenticationService
             $userKey = new EncryptionKey(new HiddenString($auth->getSessionKey()));
             $hashPass = hash_equals(
                 hash_hmac('sha256', $_COOKIE[$hashCookieName], $userKey),
-                $_COOKIE[self::COOKIE_VERIFY_B]
+                $_COOKIE[$this->cookieNameProvider->getRedundancyCookieName()]
             );
 
             if (!$hashPass) {
@@ -451,7 +439,7 @@ class AuthenticationService
     {
         $sp = session_get_cookie_params();
         foreach ($_COOKIE as $cookieName => $value) {
-            if ($cookieName !== $skipCookie && strpos($cookieName, self::COOKIE_HASH_PREFIX) !== false) {
+            if ($cookieName !== $skipCookie && strpos($cookieName, $this->cookieNameProvider->getHashPrefixCookieName()) !== false) {
                 setcookie($cookieName, null, null, '/', $sp['domain'], false, true);
             }
         }
@@ -613,7 +601,7 @@ class AuthenticationService
         }
 
         $sp = session_get_cookie_params();
-        foreach ([self::COOKIE_USER, self::COOKIE_VERIFY_A, self::COOKIE_VERIFY_B] as $cookieName) {
+        foreach ([$this->cookieNameProvider->getUserCookieName(), $this->cookieNameProvider->getVerificationCookieName(), $this->cookieNameProvider->getRedundancyCookieName()] as $cookieName) {
             setcookie($cookieName, null, null, '/', $sp['domain'], false, true);
         }
 

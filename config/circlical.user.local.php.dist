@@ -122,6 +122,13 @@ return [
 
 //                'role' => \CirclicalUser\Mapper\RoleMapper::class,
 
+                //
+                // Cookie name provider
+                // Implements CirclicalUser\Provider\CookieNameProviderInterface
+                //
+
+//                'cookie_names' => \CirclicalUser\Service\CookieNameProvider\StandardCookieNameProvider::class,
+
 
                 // Authentication mapper
                 // Implements CirclicalUser\Provider\AuthenticationProviderInterface
