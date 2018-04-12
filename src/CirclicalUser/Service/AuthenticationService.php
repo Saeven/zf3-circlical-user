@@ -125,15 +125,15 @@ class AuthenticationService
      * @param AuthenticationProviderInterface $authenticationProvider
      * @param UserProviderInterface           $userProvider
      * @param UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
-     * @param string                          $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
-     * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
-     * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
-     * @param PasswordCheckerInterface        $passwordChecker     Optional, a password checker implementation
-     * @param                                 $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
-     * @param                                 $validateIp          If password reset is enabled, do we validate the user IP address?
+     * @param string                   $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
+     * @param bool                     $transient           True if cookies should expire at the end of the session (zero value, for expiry)
+     * @param bool                     $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
+     * @param PasswordCheckerInterface $passwordChecker     Optional, a password checker implementation
+     * @param bool                     $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
+     * @param bool                     $validateIp          If password reset is enabled, do we validate the user IP address?
      */
-    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $resetTokenProvider,
-                                string $systemEncryptionKey, bool $transient, bool $secure, $passwordChecker, $validateFingerprint, $validateIp)
+    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, UserResetTokenProviderInterface $resetTokenProvider,
+                                string $systemEncryptionKey, bool $transient, bool $secure, PasswordCheckerInterface $passwordChecker, bool $validateFingerprint, bool $validateIp)
     {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
