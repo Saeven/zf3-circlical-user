@@ -23,6 +23,7 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
 use CirclicalUser\Strategy\RedirectStrategy;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 
 return [
 
@@ -54,8 +55,8 @@ return [
 
         'driver' => [
             'circlical_entities' => [
-                'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
-                'paths' => realpath(__DIR__ . '/../src/CirclicalUser/Entity'),
+                'class' => AnnotationDriver::class,
+                'paths' => \dirname(__DIR__) . '/src/CirclicalUser/Entity',
             ],
 
             'orm_default' => [
@@ -79,10 +80,6 @@ return [
     ],
 
     'service_manager' => [
-
-        'invokables' => [
-            UserAuthenticationLogMapper::class => UserAuthenticationLogMapper::class,
-        ],
 
         'factories' => [
             AuthenticationService::class => AuthenticationServiceFactory::class,
