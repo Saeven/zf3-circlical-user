@@ -4,8 +4,8 @@ namespace CirclicalUser\Factory\Service;
 
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
+use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -22,11 +22,12 @@ class AuthenticationServiceFactory implements FactoryInterface
      * @param  string             $requestedName
      * @param  null|array         $options
      *
-     * @return object
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when
-     *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @throws ServiceNotCreatedException if an exception is raised when creating a service.
+     *
+     * @return AuthenticationService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -55,7 +56,7 @@ class AuthenticationServiceFactory implements FactoryInterface
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
             false,
-            $passwordChecker,
+            $passwordChecker ?? new PasswordNotChecked(),
             $userConfig['password_reset_tokens']['validate_fingerprint'] ?? true,
             $userConfig['password_reset_tokens']['validate_ip'] ?? false
         );

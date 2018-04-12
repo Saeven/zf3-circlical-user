@@ -2,16 +2,14 @@
 
 namespace CirclicalUser\Entity;
 
+use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-
 /**
- * A promotion.
+ * Log entity that you can use when users log in.
  *
  * @ORM\Entity
  * @ORM\Table(name="users_auth_logs")
- *
- *
  */
 class UserAuthenticationLog
 {
@@ -22,7 +20,6 @@ class UserAuthenticationLog
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
 
     /**
      * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true});
@@ -40,10 +37,11 @@ class UserAuthenticationLog
     private $ip_address;
 
 
-    public function __construct($id, \DateTimeImmutable $time, $ip_address)
+    public function __construct(UserInterface $user, \DateTimeImmutable $time, string $ipAddress)
     {
-        $this->id = $id;
+        $this->id = 0;
+        $this->user_id = $user->getId();
         $this->auth_time = $time;
-        $this->ip_address = $ip_address;
+        $this->ip_address = $ipAddress;
     }
 }

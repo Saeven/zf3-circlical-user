@@ -22,7 +22,6 @@ use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Provider\UserProviderInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
-use ParagonIE\Halite\Alerts\InvalidKey;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
@@ -129,11 +128,11 @@ class AuthenticationService
      * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
      * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
      * @param PasswordCheckerInterface        $passwordChecker     Optional, a password checker implementation
-     * @param                                 $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
-     * @param                                 $validateIp          If password reset is enabled, do we validate the user IP address?
+     * @param bool                            $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
+     * @param bool                            $validateIp          If password reset is enabled, do we validate the user IP address?
      */
     public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $resetTokenProvider,
-                                string $systemEncryptionKey, bool $transient, bool $secure, $passwordChecker, $validateFingerprint, $validateIp)
+                                string $systemEncryptionKey, bool $transient, bool $secure, PasswordCheckerInterface $passwordChecker, bool $validateFingerprint, bool $validateIp)
     {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
@@ -457,6 +456,11 @@ class AuthenticationService
         }
     }
 
+    /**
+     * @param string $password
+     *
+     * @throws WeakPasswordException
+     */
     private function enforcePasswordStrength(string $password)
     {
         if ($this->passwordChecker && !$this->passwordChecker->isStrongPassword($password)) {

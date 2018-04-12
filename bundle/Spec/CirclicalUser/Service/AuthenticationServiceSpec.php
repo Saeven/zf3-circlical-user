@@ -20,11 +20,12 @@ use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\UserResetTokenInterface;
-use CirclicalUser\Provider\UserResetTokenProviderInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Passwdqc;
+use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
+use ParagonIE\Halite\Password;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
 use PhpSpec\ObjectBehavior;
@@ -62,7 +63,17 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $userMapper->getUser(1)->willReturn($user);
 
         $this->systemEncryptionKey = KeyFactory::generateEncryptionKey();
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            $tokenMapper,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new PasswordNotChecked(),
+            true,
+            true
+        );
     }
 
     public function it_is_initializable()
@@ -474,13 +485,13 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $tokenMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new PasswordNotChecked(), true, true);
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
     }
 
     public function it_bails_on_password_changes_if_no_provider_is_set($authenticationMapper, $userMapper, $tokenMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, null, true, true);
+        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new PasswordNotChecked(), true, true);
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }
 
