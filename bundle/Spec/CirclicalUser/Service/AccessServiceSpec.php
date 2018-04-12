@@ -14,7 +14,6 @@ use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\UserRequiredException;

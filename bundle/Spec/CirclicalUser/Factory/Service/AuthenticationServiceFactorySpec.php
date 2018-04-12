@@ -25,7 +25,6 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
                 'user' => [
                     'providers' => [
                         'role' => RoleMapper::class,
-                        'rule' => ActionRuleMapper::class,
                     ],
                     'auth' => [
                         'crypto_key' => 'sfZGFm1rCc7TgPr9aly3WOtAfbEOb/VafB8L3velkd0=',

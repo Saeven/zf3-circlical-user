@@ -48,6 +48,17 @@ class AccessService
     private $userPermissions;
 
 
+    /**
+     * The AccessService governs permissions around roles and guards.
+     *
+     * @param array                            $guardConfiguration
+     * @param RoleProviderInterface            $roleProvider
+     * @param GroupPermissionProviderInterface $groupPermissionProvider
+     * @param UserPermissionProviderInterface  $userPermissionProvider
+     * @param UserProviderInterface            $userProvider
+     *
+     * @throws GuardConfigurationException
+     */
     public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
                                 GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider,
                                 UserProviderInterface $userProvider)
@@ -63,7 +74,7 @@ class AccessService
             if (isset($config['controllers'])) {
                 foreach ($config['controllers'] as $controllerName => $controllerConfig) {
                     if (isset($controllerConfig['default'])) {
-                        if (!is_array($controllerConfig['default'])) {
+                        if (!\is_array($controllerConfig['default'])) {
                             throw new GuardConfigurationException($controllerName, 'the "default" setting must be an array');
                         }
                         $this->controllerDefaults[$controllerName] = $controllerConfig['default'];
@@ -71,12 +82,12 @@ class AccessService
 
                     if (isset($controllerConfig['actions'])) {
 
-                        if (!is_array($controllerConfig['actions'])) {
+                        if (!\is_array($controllerConfig['actions'])) {
                             throw new GuardConfigurationException($controllerName, 'the "actions" setting must be an array');
                         }
 
                         foreach ($controllerConfig['actions'] as $action => $actionRoles) {
-                            if (!is_array($controllerConfig['actions'][$action])) {
+                            if (!\is_array($controllerConfig['actions'][$action])) {
                                 throw new GuardConfigurationException($controllerName, 'the roles for action "$action" must be an array');
                             }
                             $this->actions[$controllerName][$action] = $actionRoles;
@@ -336,11 +347,11 @@ class AccessService
             return $this->groupPermissions->getResourcePermissions($resource);
         }
 
-        if (is_string($resource)) {
+        if (\is_string($resource)) {
             return $this->groupPermissions->getPermissions($resource);
         }
 
-        throw new UnknownResourceTypeException(get_class($resource));
+        throw new UnknownResourceTypeException(\get_class($resource));
     }
 
     /**
@@ -355,6 +366,7 @@ class AccessService
      * @param ResourceInterface|string $resource
      *
      * @return UserPermissionInterface
+     * @throws \Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
@@ -368,11 +380,11 @@ class AccessService
             return $this->userPermissions->getResourceUserPermission($resource, $this->user);
         }
 
-        if (is_string($resource)) {
+        if (\is_string($resource)) {
             return $this->userPermissions->getUserPermission($resource, $this->user);
         }
 
-        throw new UnknownResourceTypeException(get_class($resource));
+        throw new UnknownResourceTypeException(\get_class($resource));
     }
 
     /**
@@ -388,6 +400,9 @@ class AccessService
      * @param string                   $action
      *
      * @return bool
+     * @throws \Exception
+     * @throws UnknownResourceTypeException
+     * @throws UserRequiredException
      */
     public function isAllowed($resource, string $action): bool
     {
@@ -429,6 +444,9 @@ class AccessService
      * @param string                   $action
      *
      * @return bool
+     * @throws \Exception
+     * @throws UnknownResourceTypeException
+     * @throws UserRequiredException
      */
     public function isAllowedUser($resource, string $action): bool
     {
@@ -446,7 +464,7 @@ class AccessService
      *
      * @return array Array of IDs whose class was $resourceClass
      */
-    public function listAllowedByClass($resourceClass, string $action = ""): array
+    public function listAllowedByClass($resourceClass, string $action = ''): array
     {
         $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         $permitted = [];
@@ -468,6 +486,7 @@ class AccessService
      * @param string            $action
      *
      * @throws ExistingAccessException
+     * @throws UnknownResourceTypeException
      */
     public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, string $action)
     {
@@ -480,7 +499,7 @@ class AccessService
         $examinedRole = $role;
         while ($examinedRole) {
             foreach ($resourcePermissions as $permission) {
-                if ($role == $permission->getRole()) {
+                if ($role === $permission->getRole()) {
                     $matchedPermission = $permission;
                 }
 
@@ -517,6 +536,8 @@ class AccessService
      * @param string                   $action
      *
      * @throws PermissionExpectedException
+     * @throws UnknownResourceTypeException
+     * @throws UserRequiredException
      */
     public function grantUserAccess($resource, string $action)
     {
@@ -528,10 +549,8 @@ class AccessService
         }
 
         // make sure we can work with this
-        if ($permission) {
-            if (!($permission instanceof UserPermissionInterface)) {
-                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($permission));
-            }
+        if ($permission && !($permission instanceof UserPermissionInterface)) {
+            throw new PermissionExpectedException(UserPermissionInterface::class, \get_class($permission));
         }
 
         /** @var UserPermissionInterface $permission */
@@ -542,7 +561,7 @@ class AccessService
             $permission->addAction($action);
             $this->userPermissions->update($permission);
         } else {
-            $isString = is_string($resource);
+            $isString = \is_string($resource);
             $permission = $this->userPermissions->create(
                 $this->user,
                 $isString ? 'string' : $resource->getClass(),
@@ -557,9 +576,11 @@ class AccessService
      * Revoke access to a resource
      *
      * @param ResourceInterface|string $resource
-     * @param                          $action
+     * @param string                   $action
      *
      * @throws PermissionExpectedException
+     * @throws UnknownResourceTypeException
+     * @throws UserRequiredException
      */
     public function revokeUserAccess($resource, string $action)
     {
@@ -570,14 +591,12 @@ class AccessService
         }
 
         // make sure we can work with this
-        if ($resourceRule) {
-            if (!($resourceRule instanceof UserPermissionInterface)) {
-                throw new PermissionExpectedException(UserPermissionInterface::class, get_class($resourceRule));
-            }
+        if ($resourceRule && !($resourceRule instanceof UserPermissionInterface)) {
+            throw new PermissionExpectedException(UserPermissionInterface::class, \get_class($resourceRule));
         }
 
         if ($resourceRule) {
-            if (!in_array($action, $resourceRule->getActions())) {
+            if (!\in_array($action, $resourceRule->getActions(), true)) {
                 return;
             }
             $resourceRule->removeAction($action);
