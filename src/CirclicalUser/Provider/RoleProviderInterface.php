@@ -15,7 +15,7 @@ interface RoleProviderInterface
      * Fetch an array of all RoleInterface objects
      * @return RoleInterface[]
      */
-    public function getAllRoles() : array;
+    public function getAllRoles(): array;
 
 
     /**
@@ -25,6 +25,6 @@ interface RoleProviderInterface
      *
      * @return RoleInterface
      */
-    public function getRoleWithName($name);
+    public function getRoleWithName(string $name);
 
 }

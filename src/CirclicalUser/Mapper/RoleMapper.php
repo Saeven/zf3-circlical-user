@@ -18,11 +18,11 @@ class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
 {
     protected $entityName = Role::class;
 
-    public function getAllRoles() : array
+    public function getAllRoles(): array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
-                ->getQuery();
+            ->getQuery();
 
         return $query->getResult();
     }
@@ -35,7 +35,7 @@ class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
      *
      * @return mixed
      */
-    public function getRoleWithName($name)
+    public function getRoleWithName(string $name)
     {
         return $this->getRepository()->findOneBy(['name' => $name]);
     }
