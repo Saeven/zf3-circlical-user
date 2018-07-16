@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Mapper;
 
+use CirclicalUser\Entity\Role;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Provider\UserProviderInterface;
 
@@ -17,7 +18,7 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
 {
     protected $entityName;
 
-    public function __construct( $entityName )
+    public function __construct($entityName)
     {
         $this->entityName = $entityName;
     }
@@ -59,4 +60,23 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
         return $query->getResult();
     }
 
+    /**
+     * Get users with a specific role, and _not_ its hierarchical parents.
+     * In other words, if you have 'admin' which inherits from 'standard' and you request 'admin',
+     * you will not list 'standard' users.
+     *
+     * @param Role $role
+     *
+     * @return array
+     */
+    public function getUsersWithRole(Role $role): array
+    {
+        $query = $this->getRepository()->createQueryBuilder('u')
+            ->select('u')
+            ->where(':role MEMBER OF u.roles')
+            ->setParameter('role', $role)
+            ->getQuery();
+
+        return $query->getResult() ?? [];
+    }
 }

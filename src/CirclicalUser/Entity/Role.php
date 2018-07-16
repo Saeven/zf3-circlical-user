@@ -20,19 +20,19 @@ class Role implements RoleInterface
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    private $id;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      */
-    protected $name;
+    private $name;
 
     /**
      * @var Role
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
      */
-    protected $parent;
+    private $parent;
 
 
     /**
@@ -40,7 +40,7 @@ class Role implements RoleInterface
      *
      * @return int
      */
-    public function getId() : int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -73,7 +73,6 @@ class Role implements RoleInterface
         $this->name = $name;
     }
 
-
     /**
      * Get the parent role
      */
@@ -92,5 +91,21 @@ class Role implements RoleInterface
     public function setParent(Role $parent)
     {
         $this->parent = $parent;
+    }
+
+    /**
+     * Return all inherited roles, including the start role, in this to-root traversal.
+     * @return array
+     */
+    public function getInheritanceList(): array
+    {
+        $roleList = [$this];
+        $role = $this;
+        while ($parentRole = $role->getParent()) {
+            $roleList[] = $parentRole;
+            $role = $parentRole;
+        }
+
+        return $roleList;
     }
 }
