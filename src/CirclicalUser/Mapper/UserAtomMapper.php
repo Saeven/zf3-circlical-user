@@ -36,6 +36,11 @@ class UserAtomMapper extends AbstractDoctrineMapper
         return null;
     }
 
+    public function deleteAtom(UserAtom $atom)
+    {
+        $this->getEntityManager()->remove($atom);
+    }
+
     /**
      * Set a particular atom on a user
      *
