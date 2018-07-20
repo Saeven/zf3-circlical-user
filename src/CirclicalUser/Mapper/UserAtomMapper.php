@@ -22,13 +22,16 @@ class UserAtomMapper extends AbstractDoctrineMapper
      *
      * @param User $user
      * @param      $key
+     * @param bool $detachFromEntityManager
      *
      * @return UserAtom|null
      */
-    public function getAtom(User $user, $key)
+    public function getAtom(User $user, $key, bool $detachFromEntityManager = true)
     {
         if ($atom = $this->getRepository()->findOneBy(['user_id' => $user->getId(), 'key' => $key])) {
-            $this->getEntityManager()->detach($atom);
+            if ($detachFromEntityManager) {
+                $this->getEntityManager()->detach($atom);
+            }
 
             return $atom;
         }

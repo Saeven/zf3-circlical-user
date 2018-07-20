@@ -41,6 +41,19 @@ class UserAtomMapperSpec extends ObjectBehavior
         $this->getAtom($user, $key);
     }
 
+    function it_can_get_atoms_by_key_and_not_detach_them_from_the_entity_manager(UserInterface $user, EntityRepository $entityRepository, EntityManager $entityManager, UserAtom $atom)
+    {
+        $user->getId()->willReturn(1);
+        $key = 'test';
+        $entityRepository->findOneBy([
+            'user_id' => 1,
+            'key' => $key,
+        ])->willReturn($atom);
+
+        $entityManager->detach($atom)->shouldNotBeCalled();
+        $this->getAtom($user, $key, false);
+    }
+
     function it_can_delete_atoms(UserAtom $atom, EntityManager $entityManager)
     {
         $entityManager->remove($atom)->shouldBeCalled();
