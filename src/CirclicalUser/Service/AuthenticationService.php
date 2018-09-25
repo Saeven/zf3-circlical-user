@@ -342,11 +342,7 @@ class AuthenticationService
             return $this->identity;
         }
 
-        if (!isset($_COOKIE[self::COOKIE_VERIFY_A])) {
-            return null;
-        }
-
-        if (!isset($_COOKIE[self::COOKIE_USER])) {
+        if (!isset($_COOKIE[self::COOKIE_VERIFY_A], $_COOKIE[self::COOKIE_VERIFY_B], $_COOKIE[self::COOKIE_USER])) {
             return null;
         }
 
