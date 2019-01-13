@@ -38,17 +38,20 @@ class RedirectStrategy implements DenyStrategyInterface
     public function handle(MvcEvent $event, string $eventError): bool
     {
         if ($eventError == AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-            $app = $event->getTarget();
             $event->getResponse()->setStatusCode(403);
             $event->setRouteMatch(new RouteMatch([
                 'controller' => $this->controllerClass,
                 'action' => $this->action,
             ]));
+            $event->setParam('authRedirect', true);
+
+            if ($requestData = $event->getRequest() && isset($requestData['REQUEST_URI'], $requestData['SCRIPT_NAME'])) {
+                $event->setParam('authRedirectTo', $requestData['REQUEST_URI'] . $requestData['SCRIPT_NAME']);
+            }
 
             return true;
         }
 
         return false;
     }
-
 }
