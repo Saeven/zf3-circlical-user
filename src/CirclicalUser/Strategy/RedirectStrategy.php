@@ -45,8 +45,11 @@ class RedirectStrategy implements DenyStrategyInterface
             ]));
             $event->setParam('authRedirect', true);
 
-            if ($requestData = $event->getRequest() && isset($requestData['REQUEST_URI'], $requestData['SCRIPT_NAME'])) {
-                $event->setParam('authRedirectTo', $requestData['REQUEST_URI'] . $requestData['SCRIPT_NAME']);
+            /** @var \Zend\Http\PhpEnvironment\Request $requestData */
+            $requestData = $event->getRequest();
+
+            if ($requestData->getServer('REQUEST_URI')) {
+                $event->setParam('authRedirectTo', $requestData->getServer('REQUEST_URI'));
             }
 
             return true;
