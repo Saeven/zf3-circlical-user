@@ -6,7 +6,7 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Strategy\RedirectStrategy;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Zend\Http\Request;
+use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
@@ -14,14 +14,17 @@ use Zend\Router\RouteMatch;
 
 class RedirectStrategySpec extends ObjectBehavior
 {
+    static $requestUri = '/member';
+
     function it_is_initializable()
     {
         $this->shouldHaveType(RedirectStrategy::class);
     }
 
-    function let()
+    function let(Request $request)
     {
         $this->beConstructedWith('Controller', 'Action');
+        $request->getServer('REQUEST_URI')->willReturn(static::$requestUri);
     }
 
     function it_traps_unauthorized(MvcEvent $event, Response $response, Application $application, Request $request)
@@ -34,6 +37,7 @@ class RedirectStrategySpec extends ObjectBehavior
             'action' => 'Action',
         ]))->shouldBeCalled();
         $event->setParam('authRedirect', true)->shouldBeCalled();
+        $event->setParam('authRedirectTo', static::$requestUri)->shouldBeCalled();
         $response->setStatusCode(403)->shouldBeCalled();
         $event->getResponse()->willReturn($response);
         $this->handle($event, AccessService::ACCESS_UNAUTHORIZED)->shouldBe(true);
