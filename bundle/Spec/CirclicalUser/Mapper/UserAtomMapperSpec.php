@@ -57,6 +57,7 @@ class UserAtomMapperSpec extends ObjectBehavior
     function it_can_delete_atoms(UserAtom $atom, EntityManager $entityManager)
     {
         $entityManager->remove($atom)->shouldBeCalled();
+        $entityManager->flush($atom)->shouldBeCalled();
         $this->deleteAtom($atom);
     }
 
