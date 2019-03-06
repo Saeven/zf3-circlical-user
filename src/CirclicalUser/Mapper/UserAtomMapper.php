@@ -42,6 +42,7 @@ class UserAtomMapper extends AbstractDoctrineMapper
     public function deleteAtom(UserAtom $atom)
     {
         $this->getEntityManager()->remove($atom);
+        $this->getEntityManager()->flush($atom);
     }
 
     /**
