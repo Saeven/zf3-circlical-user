@@ -38,7 +38,7 @@ class AuthenticationPlugin extends AbstractPlugin
      * @throws \CirclicalUser\Exception\BadPasswordException
      * @throws \CirclicalUser\Exception\NoSuchUserException
      */
-    public function authenticate($email, $pass)
+    public function authenticate(string $email, string $pass)
     {
         return $this->authenticationService->authenticate($email, $pass);
     }

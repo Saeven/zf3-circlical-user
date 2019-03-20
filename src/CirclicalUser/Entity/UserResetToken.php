@@ -35,7 +35,8 @@ class UserResetToken implements UserResetTokenInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Authentication")
-     * @ORM\JoinColumn(name="auth_user_id", referencedColumnName="user_id")
+     * @ORM\JoinColumn(name="auth_user_id", referencedColumnName="user_id",onDelete="CASCADE")
+     *
      */
     private $authentication;
 

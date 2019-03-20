@@ -1,0 +1,12 @@
+parameters:
+  autoload_files:
+    - %rootDir%/../../../vendor/autoload.php
+  #  excludes_analyse:
+  level: 2
+  ignoreErrors:
+#    - '#Call to an undefined method [A-Za-z0-9\\_]+::json().#'
+#    - '#Call to an undefined method [A-Za-z0-9\\_]+::auth().#'
+#    - '#Call to an undefined method [A-Za-z0-9\\_]+::locale().#'
+#    - '#Call to an undefined method [A-Za-z0-9\\_]+::flashMessenger().#'
+#    - '#Constructor of class Lemonade\\Service\\EmailListProvider\\CourseListProvider has an unused parameter \$userMapper#'
+#    - '#Constructor of class Lemonade\\Service\\EmailListProvider\\CourseStepListProvider has an unused parameter \$userMapper.#'
