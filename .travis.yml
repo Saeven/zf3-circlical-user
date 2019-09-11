@@ -1,6 +1,6 @@
 language: php
 
-dist: trusty
+dist: xenial
 sudo: required
 
 php:
@@ -9,7 +9,7 @@ php:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install make build-essential automake php5-dev php-pear
+  - sudo apt-get install make build-essential automake php-dev php-pear
   - git clone git://github.com/jedisct1/libsodium.git
   - cd libsodium
   - git checkout 1.0.10
