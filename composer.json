@@ -41,7 +41,7 @@
     "codacy/coverage": "^1.0",
     "paragonie/passwdqc": "dev-master"
   },
-  "suggest":{
+  "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
     "zendframework/zend-diactoros": "Recommended to support middleware guards.",
     "zendframework/zend-psr7bridge": "Recommended to support middleware guards.",
