@@ -333,8 +333,8 @@ class AuthenticationService
      *  - COOKIE_USER has its contents encrypted by the system key
      *  - the random-named-cookie has its contents encrypted by the user key
      *
-     * @see self::setSessionCookies
      * @return User|null
+     * @see self::setSessionCookies
      */
     public function getIdentity()
     {
@@ -405,7 +405,7 @@ class AuthenticationService
             // 3. Decrypt the hash cookie with the user key
             //
             $hashedCookieContents = Crypto::decrypt(base64_decode($_COOKIE[$hashCookieName]), $userKey);
-            if (!substr_count($hashedCookieContents, ':') === 2) {
+            if (!(substr_count($hashedCookieContents, ':') === 2)) {
                 throw new \Exception();
             }
 
@@ -498,11 +498,9 @@ class AuthenticationService
      * @return bool
      *
      * @throws NoSuchUserException
-     * @throws WeakPasswordException
      */
     public function verifyPassword(User $user, string $password): bool
     {
-        $this->enforcePasswordStrength($password);
 
         $auth = $this->authenticationProvider->findByUserId($user->getId());
         if (!$auth) {
