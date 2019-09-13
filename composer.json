@@ -37,11 +37,11 @@
   },
   "require-dev": {
     "phpspec/phpspec": "^3.1",
-    "henrikbjorn/phpspec-code-coverage": "^3.0",
+    "leanphp/phpspec-code-coverage": "3.1.1",
     "codacy/coverage": "^1.0",
-    "paragonie/passwdqc": "dev-master"
+    "paragonie/passwdqc": "^0.2.0"
   },
-  "suggest":{
+  "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
     "zendframework/zend-diactoros": "Recommended to support middleware guards.",
     "zendframework/zend-psr7bridge": "Recommended to support middleware guards.",

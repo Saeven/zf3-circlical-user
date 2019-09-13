@@ -221,11 +221,11 @@ class AccessService
     /**
      * Convenience method that defers to the 'withName' method.
      *
-     * @see self::hasRoleWithName
-     *
      * @param RoleInterface $role
      *
      * @return bool
+     * @see self::hasRoleWithName
+     *
      */
     public function hasRole(RoleInterface $role): bool
     {
@@ -351,7 +351,7 @@ class AccessService
             return $this->groupPermissions->getPermissions($resource);
         }
 
-        throw new UnknownResourceTypeException(\get_class($resource));
+        throw new UnknownResourceTypeException($resource ? \get_class($resource) : 'null');
     }
 
     /**
@@ -384,7 +384,7 @@ class AccessService
             return $this->userPermissions->getUserPermission($resource, $this->user);
         }
 
-        throw new UnknownResourceTypeException(\get_class($resource));
+        throw new UnknownResourceTypeException($resource ? \get_class($resource) : 'null');
     }
 
     /**
