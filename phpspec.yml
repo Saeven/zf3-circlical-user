@@ -6,7 +6,7 @@ suites:
         spec_path: bundle
 formatter.name: pretty
 extensions:
-  PhpSpecCodeCoverage\CodeCoverageExtension:
+  LeanPHP\PhpSpec\CodeCoverage\CodeCoverageExtension:
     format:
       - html
       - clover
