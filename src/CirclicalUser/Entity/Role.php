@@ -31,6 +31,7 @@ class Role implements RoleInterface
     /**
      * @var Role
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $parent;
 
