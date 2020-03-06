@@ -78,7 +78,7 @@ class UserResetToken implements UserResetTokenInterface
 
         $fingerprint = $this->getFingerprint();
 
-        $key = new EncryptionKey(new HiddenString($authentication->getSessionKey()));
+        $key = new EncryptionKey(new HiddenString($authentication->getRawSessionKey()));
         $this->token = base64_encode(Crypto::encrypt(new HiddenString(json_encode([
             'fingerprint' => $fingerprint,
             'timestamp' => $this->request_time->format('U'),
@@ -128,7 +128,7 @@ class UserResetToken implements UserResetTokenInterface
 
         try {
             $encryptedJson = @base64_decode($checkToken);
-            $key = new EncryptionKey(new HiddenString($authenticationRecord->getSessionKey()));
+            $key = new EncryptionKey(new HiddenString($authenticationRecord->getRawSessionKey()));
             $jsonString = Crypto::decrypt($encryptedJson, $key);
         } catch (\Exception $x) {
             throw new InvalidResetTokenException();

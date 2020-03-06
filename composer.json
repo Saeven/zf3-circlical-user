@@ -36,8 +36,8 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "phpspec/phpspec": "^3.1",
-    "leanphp/phpspec-code-coverage": "3.1.1",
+    "phpspec/phpspec": "6.1.1",
+    "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
     "paragonie/passwdqc": "^0.2.0"
   },

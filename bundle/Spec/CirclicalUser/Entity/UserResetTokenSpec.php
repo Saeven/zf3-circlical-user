@@ -30,7 +30,7 @@ class UserResetTokenSpec extends ObjectBehavior
         $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 1;
 
         $this->rawKeyMaterial = KeyFactory::generateEncryptionKey()->getRawKeyMaterial();
-        $authenticationRecord->getSessionKey()->willReturn($this->rawKeyMaterial);
+        $authenticationRecord->getRawSessionKey()->willReturn($this->rawKeyMaterial);
         $authenticationRecord->getUserId()->willReturn(1);
         $this->beConstructedWith($authenticationRecord, '10.10.1.1');
 
@@ -68,7 +68,7 @@ class UserResetTokenSpec extends ObjectBehavior
         $token = $property->getValue($this->getWrappedObject());
 
         // the authentication record was manipulated during the operation
-        $authenticationRecord->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $authenticationRecord->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
 
         $this->shouldThrow(InvalidResetTokenException::class)->during(
             'isValid',
