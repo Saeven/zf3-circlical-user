@@ -28,6 +28,7 @@ use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Password;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
+use PhpSpec\Exception\Fracture\MethodNotVisibleException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -42,9 +43,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $hash = password_hash('abc', PASSWORD_DEFAULT);
         $key = KeyFactory::generateEncryptionKey();
 
-        $authenticationData = new Authentication(1, 'userA', $hash, $key->getRawKeyMaterial());
+        $authenticationData = new Authentication(1, 'userA', $hash, base64_encode($key->getRawKeyMaterial()));
         $this->authenticationData = $authenticationData;
-        $orphanAuthData = new Authentication(2, 'orphan', $hash, $key->getRawKeyMaterial());
+        $orphanAuthData = new Authentication(2, 'orphan', $hash, base64_encode($key->getRawKeyMaterial()));
 
         $authenticationMapper->findByUsername(Argument::any())->willReturn(null);
         $authenticationMapper->findByUsername('userA')->willReturn($authenticationData);
@@ -94,7 +95,12 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_has_a_private_set_identity_function()
     {
-        $this->shouldThrow(\Exception::class)->during('setIdentity');
+        try {
+            $this->setIdentity();
+            throw new \Exception("The setIdentity method should not exist!");
+        } catch (MethodNotVisibleException $x) {
+            // do nothing
+        }
     }
 
     public function it_checks_via_email_second($authenticationMapper, $userMapper)
@@ -187,8 +193,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_authenticates_with_cookies()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -203,8 +209,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_fails_when_the_random_hash_cookie_is_bad()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -219,8 +225,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_bails_when_the_user_tuple_is_not_well_formatted()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString('tanqueray'), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -235,8 +241,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_bails_when_the_user_tuple_contains_well_formatted_garbage()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString('A' . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -251,8 +257,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_bails_when_the_user_tuple_contains_an_impossible_user_id()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString(15234 . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -267,7 +273,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_bails_when_the_hash_cookie_is_not_well_formatted()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
         $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
@@ -296,8 +302,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_fails_when_any_cookies_are_missing()
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -331,8 +337,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_fails_when_the_user_verify_hash_is_bad($authenticationMapper)
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -348,8 +354,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_fails_when_the_random_verify_hash_is_bad($authenticationMapper, $userMapper)
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $this->authenticationData->getUserId() . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -365,8 +371,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
     public function it_fails_when_the_user_tuple_and_random_verify_do_not_match($authenticationMapper, $userMapper)
     {
         $systemKey = $this->systemEncryptionKey;
-        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getSessionKey()));
-        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getSessionKey() . $this->authenticationData->getUsername(), $systemKey);
+        $userKey = new EncryptionKey(new HiddenString($this->authenticationData->getRawSessionKey()));
+        $hashCookieName = hash_hmac('sha256', $this->authenticationData->getRawSessionKey() . $this->authenticationData->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($this->authenticationData->getUserId() . ":" . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . 2 . ':' . $this->authenticationData->getUsername()), $userKey));
 
@@ -394,7 +400,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_can_create_new_auth_records($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth)
     {
-        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
         $newAuth->getUserId()->willReturn(5);
         $user5->getId()->willReturn(5);
@@ -441,7 +447,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     {
         $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
-        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
         $newAuth->getUserId()->willReturn(5);
         $user5->getId()->willReturn(5);
@@ -455,7 +461,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     {
         $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
 
-        $newAuth->getSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
         $newAuth->getUserId()->willReturn(5);
         $user5->getId()->willReturn(5);

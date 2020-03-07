@@ -41,6 +41,6 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
      */
     public function create($userId, $username, $hash, $rawKey): AuthenticationRecordInterface
     {
-        return new Authentication($userId, $username, $hash, $rawKey);
+        return new Authentication($userId, $username, $hash, base64_encode($rawKey));
     }
 }

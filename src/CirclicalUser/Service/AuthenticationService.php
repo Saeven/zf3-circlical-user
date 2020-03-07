@@ -262,7 +262,7 @@ class AuthenticationService
     private function setSessionCookies(AuthenticationRecordInterface $authentication)
     {
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
-        $sessionKey = new HiddenString($authentication->getSessionKey());
+        $sessionKey = new HiddenString($authentication->getRawSessionKey());
         $userKey = new EncryptionKey($sessionKey);
         $hashCookieName = hash_hmac('sha256', $sessionKey . $authentication->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
@@ -391,7 +391,7 @@ class AuthenticationService
                 throw new \Exception();
             }
 
-            $userKey = new EncryptionKey(new HiddenString($auth->getSessionKey()));
+            $userKey = new EncryptionKey(new HiddenString($auth->getRawSessionKey()));
             $hashPass = hash_equals(
                 hash_hmac('sha256', $_COOKIE[$hashCookieName], $userKey),
                 $_COOKIE[self::COOKIE_VERIFY_B]
@@ -593,7 +593,7 @@ class AuthenticationService
     private function resetAuthenticationKey(AuthenticationRecordInterface $auth): AuthenticationRecordInterface
     {
         $key = KeyFactory::generateEncryptionKey();
-        $auth->setSessionKey($key->getRawKeyMaterial());
+        $auth->setRawSessionKey($key->getRawKeyMaterial());
         $this->authenticationProvider->update($auth);
 
         return $auth;
