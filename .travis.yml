@@ -4,8 +4,6 @@ dist: xenial
 sudo: required
 
 php:
-  - "7.0"
-  - "7.1"
   - "7.2"
   - "7.3"
   - "7.4"
@@ -15,14 +13,6 @@ before_install:
   - sudo apt-get install make build-essential automake php-dev php-pear
   - git clone git://github.com/jedisct1/libsodium.git
   - cd libsodium
-  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]; then
-    git checkout 1.0.10;
-    ./autogen.sh;
-    ./configure && make check;
-    sudo make install;
-    cd ..;
-    pecl install libsodium-1.0.7;
-    fi
   - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]; then
     git checkout 1.0.18;
     ./autogen.sh;
