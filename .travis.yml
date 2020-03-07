@@ -8,6 +8,7 @@ php:
   - "7.1"
   - "7.2"
   - "7.3"
+  - "7.4"
 
 before_install:
   - sudo apt-get update
@@ -22,7 +23,7 @@ before_install:
     cd ..;
     pecl install libsodium-1.0.7;
     fi
-  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]; then
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]; then
     git checkout 1.0.18;
     ./autogen.sh;
     ./configure && make check;
