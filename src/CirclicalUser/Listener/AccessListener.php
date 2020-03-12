@@ -5,13 +5,13 @@ namespace CirclicalUser\Listener;
 use Application\Controller\IndexController;
 use Application\Controller\LoginController;
 use CirclicalUser\Service\AccessService;
-use Zend\EventManager\EventManagerInterface;
-use Zend\EventManager\ListenerAggregateInterface;
-use Zend\Http\Response;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\EventManager\EventManagerInterface;
+use Laminas\EventManager\ListenerAggregateInterface;
+use Laminas\Http\Response;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\RouteMatch;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class AccessListener implements ListenerAggregateInterface
 {

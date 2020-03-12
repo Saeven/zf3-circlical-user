@@ -6,8 +6,8 @@ use CirclicalUser\Controller\Plugin\AuthenticationPlugin;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
-use Zend\Mvc\Controller\PluginManager;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Mvc\Controller\PluginManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AuthenticationPluginFactorySpec extends ObjectBehavior
 {

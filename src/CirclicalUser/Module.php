@@ -4,8 +4,8 @@ namespace CirclicalUser;
 
 use CirclicalUser\Entity\UserAuthenticationLog;
 use CirclicalUser\Listener\AccessListener;
-use Zend\Console\Console;
-use Zend\Mvc\MvcEvent;
+use Laminas\Console\Console;
+use Laminas\Mvc\MvcEvent;
 
 class Module
 {

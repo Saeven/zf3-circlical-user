@@ -3,7 +3,7 @@
 namespace CirclicalUser\Factory\Strategy;
 
 use CirclicalUser\Strategy\RedirectStrategy;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
 
 class RedirectStrategyFactory implements FactoryInterface

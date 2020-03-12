@@ -6,7 +6,7 @@ use CirclicalUser\Exception\UserRequiredException;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class AuthenticationPlugin extends AbstractPlugin
 {
