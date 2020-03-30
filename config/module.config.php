@@ -10,6 +10,8 @@ use CirclicalUser\Factory\Listener\UserEntityListenerFactory;
 use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
 use CirclicalUser\Factory\Strategy\RedirectStrategyFactory;
+use CirclicalUser\Factory\View\Helper\ControllerAccessViewHelperFactory;
+use CirclicalUser\Factory\View\Helper\RoleAccessViewHelperFactory;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
 use CirclicalUser\Mapper\GroupPermissionMapper;
@@ -23,6 +25,8 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
 use CirclicalUser\Strategy\RedirectStrategy;
+use CirclicalUser\View\Helper\ControllerAccessViewHelper;
+use CirclicalUser\View\Helper\RoleAccessViewHelper;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 
 return [
@@ -80,7 +84,6 @@ return [
     ],
 
     'service_manager' => [
-
         'factories' => [
             AuthenticationService::class => AuthenticationServiceFactory::class,
             AccessService::class => AccessServiceFactory::class,
@@ -92,6 +95,18 @@ return [
 
         'abstract_factories' => [
             AbstractDoctrineMapperFactory::class,
+        ],
+    ],
+
+    'view_helpers' => [
+        'aliases' => [
+            'canAccessController' => ControllerAccessViewHelper::class,
+            'hasRole' => RoleAccessViewHelper::class,
+        ],
+
+        'factories' => [
+            ControllerAccessViewHelper::class => ControllerAccessViewHelperFactory::class,
+            RoleAccessViewHelper::class => RoleAccessViewHelperFactory::class,
         ],
     ],
 
