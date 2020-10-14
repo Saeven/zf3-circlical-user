@@ -29,8 +29,8 @@
     "zendframework/zend-console": "^2.6",
     "zendframework/zend-view": "^2.8",
     "zendframework/zend-http": "^2.5",
-    "doctrine/doctrine-orm-module": "^1.1||2.1.*",
-    "doctrine/doctrine-module": "^1.2||2.1.*",
+    "doctrine/doctrine-orm-module": "^1.1||2.1.*||3^",
+    "doctrine/doctrine-module": "^1.2||2.1.*||^3.*||4.*",
     "doctrine/orm": "^2.5||2.6.*",
     "paragonie/halite": "^3.3",
     "ext-json": "*"
