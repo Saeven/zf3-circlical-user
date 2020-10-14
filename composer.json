@@ -1,5 +1,5 @@
 {
-  "name": "saeven/zf3-circlical-user",
+  "name": "bishwopl/zf3-circlical-user",
   "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
   "type": "library",
   "license": "MPL-2.0",
