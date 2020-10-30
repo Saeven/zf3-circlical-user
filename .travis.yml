@@ -2,7 +2,6 @@ language: php
 
 os: linux
 dist: xenial
-sudo: required
 
 php:
   - "7.2"
