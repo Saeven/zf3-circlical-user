@@ -42,6 +42,6 @@ class UserApiTokenSpec extends ObjectBehavior
 
     function it_has_a_convenience_method_for_tokens()
     {
-
+        $this->getUuid()->toString()->shouldBeLike($this->getToken());
     }
 }

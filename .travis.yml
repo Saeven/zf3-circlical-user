@@ -1,5 +1,6 @@
 language: php
 
+os: linux
 dist: xenial
 sudo: required
 
