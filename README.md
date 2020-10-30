@@ -186,6 +186,17 @@ You can also give individual users, access to specific actions on resources as w
  very easily.  In short, this lets the AccessService use the authenticated user to determine whether or
  not the logged-in individual can perform an action that supersedes what his role permissions otherwise
  grant.  User Permissions are meant to be more permissive, not restrictive.  
+ 
+### User API Tokens
+
+This module also provides a utility with which to generate UserApiToken objects.  See tests for usage.
+
+Adding the mapping for this entity to your User entity is very trivial
+
+    /**
+     * @ORM\OneToMany(targetEntity="CirclicalUser\Entity\UserApiToken", mappedBy="user");
+     */
+    private $api_tokens;
 
 
 # Installation

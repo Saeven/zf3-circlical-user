@@ -55,27 +55,29 @@ class AccessListener implements ListenerAggregateInterface
             if (!$this->accessService->requiresAuthentication($controllerName, $actionName)) {
                 return;
             }
-        } else if ($middleware) {
-            // zend-mvc supports both string and array definitions for middleware
-            if (is_string($middleware)) {
-                $middleware = [$middleware];
-            }
-
-            // check all middleware handlers to ascertain access
-            $requiresAuthentication = false;
-            foreach ($middleware as $middlewareHandler) {
-                if (!$this->accessService->canAccessController($middlewareHandler)) {
-                    $requiresAuthentication = true;
-                    $controllerName = $middlewareHandler;
-                }
-            }
-
-            if (!$requiresAuthentication) {
-                return;
-            }
-
         } else {
-            throw new \LogicException('A controller and action, or middleware are required to verify access!');
+            if ($middleware) {
+                // zend-mvc supports both string and array definitions for middleware
+                if (is_string($middleware)) {
+                    $middleware = [$middleware];
+                }
+
+                // check all middleware handlers to ascertain access
+                $requiresAuthentication = false;
+                foreach ($middleware as $middlewareHandler) {
+                    if (!$this->accessService->canAccessController($middlewareHandler)) {
+                        $requiresAuthentication = true;
+                        $controllerName = $middlewareHandler;
+                    }
+                }
+
+                if (!$requiresAuthentication) {
+                    return;
+                }
+
+            } else {
+                throw new \LogicException('A controller and action, or middleware are required to verify access!');
+            }
         }
 
 

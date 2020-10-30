@@ -60,7 +60,7 @@ class GroupPermission implements GroupPermissionInterface
     }
 
 
-    public function getResourceClass() : string
+    public function getResourceClass(): string
     {
         return $this->resource_class;
     }
@@ -75,11 +75,12 @@ class GroupPermission implements GroupPermissionInterface
         return $this->role;
     }
 
-    public function getActions() : array
+    public function getActions(): array
     {
         if (!$this->actions) {
             return [];
         }
+
         return $this->actions;
     }
 
@@ -102,7 +103,7 @@ class GroupPermission implements GroupPermissionInterface
         $this->actions = array_diff($this->actions, [$action]);
     }
 
-    public function can($actionName) : bool
+    public function can($actionName): bool
     {
         if (!$this->actions) {
             return false;

@@ -34,7 +34,7 @@ interface UserPermissionProviderInterface
     public function update($rule);
 
 
-    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserPermissionInterface;
+    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions): UserPermissionInterface;
 
 
     public function save($rule);

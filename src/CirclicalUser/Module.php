@@ -4,6 +4,8 @@ namespace CirclicalUser;
 
 use CirclicalUser\Entity\UserAuthenticationLog;
 use CirclicalUser\Listener\AccessListener;
+use Doctrine\DBAL\Types\Type;
+use Ramsey\Uuid\Doctrine\UuidBinaryType;
 use Zend\Console\Console;
 use Zend\Mvc\MvcEvent;
 
@@ -17,7 +19,11 @@ class Module
 
     public function onBootstrap(MvcEvent $mvcEvent)
     {
-        if( Console::isConsole() ) {
+        if (!Type::hasType('uuid_binary')) {
+            Type::addType('uuid_binary', UuidBinaryType::class);
+        }
+
+        if (Console::isConsole()) {
             return;
         }
 
@@ -25,8 +31,7 @@ class Module
         $serviceLocator = $application->getServiceManager();
         $strategy = $serviceLocator->get(AccessListener::class);
         $eventManager = $application->getEventManager();
-        $strategy->attach( $eventManager );
-
+        $strategy->attach($eventManager);
 
 //            try {
 //                $remote = new RemoteAddress;

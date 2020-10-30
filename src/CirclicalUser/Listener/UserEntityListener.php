@@ -2,8 +2,10 @@
 
 namespace CirclicalUser\Listener;
 
+use CirclicalUser\Entity\UserApiToken;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\Common\EventSubscriber;
+use CirclicalUser\Entity\UserPermission;
 
 /**
  * Because this module doesn't provide a user
@@ -32,12 +34,13 @@ class UserEntityListener implements EventSubscriber
         /** @var \Doctrine\ORM\Mapping\ClassMetadata $classMetadata */
         $classMetadata = $eventArgs->getClassMetadata();
 
-        if ($this->userEntity == self::DEFAULT_ENTITY) {
+        if ($this->userEntity === self::DEFAULT_ENTITY) {
             return;
         }
 
         switch ($classMetadata->getName()) {
-            case 'CirclicalUser\Entity\UserPermission':
+            case UserPermission::class:
+            case UserApiToken::class:
                 $classMetadata->associationMappings['user']['targetEntity'] = $this->userEntity;
                 break;
         }

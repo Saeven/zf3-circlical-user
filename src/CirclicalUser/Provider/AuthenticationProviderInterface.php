@@ -50,6 +50,6 @@ interface AuthenticationProviderInterface
      *
      * @return AuthenticationRecordInterface
      */
-    public function create($userId, $username, $hash, $rawKey) : AuthenticationRecordInterface;
+    public function create($userId, $username, $hash, $rawKey): AuthenticationRecordInterface;
 
 }
