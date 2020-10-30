@@ -198,6 +198,18 @@ Adding the mapping for this entity to your User entity is very trivial
      */
     private $api_tokens;
 
+Pulling a token to perform your own logic with it, is done with UserApiTokenMapper, e.g.
+
+    $token = $this->userApiTokenMapper->get('d0cad39b-f269-405e-b3f9-d45b349c0587');
+
+When it is used/consumed, you can tag it:
+
+    $token->tagUse();
+    
+Scope (as defined by your application) is defined with bit flags
+     
+    $token->addScope(FooApi::SCOPE_QUERY);
+             
 
 # Installation
 
