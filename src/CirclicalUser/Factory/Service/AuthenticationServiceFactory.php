@@ -18,16 +18,16 @@ class AuthenticationServiceFactory implements FactoryInterface
     /**
      * Create an object
      *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
+     * @param ContainerInterface $container
+     * @param string             $requestedName
+     * @param null|array         $options
      *
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @return AuthenticationService
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws ServiceNotFoundException if unable to resolve the service.
      * @throws ServiceNotCreatedException if an exception is raised when creating a service.
      *
-     * @return AuthenticationService
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

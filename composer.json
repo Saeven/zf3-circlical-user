@@ -3,12 +3,13 @@
   "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
   "type": "library",
   "license": "MPL-2.0",
-  "homepage": "https://github.com/Saeven/zf2-circlical-user",
+  "homepage": "https://github.com/Saeven/zf3-circlical-user",
   "keywords": [
     "user",
     "zf3",
     "user management",
     "acl",
+    "rbac",
     "bjyauthorize",
     "authorization",
     "auth"
@@ -22,7 +23,8 @@
     }
   ],
   "require": {
-    "php": "^7.2.0",
+    "ext-json": "*",
+    "php": "^7.2.0 | ^8",
     "zendframework/zend-eventmanager": "^3.0",
     "zendframework/zend-servicemanager": "^3.0",
     "zendframework/zend-mvc": "^3.0",
@@ -33,7 +35,8 @@
     "doctrine/doctrine-module": "^1.2||2.1.*",
     "doctrine/orm": "^2.5||2.6.*",
     "paragonie/halite": "^3.3",
-    "ext-json": "*"
+    "ramsey/uuid": "^3.5 | ^4",
+    "ramsey/uuid-doctrine": ">=1.5.0"
   },
   "require-dev": {
     "phpspec/phpspec": "6.1.1",

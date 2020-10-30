@@ -59,10 +59,13 @@ class AccessService
      *
      * @throws GuardConfigurationException
      */
-    public function __construct(array $guardConfiguration, RoleProviderInterface $roleProvider,
-                                GroupPermissionProviderInterface $groupPermissionProvider, UserPermissionProviderInterface $userPermissionProvider,
-                                UserProviderInterface $userProvider)
-    {
+    public function __construct(
+        array $guardConfiguration,
+        RoleProviderInterface $roleProvider,
+        GroupPermissionProviderInterface $groupPermissionProvider,
+        UserPermissionProviderInterface $userPermissionProvider,
+        UserProviderInterface $userProvider
+    ) {
         $this->userProvider = $userProvider;
         $this->roleProvider = $roleProvider;
         $this->groupPermissions = $groupPermissionProvider;

@@ -21,14 +21,14 @@ interface GroupPermissionProviderInterface
      *
      * @return GroupPermissionInterface[]
      */
-    public function getPermissions($string) : array;
+    public function getPermissions($string): array;
 
     /**
      * @param ResourceInterface $resource
      *
      * @return GroupPermissionInterface[]
      */
-    public function getResourcePermissions(ResourceInterface $resource) : array;
+    public function getResourcePermissions(ResourceInterface $resource): array;
 
 
     /**
@@ -36,13 +36,13 @@ interface GroupPermissionProviderInterface
      *
      * @return GroupPermissionInterface[]
      */
-    public function getResourcePermissionsByClass($resourceClass) : array;
+    public function getResourcePermissionsByClass($resourceClass): array;
 
 
     public function update($rule);
 
 
-    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupPermissionInterface;
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions): GroupPermissionInterface;
 
 
     public function save($rule);

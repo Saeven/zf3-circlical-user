@@ -12,7 +12,7 @@ namespace CirclicalUser\Provider;
  */
 interface GroupPermissionInterface
 {
-    public function getResourceClass() : string;
+    public function getResourceClass(): string;
 
     public function getResourceId();
 
@@ -21,9 +21,9 @@ interface GroupPermissionInterface
      */
     public function getRole();
 
-    public function can($actionName) : bool;
+    public function can($actionName): bool;
 
-    public function getActions() : array;
+    public function getActions(): array;
 
     public function addAction($action);
 

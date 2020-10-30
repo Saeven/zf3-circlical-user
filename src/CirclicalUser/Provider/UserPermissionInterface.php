@@ -13,15 +13,15 @@ namespace CirclicalUser\Provider;
  */
 interface UserPermissionInterface
 {
-    public function getResourceClass() : string;
+    public function getResourceClass(): string;
 
     public function getResourceId();
 
     public function getUser();
 
-    public function can($actionName) : bool;
+    public function can($actionName): bool;
 
-    public function getActions() : array;
+    public function getActions(): array;
 
     public function addAction($action);
 

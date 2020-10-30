@@ -131,9 +131,17 @@ class AuthenticationService
      * @param bool                            $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
      * @param bool                            $validateIp          If password reset is enabled, do we validate the user IP address?
      */
-    public function __construct(AuthenticationProviderInterface $authenticationProvider, UserProviderInterface $userProvider, $resetTokenProvider,
-                                string $systemEncryptionKey, bool $transient, bool $secure, PasswordCheckerInterface $passwordChecker, bool $validateFingerprint, bool $validateIp)
-    {
+    public function __construct(
+        AuthenticationProviderInterface $authenticationProvider,
+        UserProviderInterface $userProvider,
+        $resetTokenProvider,
+        string $systemEncryptionKey,
+        bool $transient,
+        bool $secure,
+        PasswordCheckerInterface $passwordChecker,
+        bool $validateFingerprint,
+        bool $validateIp
+    ) {
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
         $this->systemEncryptionKey = new HiddenString($systemEncryptionKey);
@@ -409,7 +417,7 @@ class AuthenticationService
                 throw new \Exception();
             }
 
-            list(, $hashedUserId, $hashedUsername) = explode(':', $hashedCookieContents);
+            [, $hashedUserId, $hashedUsername] = explode(':', $hashedCookieContents);
             if ($hashedUserId !== $cookieUserId) {
                 throw new \Exception();
             }

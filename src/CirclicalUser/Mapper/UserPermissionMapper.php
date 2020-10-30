@@ -70,7 +70,7 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
      *
      * @return UserPermissionInterface
      */
-    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions) : UserPermissionInterface
+    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions): UserPermissionInterface
     {
         return new UserPermission($user, $resourceClass, $resourceId, $actions);
     }

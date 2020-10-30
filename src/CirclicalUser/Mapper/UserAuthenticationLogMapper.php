@@ -10,6 +10,7 @@ namespace CirclicalUser\Mapper;
  *
  * @package CirclicalUser\Mapper
  */
+
 use CirclicalUser\Entity\UserAuthenticationLog;
 
 class UserAuthenticationLogMapper extends AbstractDoctrineMapper

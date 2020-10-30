@@ -12,7 +12,7 @@ namespace CirclicalUser\Provider;
  */
 interface ResourceInterface
 {
-    public function getClass() : string;
+    public function getClass(): string;
 
-    public function getId() : string;
+    public function getId(): string;
 }

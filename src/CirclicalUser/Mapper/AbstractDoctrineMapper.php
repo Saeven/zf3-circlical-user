@@ -17,11 +17,11 @@ abstract class AbstractDoctrineMapper
 
     protected $entityName;
 
-    public function getEntityManager() : EntityManager
+    public function getEntityManager(): EntityManager
     {
         return $this->entityManager;
     }
-    
+
     /**
      * @param \Doctrine\ORM\EntityManager $entityManager
      */
@@ -30,12 +30,12 @@ abstract class AbstractDoctrineMapper
         $this->entityManager = $entityManager;
     }
 
-    public function getDatabase() : Connection
+    public function getDatabase(): Connection
     {
         return $this->entityManager->getConnection();
     }
 
-    public function getRepository() : EntityRepository
+    public function getRepository(): EntityRepository
     {
         return $this->entityManager->getRepository($this->entityName);
     }

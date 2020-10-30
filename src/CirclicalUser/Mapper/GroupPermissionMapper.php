@@ -17,7 +17,7 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
      *
      * @return GroupPermissionInterface[]
      */
-    public function getPermissions($string) : array
+    public function getPermissions($string): array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -34,7 +34,7 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
      *
      * @return array|\CirclicalUser\Provider\GroupPermissionInterface[]
      */
-    public function getResourcePermissions(ResourceInterface $resource) : array
+    public function getResourcePermissions(ResourceInterface $resource): array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -51,7 +51,7 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
      *
      * @return array
      */
-    public function getResourcePermissionsByClass($resourceClass) : array
+    public function getResourcePermissionsByClass($resourceClass): array
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -62,7 +62,7 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
         return $query->getResult();
     }
 
-    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions) : GroupPermissionInterface
+    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions): GroupPermissionInterface
     {
         return new GroupPermission(
             $role,

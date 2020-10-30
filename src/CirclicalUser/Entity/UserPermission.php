@@ -61,8 +61,7 @@ class UserPermission implements UserPermissionInterface
         $this->actions = $actions;
     }
 
-
-    public function getResourceClass() : string
+    public function getResourceClass(): string
     {
         return $this->resource_class;
     }
@@ -77,7 +76,7 @@ class UserPermission implements UserPermissionInterface
         return $this->user;
     }
 
-    public function getActions() : array
+    public function getActions(): array
     {
         if (!$this->actions) {
             return [];
@@ -105,7 +104,7 @@ class UserPermission implements UserPermissionInterface
         $this->actions = array_diff($this->actions, [$action]);
     }
 
-    public function can($actionName) : bool
+    public function can($actionName): bool
     {
         if (!$this->actions) {
             return false;

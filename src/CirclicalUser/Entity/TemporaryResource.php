@@ -10,19 +10,18 @@ class TemporaryResource implements ResourceInterface
 
     private $id;
 
-
     public function __construct($class, $id)
     {
         $this->class = $class;
         $this->id = $id;
     }
 
-    public function getClass() : string
+    public function getClass(): string
     {
         return $this->class;
     }
 
-    public function getId() : string
+    public function getId(): string
     {
         return $this->id;
     }

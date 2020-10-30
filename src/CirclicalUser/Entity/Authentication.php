@@ -67,7 +67,6 @@ class Authentication implements AuthenticationRecordInterface
         $this->session_key = $encodedSessionKey;
     }
 
-
     /**
      * @return int
      */
