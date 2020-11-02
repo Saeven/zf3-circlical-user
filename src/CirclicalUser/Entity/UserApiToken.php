@@ -119,4 +119,9 @@ class UserApiToken
     {
         return $this->uuid;
     }
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
 }
