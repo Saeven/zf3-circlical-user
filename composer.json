@@ -42,10 +42,12 @@
     "phpspec/phpspec": "6.1.1",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
-    "paragonie/passwdqc": "^0.2.0"
+    "paragonie/passwdqc": "^0.2.0",
+    "bjeavons/zxcvbn-php": "1.1.0"
   },
   "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
+    "bjeavons/zxcvbn-php": "Even better password checking!",
     "zendframework/zend-diactoros": "Recommended to support middleware guards.",
     "zendframework/zend-psr7bridge": "Recommended to support middleware guards.",
     "zendframework/zend-stratigility": "Recommended to support middleware guards.",

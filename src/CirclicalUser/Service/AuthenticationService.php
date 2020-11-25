@@ -117,28 +117,37 @@ class AuthenticationService
      */
     private $validateIp;
 
+    /**
+     * @var array
+     * Password-checker configuration as provided by config files
+     */
+    private $passwordCheckerParameters;
+
 
     /**
      * AuthenticationService constructor.
      *
      * @param AuthenticationProviderInterface $authenticationProvider
      * @param UserProviderInterface           $userProvider
-     * @param UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
-     * @param string                          $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
-     * @param bool                            $transient           True if cookies should expire at the end of the session (zero value, for expiry)
-     * @param bool                            $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
-     * @param PasswordCheckerInterface        $passwordChecker     Optional, a password checker implementation
-     * @param bool                            $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
-     * @param bool                            $validateIp          If password reset is enabled, do we validate the user IP address?
+     * @param UserResetTokenProviderInterface $resetTokenProvider        If not null, permit password reset
+     * @param string                          $systemEncryptionKey       The raw material of a Halite-generated encryption key, stored in config.
+     * @param bool                            $transient                 True if cookies should expire at the end of the session (zero value, for expiry)
+     * @param bool                            $secure                    True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
+     * @param PasswordCheckerInterface        $passwordChecker           Optional, a password checker implementation
+     * @param array                           $passwordCheckerParameters Defined by config, the base parameters that are pushed into the password check sequence. Is not comprehensive, since
+     *                                                                   some password checkers require user information that is pushed at invocation time.
+     * @param bool                            $validateFingerprint       If password reset is enabled, do we validate the browser fingerprint?
+     * @param bool                            $validateIp                If password reset is enabled, do we validate the user IP address?
      */
     public function __construct(
         AuthenticationProviderInterface $authenticationProvider,
         UserProviderInterface $userProvider,
-        $resetTokenProvider,
+        ?UserResetTokenProviderInterface $resetTokenProvider,
         string $systemEncryptionKey,
         bool $transient,
         bool $secure,
         PasswordCheckerInterface $passwordChecker,
+        array $passwordCheckerParameters,
         bool $validateFingerprint,
         bool $validateIp
     ) {
@@ -151,6 +160,7 @@ class AuthenticationService
         $this->resetTokenProvider = $resetTokenProvider;
         $this->validateFingerprint = $validateFingerprint;
         $this->validateIp = $validateIp;
+        $this->passwordCheckerParameters = $passwordCheckerParameters;
     }
 
     /**
@@ -462,12 +472,13 @@ class AuthenticationService
 
     /**
      * @param string $password
+     * @param User   $user Used by some password checkers to provide better checking
      *
      * @throws WeakPasswordException
      */
-    private function enforcePasswordStrength(string $password)
+    private function enforcePasswordStrength(string $password, User $user)
     {
-        if ($this->passwordChecker && !$this->passwordChecker->isStrongPassword($password)) {
+        if ($this->passwordChecker && !$this->passwordChecker->isStrongPassword($password, $user, $this->passwordCheckerParameters)) {
             throw new WeakPasswordException();
         }
     }
@@ -484,7 +495,7 @@ class AuthenticationService
      */
     public function resetPassword(User $user, string $newPassword)
     {
-        $this->enforcePasswordStrength($newPassword);
+        $this->enforcePasswordStrength($newPassword, $user);
 
         $auth = $this->authenticationProvider->findByUserId($user->getId());
         if (!$auth) {
@@ -532,7 +543,7 @@ class AuthenticationService
      */
     public function create(User $user, string $username, string $password): AuthenticationRecordInterface
     {
-        $this->enforcePasswordStrength($password);
+        $this->enforcePasswordStrength($password, $user);
 
         $auth = $this->registerAuthenticationRecord($user, $username, $password);
         $this->setSessionCookies($auth);
@@ -545,6 +556,8 @@ class AuthenticationService
     /**
      * Very similar to create, except that it won't log the user in.  This was created to satisfy circumstances where
      * you are creating users from an admin panel for example.  This function is also used by create.
+     *
+     * Note, this method does not check password strength!
      *
      * @param User   $user
      * @param string $username

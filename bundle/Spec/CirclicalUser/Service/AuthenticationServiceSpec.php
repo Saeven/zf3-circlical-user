@@ -23,14 +23,15 @@ use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
+use CirclicalUser\Service\PasswordChecker\Zxcvbn;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
-use ParagonIE\Halite\Password;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
 use PhpSpec\Exception\Fracture\MethodNotVisibleException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Spec\CirclicalUser\Objects\SampleUser;
 
 class AuthenticationServiceSpec extends ObjectBehavior
 {
@@ -72,6 +73,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new PasswordNotChecked(),
+            [], // these are password checker options, typically defined in config
             true,
             true
         );
@@ -445,7 +447,18 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            $tokenMapper,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new Passwdqc(),
+            [],
+            true,
+            true
+        );
 
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -457,9 +470,20 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
     }
 
-    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
+    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, UserMapper $userMapper, UserResetTokenMapper $tokenMapper)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, $tokenMapper, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new Passwdqc(), true, true);
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            $tokenMapper,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new Passwdqc(),
+            [],
+            true,
+            true
+        );
 
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
@@ -467,6 +491,49 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $user5->getId()->willReturn(5);
 
         $this->shouldThrow(WeakPasswordException::class)->during('create', [$user5, 'userC', '123456']);
+    }
+
+    public function it_wont_create_new_auth_records_with_weak_passwords_via_zxcvbn(
+        AuthenticationMapper $authenticationMapper,
+        AuthenticationRecordInterface $newAuth,
+        UserMapper $userMapper,
+        UserResetTokenMapper $tokenMapper
+    ) {
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            $tokenMapper,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new Zxcvbn(),
+            [],
+            true,
+            true
+        );
+
+        // Required, since the array-cast can't support closures which are passed by phpspec, even with getWrappedObject()
+        include getcwd() . '/bundle/Spec/CirclicalUser/Objects/SampleUser.php';
+        $userInstance = new SampleUser(5, [], 'marco@example.com', 'Marco');
+
+        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+        $newAuth->getUsername()->willReturn('pwUser');
+        $newAuth->getUserId()->willReturn(5);
+        $authenticationMapper->findByUsername('pwUser')->willReturn(null);
+        $userMapper->findByEmail('marco@example.com')->willReturn(null);
+        $authenticationMapper->create(5, 'pwUser', Argument::any(), Argument::any())->willReturn($newAuth);
+
+
+        // PASSWORD QUALITY CHECKS BELOW
+
+        // not ok
+        $authenticationMapper->save($newAuth)->shouldNotBeCalled();
+        $this->shouldThrow(WeakPasswordException::class)->during('create', [$userInstance, 'pwUser', '123123123']);
+        $this->shouldThrow(WeakPasswordException::class)->during('create', [$userInstance, 'pwUser', 'Marco123Marco123']);
+
+        // ok
+        $authenticationMapper->save($newAuth)->shouldBeCalled();
+        $this->create($userInstance, 'pwUser', '@t738D723fy1928dS')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
     }
 
     public function it_creates_forgot_password_hashes(User $user, $tokenMapper)
@@ -489,15 +556,37 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(NoSuchUserException::class)->during('createRecoveryToken', [$who]);
     }
 
-    public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $tokenMapper, $user)
+    public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new PasswordNotChecked(), true, true);
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            null,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new PasswordNotChecked(),
+            [],
+            true,
+            true
+        );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
     }
 
     public function it_bails_on_password_changes_if_no_provider_is_set($authenticationMapper, $userMapper, $tokenMapper, $user)
     {
-        $this->beConstructedWith($authenticationMapper, $userMapper, null, $this->systemEncryptionKey->getRawKeyMaterial(), false, false, new PasswordNotChecked(), true, true);
+        $this->beConstructedWith(
+            $authenticationMapper,
+            $userMapper,
+            null,
+            $this->systemEncryptionKey->getRawKeyMaterial(),
+            false,
+            false,
+            new PasswordNotChecked(),
+            [],
+            true,
+            true
+        );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }
 
