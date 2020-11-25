@@ -75,6 +75,20 @@ Writing your own should be very simple, see provided tests.
 You can use the built-in support for [paragonie/passwdqc](https://github.com/paragonie/passwdqc) by uncommenting the password_strength_checker config key. You can also roll your own if you have more complex needs; uncomment the key and specify your own implementation of [PasswordCheckerInterface](src/CirclicalUser/Provider/PasswordCheckerInterface.php). This will cause the
 password input routines to throw WeakPasswordExceptions when weak input is received.
 
+Configuration of the password checker can be done two ways:
+
+#### Class without options
+
+    'password_strength_checker' => \CirclicalUser\Service\PasswordChecker\Passwdqc::class,
+    
+#### Class with options
+    
+    'password_strength_checker' => [
+        'implementation' => \CirclicalUser\Service\PasswordChecker\Zxcvbn::class,
+        'config' => [
+            'required_strength' => 3,
+        ],
+    ],
      
      
 ## Creating Access For Your Users
