@@ -6,6 +6,7 @@ use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Service\AuthenticationService;
+use CirclicalUser\Service\PasswordChecker\Zxcvbn;
 use PhpSpec\ObjectBehavior;
 use Zend\ServiceManager\ServiceManager;
 
@@ -18,9 +19,7 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
 
     public function it_creates_its_service(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
     {
-
         $config = [
-
             'circlical' => [
                 'user' => [
                     'providers' => [
@@ -59,6 +58,60 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
         $serviceManager->get(UserMapper::class)->willReturn($userMapper);
 
         $this->__invoke($serviceManager, AuthenticationService::class)->shouldBeAnInstanceOf(AuthenticationService::class);
+    }
 
+    public function it_supports_password_checker_array_configs(ServiceManager $serviceManager, AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
+    {
+        $config = [
+            'circlical' => [
+                'user' => [
+                    'providers' => [
+                        'role' => RoleMapper::class,
+                    ],
+                    'auth' => [
+                        'crypto_key' => 'sfZGFm1rCc7TgPr9aly3WOtAfbEOb/VafB8L3velkd0=',
+                        'transient' => false,
+                    ],
+
+                    'password_strength_checker' => [
+                        'implementation' => \CirclicalUser\Service\PasswordChecker\Zxcvbn::class,
+                        'config' => [
+                            'required_strength' => 3,
+                        ],
+                    ],
+
+                    'guards' => [
+                        'Foo' => [
+                            // controller-level-permissions
+                            'controllers' => [
+                                'Foo\Controller\ThisController' => [
+                                    'default' => ['user'],
+                                    'actions' => [
+                                        'index' => ['user'],
+                                        'userList' => ['admin'],
+                                    ],
+                                ],
+                                'Foo\Controller\AdminController' => [
+                                    'default' => ['admin'],
+                                    'actions' => [
+                                        'oddity' => ['user'],
+                                        'superodd' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $serviceManager->get('config')->willReturn($config);
+        $serviceManager->get(AuthenticationMapper::class)->willReturn($authenticationMapper);
+        $serviceManager->get(UserMapper::class)->willReturn($userMapper);
+
+        $service = $this->__invoke($serviceManager, AuthenticationService::class);
+        $service->shouldBeAnInstanceOf(AuthenticationService::class);
+        $service->getPasswordChecker()->shouldBeAnInstanceOf(Zxcvbn::class);
+        $parameters = $service->getPasswordCheckerParameters();
+        $parameters->shouldHaveKeyWithValue('required_strength', 3);
     }
 }

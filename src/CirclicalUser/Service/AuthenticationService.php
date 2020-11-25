@@ -183,6 +183,17 @@ class AuthenticationService
     }
 
 
+    public function getPasswordChecker(): PasswordCheckerInterface
+    {
+        return $this->passwordChecker;
+    }
+
+    public function getPasswordCheckerParameters(): array
+    {
+        return $this->passwordCheckerParameters;
+    }
+
+
     /**
      * Passed in by a successful form submission, should set proper auth cookies if the identity verifies.
      * The login should work with both username, and email address.
