@@ -18,7 +18,6 @@ use CirclicalUser\Exception\EmailUsernameTakenException;
 use CirclicalUser\Exception\MismatchedEmailsException;
 use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\UsernameTakenException;
-use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Provider\UserProviderInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
@@ -62,12 +61,12 @@ class AuthenticationService
     /**
      * Stores the user identity after having been authenticated.
      *
-     * @var User
+     * @var ?User
      */
     private $identity;
 
     /**
-     * @var AuthenticationMapper
+     * @var AuthenticationProviderInterface
      */
     private $authenticationProvider;
 
@@ -77,7 +76,7 @@ class AuthenticationService
     private $userProvider;
 
     /**
-     * @var string A config-defined key that's used to encrypt ID cookie
+     * @var HiddenString A config-defined key that's used to encrypt ID cookie
      */
     private $systemEncryptionKey;
 
@@ -127,17 +126,17 @@ class AuthenticationService
     /**
      * AuthenticationService constructor.
      *
-     * @param AuthenticationProviderInterface $authenticationProvider
-     * @param UserProviderInterface           $userProvider
-     * @param UserResetTokenProviderInterface $resetTokenProvider        If not null, permit password reset
-     * @param string                          $systemEncryptionKey       The raw material of a Halite-generated encryption key, stored in config.
-     * @param bool                            $transient                 True if cookies should expire at the end of the session (zero value, for expiry)
-     * @param bool                            $secure                    True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
-     * @param PasswordCheckerInterface        $passwordChecker           Optional, a password checker implementation
-     * @param array                           $passwordCheckerParameters Defined by config, the base parameters that are pushed into the password check sequence. Is not comprehensive, since
-     *                                                                   some password checkers require user information that is pushed at invocation time.
-     * @param bool                            $validateFingerprint       If password reset is enabled, do we validate the browser fingerprint?
-     * @param bool                            $validateIp                If password reset is enabled, do we validate the user IP address?
+     * @param AuthenticationProviderInterface  $authenticationProvider
+     * @param UserProviderInterface            $userProvider
+     * @param ?UserResetTokenProviderInterface $resetTokenProvider        If not null, permit password reset
+     * @param string                           $systemEncryptionKey       The raw material of a Halite-generated encryption key, stored in config.
+     * @param bool                             $transient                 True if cookies should expire at the end of the session (zero value, for expiry)
+     * @param bool                             $secure                    True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
+     * @param PasswordCheckerInterface         $passwordChecker           Optional, a password checker implementation
+     * @param array                            $passwordCheckerParameters Defined by config, the base parameters that are pushed into the password check sequence. Is not comprehensive, since
+     *                                                                    some password checkers require user information that is pushed at invocation time.
+     * @param bool                             $validateFingerprint       If password reset is enabled, do we validate the browser fingerprint?
+     * @param bool                             $validateIp                If password reset is enabled, do we validate the user IP address?
      */
     public function __construct(
         AuthenticationProviderInterface $authenticationProvider,
@@ -198,11 +197,6 @@ class AuthenticationService
      * Passed in by a successful form submission, should set proper auth cookies if the identity verifies.
      * The login should work with both username, and email address.
      *
-     * @param $username
-     * @param $password
-     *
-     * @return User
-     *
      * @throws BadPasswordException Thrown when the password doesn't work
      * @throws NoSuchUserException Thrown when the user can't be identified
      */
@@ -251,29 +245,24 @@ class AuthenticationService
      * Change an auth record username given a user id and a new username.
      * Note - in this case username is email.
      *
-     * @param User $user
-     * @param      $newUsername
-     *
-     * @return AuthenticationRecordInterface
      * @throws NoSuchUserException Thrown when the user's authentication records couldn't be found
      * @throws UsernameTakenException
      */
     public function changeUsername(User $user, string $newUsername): AuthenticationRecordInterface
     {
-        /** @var AuthenticationRecordInterface $auth */
         $auth = $this->authenticationProvider->findByUserId($user->getId());
 
-        if (!$auth) {
+        if ($auth === null) {
             throw new NoSuchUserException();
         }
 
         // check to see if already taken
         if ($otherAuth = $this->authenticationProvider->findByUsername($newUsername)) {
-            if ($auth == $otherAuth) {
+            if ($auth === $otherAuth) {
                 return $auth;
-            } else {
-                throw new UsernameTakenException();
             }
+
+            throw new UsernameTakenException();
         }
 
         $auth->setUsername($newUsername);
@@ -332,11 +321,8 @@ class AuthenticationService
 
     /**
      * Set a cookie with values defined by configuration
-     *
-     * @param $name
-     * @param $value
      */
-    private function setCookie(string $name, $value)
+    private function setCookie(string $name, string $value)
     {
         $expiry = $this->transient ? 0 : (time() + 2629743);
         $sessionParameters = session_get_cookie_params();
@@ -402,11 +388,10 @@ class AuthenticationService
 
             // paranoid, make sure we have everything we need
             @list($cookieUserId, $hashCookieSuffix) = @explode(":", $userTuple, 2);
-            if (!isset($cookieUserId, $hashCookieSuffix) || !is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
+            if (!is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
                 throw new \Exception();
             }
 
-            /** @var AuthenticationRecordInterface $auth */
             if (!($auth = $this->authenticationProvider->findByUserId($cookieUserId))) {
                 throw new \Exception();
             }
@@ -474,9 +459,10 @@ class AuthenticationService
     private function purgeHashCookies(string $skipCookie = null)
     {
         $sp = session_get_cookie_params();
+        $killTime = time() - 3600;
         foreach ($_COOKIE as $cookieName => $value) {
             if ($cookieName !== $skipCookie && strpos($cookieName, self::COOKIE_HASH_PREFIX) !== false) {
-                setcookie($cookieName, null, null, '/', $sp['domain'], false, true);
+                setcookie($cookieName, '', $killTime, '/', $sp['domain'], false, true);
             }
         }
     }
@@ -489,7 +475,7 @@ class AuthenticationService
      */
     private function enforcePasswordStrength(string $password, User $user)
     {
-        if ($this->passwordChecker && !$this->passwordChecker->isStrongPassword($password, $user, $this->passwordCheckerParameters)) {
+        if (!$this->passwordChecker->isStrongPassword($password, $user, $this->passwordCheckerParameters)) {
             throw new WeakPasswordException();
         }
     }
@@ -643,8 +629,9 @@ class AuthenticationService
         }
 
         $sp = session_get_cookie_params();
+        $killTime = time() - 3600;
         foreach ([self::COOKIE_USER, self::COOKIE_VERIFY_A, self::COOKIE_VERIFY_B] as $cookieName) {
-            setcookie($cookieName, null, null, '/', $sp['domain'], false, true);
+            setcookie($cookieName, '', $killTime, '/', $sp['domain'], false, true);
         }
 
         $this->identity = null;
@@ -663,7 +650,7 @@ class AuthenticationService
      */
     public function createRecoveryToken(User $user): UserResetToken
     {
-        if (!$this->resetTokenProvider) {
+        if ($this->resetTokenProvider === null) {
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 
@@ -688,11 +675,6 @@ class AuthenticationService
 
 
     /**
-     * @param User   $user
-     * @param int    $tokenId
-     * @param string $token
-     * @param string $newPassword
-     *
      * @throws InvalidResetTokenException
      * @throws NoSuchUserException
      * @throws PasswordResetProhibitedException
@@ -700,7 +682,7 @@ class AuthenticationService
      */
     public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword)
     {
-        if (!$this->resetTokenProvider) {
+        if ($this->resetTokenProvider === null) {
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 

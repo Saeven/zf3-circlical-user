@@ -37,12 +37,8 @@ interface UserResetTokenProviderInterface
 
     /**
      * Get the latest request
-     *
-     * @param int $tokenId
-     *
-     * @return UserResetTokenInterface
      */
-    public function get(int $tokenId);
+    public function get(int $tokenId): ?UserResetTokenInterface;
 
 
     /**

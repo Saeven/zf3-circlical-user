@@ -8,19 +8,15 @@ interface AuthenticationProviderInterface
      * Find a proper authentication record by username. Note, usernames
      * could be anything, including email addresses.
      *
-     * @param $username
-     *
      * @return AuthenticationRecordInterface
      */
-    public function findByUsername($username);
+    public function findByUsername(string $username): ?AuthenticationRecordInterface;
 
 
     /**
      * Find an  authentication record by user ID.
-     *
-     * @return AuthenticationRecordInterface
      */
-    public function findByUserId($userId);
+    public function findByUserId($userId): ?AuthenticationRecordInterface;
 
 
     /**
@@ -42,14 +38,6 @@ interface AuthenticationProviderInterface
      */
     public function save($record);
 
-    /**
-     * @param $userId
-     * @param $username
-     * @param $hash
-     * @param $rawKey
-     *
-     * @return AuthenticationRecordInterface
-     */
-    public function create($userId, $username, $hash, $rawKey): AuthenticationRecordInterface;
+    public function create($userId, string $username, string $hash, string $rawKey): AuthenticationRecordInterface;
 
 }

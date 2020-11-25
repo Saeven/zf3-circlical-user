@@ -19,5 +19,7 @@ interface AuthenticationRecordInterface
 
     public function getUserId();
 
+    public function getHash(): string;
 
+    public function setHash(string $hash);
 }

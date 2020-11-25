@@ -19,13 +19,9 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
     /**
      * Get any user-level, string (simple) permissions that are configured in the database.
      *
-     * @param               $string
-     * @param UserInterface $user
-     *
-     * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getUserPermission($string, UserInterface $user)
+    public function getUserPermission(string $string, UserInterface $user): ?UserPermissionInterface
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -41,13 +37,9 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
     /**
      * Get resource-type permissions from the database
      *
-     * @param ResourceInterface $resource
-     * @param UserInterface     $user
-     *
-     * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user)
+    public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user): ?UserPermissionInterface
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->select('r')
@@ -63,14 +55,9 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
     /**
      * Create a user permission, not persisted, and return it.
      *
-     * @param UserInterface $user
-     * @param               $resourceClass
-     * @param               $resourceId
-     * @param array         $actions
-     *
      * @return UserPermissionInterface
      */
-    public function create(UserInterface $user, $resourceClass, $resourceId, array $actions): UserPermissionInterface
+    public function create(UserInterface $user, string $resourceClass, string $resourceId, array $actions): UserPermissionInterface
     {
         return new UserPermission($user, $resourceClass, $resourceId, $actions);
     }

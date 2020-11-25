@@ -17,11 +17,9 @@ namespace CirclicalUser\Provider;
 interface GroupPermissionProviderInterface
 {
     /**
-     * @param $string
-     *
      * @return GroupPermissionInterface[]
      */
-    public function getPermissions($string): array;
+    public function getPermissions(string $string): array;
 
     /**
      * @param ResourceInterface $resource
@@ -32,17 +30,15 @@ interface GroupPermissionProviderInterface
 
 
     /**
-     * @param $resourceClass
-     *
      * @return GroupPermissionInterface[]
      */
-    public function getResourcePermissionsByClass($resourceClass): array;
+    public function getResourcePermissionsByClass(string $resourceClass): array;
 
 
     public function update($rule);
 
 
-    public function create(RoleInterface $role, $resourceClass, $resourceId, array $actions): GroupPermissionInterface;
+    public function create(RoleInterface $role, string $resourceClass, string $resourceId, array $actions): GroupPermissionInterface;
 
 
     public function save($rule);

@@ -7,8 +7,6 @@ use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Mapper\AuthenticationMapper;
@@ -24,11 +22,6 @@ class AuthenticationServiceFactory implements FactoryInterface
      * @param null|array         $options
      *
      * @return AuthenticationService
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when creating a service.
-     *
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

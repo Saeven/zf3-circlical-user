@@ -3,6 +3,7 @@
 namespace CirclicalUser\Controller\Plugin;
 
 use CirclicalUser\Exception\UserRequiredException;
+use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
@@ -30,20 +31,15 @@ class AuthenticationPlugin extends AbstractPlugin
 
     /**
      * Pass me an email/username combo and I'll start the user session
-     *
-     * @param $email
-     * @param $pass
-     *
-     * @return User
      * @throws \CirclicalUser\Exception\BadPasswordException
      * @throws \CirclicalUser\Exception\NoSuchUserException
      */
-    public function authenticate(string $email, string $pass)
+    public function authenticate(string $email, string $pass): User
     {
         return $this->authenticationService->authenticate($email, $pass);
     }
 
-    public function getIdentity()
+    public function getIdentity(): ?UserInterface
     {
         return $this->authenticationService->getIdentity();
     }
@@ -78,12 +74,12 @@ class AuthenticationPlugin extends AbstractPlugin
      * @param string $username Can be an email address or username, should be validated prior
      * @param string $password
      */
-    public function create(User $user, $username, $password)
+    public function create(User $user, string $username, string $password)
     {
         $this->authenticationService->create($user, $username, $password);
     }
 
-    public function isAllowed($resource, $action)
+    public function isAllowed($resource, string $action)
     {
         return $this->accessService->isAllowed($resource, $action);
     }
