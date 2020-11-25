@@ -16,11 +16,11 @@ use Zend\View\Model\ViewModel;
 
 class AccessListenerSpec extends ObjectBehavior
 {
-    const CONTROLLER_INDEX = '\Namespace\Controller\IndexController';
-    const CONTROLLER_ADMIN = '\Namespace\Controller\AdminController';
+    private const CONTROLLER_INDEX = '\Namespace\Controller\IndexController';
+    private const CONTROLLER_ADMIN = '\Namespace\Controller\AdminController';
 
-    const CONTROLLER_MIDDLEWARE_1 = '\Namespace\Controller\MiddlewareInterface1';
-    const CONTROLLER_MIDDLEWARE_2 = '\Namespace\Controller\MiddlewareInterface2';
+    private const CONTROLLER_MIDDLEWARE_1 = '\Namespace\Controller\MiddlewareInterface1';
+    private const CONTROLLER_MIDDLEWARE_2 = '\Namespace\Controller\MiddlewareInterface2';
 
     function it_is_initializable()
     {
@@ -119,10 +119,10 @@ class AccessListenerSpec extends ObjectBehavior
     }
 
 
-    public function it_dispatches_errors_properly(MvcEvent $event)
+    public function it_dispatches_errors_properly(MvcEvent $event, Response $mvcResponse)
     {
         $event->getParams()->willReturn(['a' => 1]);
-        $event->getResponse()->willReturn(null);
+        $event->getResponse()->willReturn($mvcResponse);
         $event->getError()->willReturn(AccessService::ACCESS_DENIED);
 
         $event->setResponse(Argument::type(Response::class))->shouldBeCalled();
@@ -133,12 +133,12 @@ class AccessListenerSpec extends ObjectBehavior
 
     }
 
-    public function it_dispatches_ajax_errors_properly(MvcEvent $event)
+    public function it_dispatches_ajax_errors_properly(MvcEvent $event, Response $mvcResponse)
     {
         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
 
         $event->getParams()->willReturn(['a' => 1]);
-        $event->getResponse()->willReturn(null);
+        $event->getResponse()->willReturn($mvcResponse);
         $event->getError()->willReturn(AccessService::ACCESS_DENIED);
 
         $event->setResponse(Argument::type(Response::class))->shouldBeCalled();
