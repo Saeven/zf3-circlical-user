@@ -2,9 +2,12 @@
 
 namespace CirclicalUser\Controller\Plugin;
 
+use CirclicalUser\Exception\BadPasswordException;
+use CirclicalUser\Exception\NoSuchUserException;
+use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Exception\UserRequiredException;
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface;
-use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
@@ -31,10 +34,10 @@ class AuthenticationPlugin extends AbstractPlugin
 
     /**
      * Pass me an email/username combo and I'll start the user session
-     * @throws \CirclicalUser\Exception\BadPasswordException
-     * @throws \CirclicalUser\Exception\NoSuchUserException
+     * @throws BadPasswordException
+     * @throws NoSuchUserException
      */
-    public function authenticate(string $email, string $pass): User
+    public function authenticate(string $email, string $pass): UserInterface
     {
         return $this->authenticationService->authenticate($email, $pass);
     }
@@ -46,13 +49,12 @@ class AuthenticationPlugin extends AbstractPlugin
 
     /**
      * Get a user identity, or else!
-     * @return User|null
      * @throws UserRequiredException
      */
-    public function requireIdentity()
+    public function requireIdentity(): UserInterface
     {
         $user = $this->authenticationService->getIdentity();
-        if (!$user) {
+        if ($user === null) {
             throw new UserRequiredException();
         }
 
@@ -62,24 +64,25 @@ class AuthenticationPlugin extends AbstractPlugin
     /**
      * Clear identity and reset tokens
      */
-    public function clearIdentity()
+    public function clearIdentity(): void
     {
         $this->authenticationService->clearIdentity();
     }
 
     /**
-     * Give me a user and password, and I'll create authentication records for you
+     * Give me a user, username and password; and I'll create authentication records for you
      *
-     * @param User   $user
      * @param string $username Can be an email address or username, should be validated prior
      * @param string $password
+     *
+     * @throws PersistedUserRequiredException
      */
-    public function create(User $user, string $username, string $password)
+    public function create(UserInterface $user, string $username, string $password): AuthenticationRecordInterface
     {
-        $this->authenticationService->create($user, $username, $password);
+        return $this->authenticationService->create($user, $username, $password);
     }
 
-    public function isAllowed($resource, string $action)
+    public function isAllowed($resource, string $action): bool
     {
         return $this->accessService->isAllowed($resource, $action);
     }

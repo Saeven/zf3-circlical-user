@@ -98,7 +98,7 @@ class AuthenticationService
 
 
     /**
-     * @var UserResetTokenProviderInterface
+     * @var ?UserResetTokenProviderInterface
      */
     private $resetTokenProvider;
 
@@ -217,6 +217,7 @@ class AuthenticationService
 
         if (password_verify($password, $auth->getHash())) {
 
+            // might have been discovered earlier
             if (!$user) {
                 $user = $this->userProvider->getUser($auth->getUserId());
             }
@@ -232,9 +233,9 @@ class AuthenticationService
                 }
 
                 return $user;
-            } else {
-                throw new NoSuchUserException();
             }
+
+            throw new NoSuchUserException();
         }
 
         throw new BadPasswordException();
@@ -252,7 +253,7 @@ class AuthenticationService
     {
         $auth = $this->authenticationProvider->findByUserId($user->getId());
 
-        if ($auth === null) {
+        if (!$auth) {
             throw new NoSuchUserException();
         }
 
@@ -650,7 +651,7 @@ class AuthenticationService
      */
     public function createRecoveryToken(User $user): UserResetToken
     {
-        if ($this->resetTokenProvider === null) {
+        if (!$this->resetTokenProvider) {
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 
@@ -682,7 +683,7 @@ class AuthenticationService
      */
     public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword)
     {
-        if ($this->resetTokenProvider === null) {
+        if (!$this->resetTokenProvider) {
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 

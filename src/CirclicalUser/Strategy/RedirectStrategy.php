@@ -40,7 +40,7 @@ class RedirectStrategy implements DenyStrategyInterface
     {
         if ($eventError === AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
 
-            $response = $event->getREsponse();
+            $response = $event->getResponse();
             if ($response instanceof Response) {
                 $response->setStatusCode(403);
             }
