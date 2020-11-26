@@ -28,9 +28,6 @@ class AccessService
 
     const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
 
-    /**
-     * @var  UserInterface
-     */
     private $user;
 
     private $userProvider;
@@ -101,7 +98,7 @@ class AccessService
         }
     }
 
-    public function setUser(User $user)
+    public function setUser(User $user): void
     {
         if (!$user->getId()) {
             throw new UserRequiredException();
@@ -111,7 +108,7 @@ class AccessService
 
     public function hasUser(): bool
     {
-        return $this->user != null;
+        return $this->user !== null;
     }
 
     /**
@@ -128,7 +125,7 @@ class AccessService
             return true;
         }
 
-        if ($this->user === null) {
+        if (!$this->user) {
             return false;
         }
 
