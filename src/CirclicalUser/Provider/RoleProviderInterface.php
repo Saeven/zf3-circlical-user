@@ -21,10 +21,8 @@ interface RoleProviderInterface
     /**
      * Fetch a role with a particular name
      *
-     * @param $name
-     *
      * @return RoleInterface
      */
-    public function getRoleWithName(string $name);
+    public function getRoleWithName(string $name): ?RoleInterface;
 
 }

@@ -53,7 +53,7 @@ class UserPermission implements UserPermissionInterface
     protected $actions;
 
 
-    public function __construct(UserInterface $user, $resourceClass, $resourceId, array $actions)
+    public function __construct(UserInterface $user, string $resourceClass, string $resourceId, array $actions)
     {
         $this->user = $user;
         $this->resource_class = $resourceClass;

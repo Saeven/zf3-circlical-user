@@ -9,7 +9,6 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -109,6 +108,11 @@ class AccessListener implements ListenerAggregateInterface
         }
 
         $app = $event->getTarget();
+
+        if (is_string($app)) {
+            return;
+        }
+
         $event->setName(MvcEvent::EVENT_DISPATCH_ERROR);
         $app->getEventManager()->triggerEvent($event);
     }
@@ -121,6 +125,7 @@ class AccessListener implements ListenerAggregateInterface
             case AccessService::ACCESS_DENIED:
                 $statusCode = 403;
                 break;
+
             case AccessService::ACCESS_UNAUTHORIZED:
                 $statusCode = 401;
                 break;
@@ -138,8 +143,10 @@ class AccessListener implements ListenerAggregateInterface
         }
 
         $viewModel->setVariables($event->getParams());
-        $response = $event->getResponse() ?: new Response();
-        $response->setStatusCode($statusCode);
+        $response = $event->getResponse();
+        if ($response instanceof Response) {
+            $response->setStatusCode($statusCode);
+        }
         $event->setViewModel($viewModel);
         $event->setResponse($response);
     }

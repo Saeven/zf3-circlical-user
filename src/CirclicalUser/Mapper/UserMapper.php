@@ -3,6 +3,7 @@
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\Role;
+use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Provider\UserProviderInterface;
 
@@ -23,24 +24,15 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
         $this->entityName = $entityName;
     }
 
-    /**
-     * @param $userId
-     *
-     * @return User
-     */
-    public function getUser($userId)
+    public function getUser($userId): ?UserInterface
     {
         return $this->getRepository()->findOneBy(['id' => $userId]);
     }
 
     /**
      * Locate a user by email address
-     *
-     * @param $email
-     *
-     * @return User
      */
-    public function findByEmail($email)
+    public function findByEmail(string $email): ?UserInterface
     {
         return $this->getRepository()->findOneBy(['email' => $email]);
     }
@@ -64,8 +56,6 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
      * Get users with a specific role, and _not_ its hierarchical parents.
      * In other words, if you have 'admin' which inherits from 'standard' and you request 'admin',
      * you will not list 'standard' users.
-     *
-     * @param Role $role
      *
      * @return array
      */

@@ -38,7 +38,7 @@ class GroupPermission implements GroupPermissionInterface
 
 
     /**
-     * @var Role
+     * @var RoleInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
      */
     protected $role;
@@ -51,7 +51,7 @@ class GroupPermission implements GroupPermissionInterface
     protected $actions;
 
 
-    public function __construct(RoleInterface $role, $resourceClass, $resourceId, array $actions)
+    public function __construct(RoleInterface $role, string $resourceClass, string $resourceId, array $actions)
     {
         $this->role = $role;
         $this->resource_class = $resourceClass;

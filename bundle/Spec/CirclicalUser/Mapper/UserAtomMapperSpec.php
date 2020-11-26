@@ -63,7 +63,7 @@ class UserAtomMapperSpec extends ObjectBehavior
 
     function it_can_search_atoms(EntityRepository $entityRepository)
     {
-        $entityRepository->findBy(['key' => 'abc', 'value' => '123'])->shouldBeCalled();
+        $entityRepository->findBy(['key' => 'abc', 'value' => '123'])->willReturn([]);
         $this->search('abc', '123');
     }
 

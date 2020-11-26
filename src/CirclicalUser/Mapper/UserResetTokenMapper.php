@@ -46,12 +46,8 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
 
     /**
      * Get the latest request
-     *
-     * @param int $tokenId
-     *
-     * @return mixed
      */
-    public function get(int $tokenId)
+    public function get(int $tokenId): ?UserResetTokenInterface
     {
         return $this->getRepository()->findOneBy(['id' => $tokenId, 'status' => UserResetTokenInterface::STATUS_UNUSED]);
     }

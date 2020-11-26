@@ -28,9 +28,6 @@ class AccessService
 
     const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
 
-    /**
-     * @var  UserInterface
-     */
     private $user;
 
     private $userProvider;
@@ -101,7 +98,7 @@ class AccessService
         }
     }
 
-    public function setUser(User $user)
+    public function setUser(User $user): void
     {
         if (!$user->getId()) {
             throw new UserRequiredException();
@@ -111,16 +108,12 @@ class AccessService
 
     public function hasUser(): bool
     {
-        return $this->user != null;
+        return $this->user !== null;
     }
 
     /**
      * Check the guard configuration to see if the current user (or guest) can access a specific controller.
      * Critical distinction: this method does not invoke action rules, only roles.
-     *
-     * @param $controllerName
-     *
-     * @return bool
      */
     public function canAccessController(string $controllerName): bool
     {
@@ -148,11 +141,6 @@ class AccessService
     /**
      * Similar to controller access, see if the config array grants the current user (or guest) access to a specific
      * action on a given controller.
-     *
-     * @param $controllerName
-     * @param $action
-     *
-     * @return bool
      */
     public function canAccessAction(string $controllerName, string $action): bool
     {
@@ -179,10 +167,6 @@ class AccessService
      * that a guard exists, for the controller/action being queried.  Note that this method qualifies
      * the route, and not the user & route relationship.
      *
-     * @param string $controllerName
-     * @param string $action
-     *
-     * @return bool
      * @throws GuardExpectedException
      */
     public function requiresAuthentication(string $controllerName, string $action): bool
@@ -209,8 +193,6 @@ class AccessService
     /**
      * Check if the current user has a given role.
      *
-     * @param $role
-     *
      * @return bool True if the role fits, false if there is no user or the role is not accessible in the hierarchy
      *              of existing user roles.
      */
@@ -218,7 +200,7 @@ class AccessService
     {
         $this->compileUserRoles();
 
-        return in_array($role, $this->userRoles);
+        return in_array($role, $this->userRoles, true);
     }
 
     /**
@@ -226,9 +208,7 @@ class AccessService
      *
      * @param RoleInterface $role
      *
-     * @return bool
      * @see self::hasRoleWithName
-     *
      */
     public function hasRole(RoleInterface $role): bool
     {
@@ -238,12 +218,8 @@ class AccessService
 
     /**
      * Proxy method, for convenience
-     *
-     * @param $roleName
-     *
-     * @return RoleInterface
      */
-    public function getRoleWithName(string $roleName)
+    public function getRoleWithName(string $roleName): ?RoleInterface
     {
         return $this->roleProvider->getRoleWithName($roleName);
     }
@@ -252,15 +228,13 @@ class AccessService
     /**
      * Add a role for the current User
      *
-     * @param $roleName
-     *
      * @throws InvalidRoleException
      * @throws UserRequiredException
      * @internal param $roleId
      */
-    public function addRoleByName(string $roleName)
+    public function addRoleByName(string $roleName): void
     {
-        if (!$this->user) {
+        if ($this->user === null) {
             throw new UserRequiredException();
         }
 
@@ -304,23 +278,16 @@ class AccessService
             return;
         }
 
-        if (!$this->user) {
+        if ($this->user === null) {
             $this->userRoles = [];
 
             return;
         }
 
-        $roleList = [];
         $roleExpansion = [];
-
-        /** @var Role $role */
-        foreach ($this->roleProvider->getAllRoles() as $role) {
-            $roleList[$role->getId()] = $role;
-        }
-
-        /** @var Role $userRole */
         $userRoles = $this->user->getRoles();
         if ($userRoles) {
+            /** @var RoleInterface $userRole */
             foreach ($userRoles as $userRole) {
                 $roleExpansion[] = $userRole->getName();
 
@@ -338,8 +305,6 @@ class AccessService
      * Permissions are an ability to do 'something' with either a 'string' or ResourceInterface as the subject.  Some
      * permissions are attributed to roles, as defined by your role provider.  This method checks to see if the set of
      * roles associated to your user, grants access to a specific verb-actions on a resource.
-     *
-     * @param ResourceInterface|string $resource
      *
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
@@ -366,16 +331,13 @@ class AccessService
      *
      * A single permission is returned, since the user can only have one permission set attributed to a given Resource
      *
-     * @param ResourceInterface|string $resource
-     *
-     * @return UserPermissionInterface
      * @throws \Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
-    public function getUserPermission($resource)
+    public function getUserPermission($resource): ?UserPermissionInterface
     {
-        if (!$this->user) {
+        if ($this->user === null) {
             throw new UserRequiredException();
         }
 
@@ -399,10 +361,6 @@ class AccessService
      * It was a design condition to favor consistent method invocation, and let this library handle string or
      * resource distinction, rather than force you to differentiate the cases in your code.
      *
-     * @param ResourceInterface|string $resource
-     * @param string                   $action
-     *
-     * @return bool
      * @throws \Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -418,7 +376,7 @@ class AccessService
             }
         }
 
-        if ($this->user) {
+        if ($this->user !== null) {
             return $this->isAllowedUser($resource, $action);
         }
 
@@ -443,10 +401,6 @@ class AccessService
      *
      * isAllowed, will pass the buck to this method if no group rules satisfy the action.
      *
-     * @param ResourceInterface|string $resource
-     * @param string                   $action
-     *
-     * @return bool
      * @throws \Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -462,12 +416,9 @@ class AccessService
     /**
      * List allowed resource IDs by class
      *
-     * @param $resourceClass
-     * @param $action
-     *
      * @return array Array of IDs whose class was $resourceClass
      */
-    public function listAllowedByClass($resourceClass, string $action = ''): array
+    public function listAllowedByClass(string $resourceClass, string $action = ''): array
     {
         $permissions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         $permitted = [];
@@ -535,44 +486,38 @@ class AccessService
      * The user must have been loaded in using setUser (done automatically by the factory when a user is authenticated)
      * prior to this call.
      *
-     * @param ResourceInterface|string $resource
-     * @param string                   $action
-     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
     public function grantUserAccess($resource, string $action)
     {
-        $permission = $this->getUserPermission($resource);
-
         // already have permission? get out
         if ($this->isAllowed($resource, $action)) {
             return;
         }
 
-        // make sure we can work with this
-        if ($permission && !($permission instanceof UserPermissionInterface)) {
-            throw new PermissionExpectedException(UserPermissionInterface::class, \get_class($permission));
-        }
+        $permission = $this->getUserPermission($resource);
 
-        /** @var UserPermissionInterface $permission */
-        if ($permission) {
+        // permission exists
+        if ($permission !== null) {
             if ($permission->can($action)) {
                 return;
             }
             $permission->addAction($action);
             $this->userPermissions->update($permission);
-        } else {
-            $isString = \is_string($resource);
-            $permission = $this->userPermissions->create(
-                $this->user,
-                $isString ? 'string' : $resource->getClass(),
-                $isString ? $resource : $resource->getId(),
-                [$action]
-            );
-            $this->userPermissions->save($permission);
+
+            return;
         }
+
+        $isString = \is_string($resource);
+        $permission = $this->userPermissions->create(
+            $this->user,
+            $isString ? 'string' : $resource->getClass(),
+            $isString ? $resource : $resource->getId(),
+            [$action]
+        );
+        $this->userPermissions->save($permission);
     }
 
     /**
@@ -589,22 +534,15 @@ class AccessService
     {
         $resourceRule = $this->getUserPermission($resource);
 
-        if (!$resourceRule) {
+        if ($resourceRule === null) {
             return;
         }
 
-        // make sure we can work with this
-        if ($resourceRule && !($resourceRule instanceof UserPermissionInterface)) {
-            throw new PermissionExpectedException(UserPermissionInterface::class, \get_class($resourceRule));
+        if (!\in_array($action, $resourceRule->getActions(), true)) {
+            return;
         }
-
-        if ($resourceRule) {
-            if (!\in_array($action, $resourceRule->getActions(), true)) {
-                return;
-            }
-            $resourceRule->removeAction($action);
-            $this->userPermissions->update($resourceRule);
-        }
+        $resourceRule->removeAction($action);
+        $this->userPermissions->update($resourceRule);
     }
 
 }

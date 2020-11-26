@@ -2,7 +2,7 @@ parameters:
   autoload_files:
     - %rootDir%/../../../vendor/autoload.php
   #  excludes_analyse:
-  level: 2
+  level: 5
   ignoreErrors:
 #    - '#Call to an undefined method [A-Za-z0-9\\_]+::json().#'
 #    - '#Call to an undefined method [A-Za-z0-9\\_]+::auth().#'

@@ -4,6 +4,7 @@ namespace CirclicalUser\Strategy;
 
 use CirclicalUser\Provider\DenyStrategyInterface;
 use CirclicalUser\Service\AccessService;
+use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\RouteMatch;
 
@@ -37,8 +38,12 @@ class RedirectStrategy implements DenyStrategyInterface
 
     public function handle(MvcEvent $event, string $eventError): bool
     {
-        if ($eventError == AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-            $event->getResponse()->setStatusCode(403);
+        if ($eventError === AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+
+            $response = $event->getResponse();
+            if ($response instanceof Response) {
+                $response->setStatusCode(403);
+            }
             $event->setRouteMatch(new RouteMatch([
                 'controller' => $this->controllerClass,
                 'action' => $this->action,
