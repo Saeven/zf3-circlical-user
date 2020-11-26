@@ -9,6 +9,7 @@ use CirclicalUser\Factory\Listener\AccessListenerFactory;
 use CirclicalUser\Factory\Listener\UserEntityListenerFactory;
 use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
+use CirclicalUser\Factory\Service\PasswordChecker\PasswordCheckerFactory;
 use CirclicalUser\Factory\Strategy\RedirectStrategyFactory;
 use CirclicalUser\Factory\View\Helper\ControllerAccessViewHelperFactory;
 use CirclicalUser\Factory\View\Helper\RoleAccessViewHelperFactory;
@@ -21,6 +22,7 @@ use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Mapper\UserResetTokenMapper;
+use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
@@ -95,6 +97,12 @@ return [
 
         'abstract_factories' => [
             AbstractDoctrineMapperFactory::class,
+        ],
+    ],
+
+    'validators' => [
+        'factories' => [
+            PasswordCheckerInterface::class => PasswordCheckerFactory::class,
         ],
     ],
 
