@@ -11,6 +11,7 @@ use CirclicalUser\Factory\Mapper\UserMapperFactory;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
 use CirclicalUser\Factory\Service\PasswordChecker\PasswordCheckerFactory;
 use CirclicalUser\Factory\Strategy\RedirectStrategyFactory;
+use CirclicalUser\Factory\Validator\PasswordValidatorFactory;
 use CirclicalUser\Factory\View\Helper\ControllerAccessViewHelperFactory;
 use CirclicalUser\Factory\View\Helper\RoleAccessViewHelperFactory;
 use CirclicalUser\Listener\AccessListener;
@@ -27,6 +28,7 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Factory\Service\AuthenticationServiceFactory;
 use CirclicalUser\Strategy\RedirectStrategy;
+use CirclicalUser\Validator\PasswordValidator;
 use CirclicalUser\View\Helper\ControllerAccessViewHelper;
 use CirclicalUser\View\Helper\RoleAccessViewHelper;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
@@ -93,6 +95,7 @@ return [
             UserEntityListener::class => UserEntityListenerFactory::class,
             UserMapper::class => UserMapperFactory::class,
             RedirectStrategy::class => RedirectStrategyFactory::class,
+            PasswordCheckerInterface::class => PasswordCheckerFactory::class,
         ],
 
         'abstract_factories' => [
@@ -102,7 +105,7 @@ return [
 
     'validators' => [
         'factories' => [
-            PasswordCheckerInterface::class => PasswordCheckerFactory::class,
+            PasswordValidator::class => PasswordValidatorFactory::class,
         ],
     ],
 

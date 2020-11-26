@@ -2,10 +2,8 @@
 
 namespace CirclicalUser\Factory\Service;
 
-use CirclicalUser\Exception\PasswordStrengthCheckerException;
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
-use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\Service\AuthenticationService;
