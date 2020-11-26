@@ -11,12 +11,12 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
 {
     protected $entityName = Authentication::class;
 
-    public function findByUsername(string $username): ?Authentication
+    public function findByUsername(string $username): ?AuthenticationRecordInterface
     {
         return $this->getRepository()->findOneBy(['username' => $username]);
     }
 
-    public function findByUserId($userId): ?Authentication
+    public function findByUserId($userId): ?AuthenticationRecordInterface
     {
         return $this->getRepository()->findOneBy(['user_id' => $userId]);
     }
