@@ -23,7 +23,6 @@ class AccessListenerFactorySpec extends ObjectBehavior
         $this->__invoke($serviceLocator, AccessListener::class)->shouldBeAnInstanceOf(AccessListener::class);
     }
 
-
     function it_supports_factory_interface_with_strategy(ServiceManager $serviceLocator, AccessService $accessService, RedirectStrategy $redirectStrategy)
     {
         $config = [
@@ -45,7 +44,6 @@ class AccessListenerFactorySpec extends ObjectBehavior
         $serviceLocator->get('config')->willReturn($config);
         $this->__invoke($serviceLocator, AccessListener::class)->shouldBeAnInstanceOf(AccessListener::class);
     }
-
 
     function it_throws_exceptions_for_absent_strategy_specifications(ServiceManager $serviceLocator, AccessService $accessService, RedirectStrategy $redirectStrategy)
     {

@@ -35,25 +35,6 @@ class AuthenticationServiceFactory implements FactoryInterface
             $resetTokenProvider = $userConfig['providers']['reset'] ?? UserResetTokenMapper::class;
         }
 
-        $passwordChecker = null;
-        $passwordCheckerParameters = [];
-        if (!empty($userConfig['password_strength_checker'])) {
-            if (is_array($userConfig['password_strength_checker'])) {
-                if (!is_string($userConfig['password_strength_checker']['implementation'] ?? null) || !is_array($userConfig['password_strength_checker']['config'] ?? null)) {
-                    throw new PasswordStrengthCheckerException("When using array notation, the password strength checker must contain 'implementation' and 'config'");
-                }
-                $checkerImplementation = new $userConfig['password_strength_checker']['implementation'];
-                $passwordCheckerParameters = $userConfig['password_strength_checker']['config'];
-            } else {
-                $checkerImplementation = new $userConfig['password_strength_checker'];
-            }
-
-            if ($checkerImplementation instanceof PasswordCheckerInterface) {
-                $passwordChecker = $checkerImplementation;
-            }
-
-        }
-
         return new AuthenticationService(
             $container->get($authMapper),
             $container->get($userProvider),
@@ -61,8 +42,7 @@ class AuthenticationServiceFactory implements FactoryInterface
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
             false,
-            $passwordChecker ?? new PasswordNotChecked(),
-            $passwordCheckerParameters,
+            $container->get(PasswordCheckerInterface::class),
             $userConfig['password_reset_tokens']['validate_fingerprint'] ?? true,
             $userConfig['password_reset_tokens']['validate_ip'] ?? false
         );

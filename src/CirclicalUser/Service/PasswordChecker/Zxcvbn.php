@@ -3,17 +3,22 @@
 namespace CirclicalUser\Service\PasswordChecker;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
-use CirclicalUser\Provider\UserInterface;
 
 class Zxcvbn implements PasswordCheckerInterface
 {
+    private $creationOptions;
+
+    public function __construct(array $creationOptions)
+    {
+        $this->creationOptions = $creationOptions;
+    }
+
     /**
      * Check strength using the excellent zxcvbn library.
      */
-    public function isStrongPassword(string $clearPassword, ?UserInterface $user, array $options): bool
+    public function isStrongPassword(string $clearPassword, array $userData): bool
     {
-        $requiredStrength = $options['required_strength'] ?? 4;
-        $userData = array_values(array_filter($user ? array_values((array)$user) : [], 'is_string'));
+        $requiredStrength = $this->creationOptions['required_strength'] ?? 4;
         $strength = (new \ZxcvbnPhp\Zxcvbn())->passwordStrength($clearPassword, $userData);
 
         return $strength['score'] >= $requiredStrength;

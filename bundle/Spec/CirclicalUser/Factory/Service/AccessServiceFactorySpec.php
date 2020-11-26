@@ -11,16 +11,23 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
 use Zend\ServiceManager\ServiceManager;
+use CirclicalUser\Factory\Service\AccessServiceFactory;
 
 class AccessServiceFactorySpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
-        $this->shouldHaveType('CirclicalUser\Factory\Service\AccessServiceFactory');
+        $this->shouldHaveType(AccessServiceFactory::class);
     }
 
-    function it_creates_its_service(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper, UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, UserMapper $userMapper)
-    {
+    function it_creates_its_service(
+        ServiceManager $serviceManager,
+        RoleMapper $roleMapper,
+        GroupPermissionProviderInterface $ruleMapper,
+        UserPermissionProviderInterface $userActionRuleMapper,
+        AuthenticationService $authenticationService,
+        UserMapper $userMapper
+    ) {
         $config = [
 
             'circlical' => [
@@ -69,9 +76,15 @@ class AccessServiceFactorySpec extends ObjectBehavior
         $this->__invoke($serviceManager, AccessService::class)->shouldBeAnInstanceOf(AccessService::class);
     }
 
-    function it_creates_its_service_with_user_identity(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper,
-                                                       UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, User $user, UserMapper $userMapper)
-    {
+    function it_creates_its_service_with_user_identity(
+        ServiceManager $serviceManager,
+        RoleMapper $roleMapper,
+        GroupPermissionProviderInterface $ruleMapper,
+        UserPermissionProviderInterface $userActionRuleMapper,
+        AuthenticationService $authenticationService,
+        User $user,
+        UserMapper $userMapper
+    ) {
         $config = [
 
             'circlical' => [
@@ -121,9 +134,15 @@ class AccessServiceFactorySpec extends ObjectBehavior
     }
 
 
-    function it_should_not_panic_when_guards_are_not_defined(ServiceManager $serviceManager, RoleMapper $roleMapper, GroupPermissionProviderInterface $ruleMapper,
-                                                             UserPermissionProviderInterface $userActionRuleMapper, AuthenticationService $authenticationService, User $user, UserMapper $userMapper)
-    {
+    function it_should_not_panic_when_guards_are_not_defined(
+        ServiceManager $serviceManager,
+        RoleMapper $roleMapper,
+        GroupPermissionProviderInterface $ruleMapper,
+        UserPermissionProviderInterface $userActionRuleMapper,
+        AuthenticationService $authenticationService,
+        User $user,
+        UserMapper $userMapper
+    ) {
         $config = [
             'circlical' => [
                 'user' => [

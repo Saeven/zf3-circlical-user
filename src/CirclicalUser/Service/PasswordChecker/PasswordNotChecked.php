@@ -3,11 +3,17 @@
 namespace CirclicalUser\Service\PasswordChecker;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
-use CirclicalUser\Provider\UserInterface;
 
 class PasswordNotChecked implements PasswordCheckerInterface
 {
-    public function isStrongPassword(string $clearPassword, ?UserInterface $user, array $options): bool
+    private $creationOptions;
+
+    public function __construct(array $creationOptions = null)
+    {
+        $this->creationOptions = $creationOptions;
+    }
+
+    public function isStrongPassword(string $clearPassword, array $userData): bool
     {
         return true;
     }

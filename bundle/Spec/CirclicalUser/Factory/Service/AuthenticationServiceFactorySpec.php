@@ -5,6 +5,7 @@ namespace Spec\CirclicalUser\Factory\Service;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Zxcvbn;
 use PhpSpec\ObjectBehavior;
@@ -12,6 +13,11 @@ use Zend\ServiceManager\ServiceManager;
 
 class AuthenticationServiceFactorySpec extends ObjectBehavior
 {
+    public function let(ServiceManager $serviceManager, PasswordCheckerInterface $interface)
+    {
+        $serviceManager->get(PasswordCheckerInterface::class)->willReturn($interface);
+    }
+
     public function it_is_initializable()
     {
         $this->shouldHaveType('CirclicalUser\Factory\Service\AuthenticationServiceFactory');
@@ -110,8 +116,5 @@ class AuthenticationServiceFactorySpec extends ObjectBehavior
 
         $service = $this->__invoke($serviceManager, AuthenticationService::class);
         $service->shouldBeAnInstanceOf(AuthenticationService::class);
-        $service->getPasswordChecker()->shouldBeAnInstanceOf(Zxcvbn::class);
-        $parameters = $service->getPasswordCheckerParameters();
-        $parameters->shouldHaveKeyWithValue('required_strength', 3);
     }
 }

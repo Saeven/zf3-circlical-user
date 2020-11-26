@@ -73,7 +73,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new PasswordNotChecked(),
-            [], // these are password checker options, typically defined in config
             true,
             true
         );
@@ -455,7 +454,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new Passwdqc(),
-            [],
             true,
             true
         );
@@ -480,7 +478,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new Passwdqc(),
-            [],
             true,
             true
         );
@@ -507,7 +504,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new Zxcvbn(),
-            [],
             true,
             true
         );
@@ -566,7 +562,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new PasswordNotChecked(),
-            [],
             true,
             true
         );
@@ -583,7 +578,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             false,
             new PasswordNotChecked(),
-            [],
             true,
             true
         );
