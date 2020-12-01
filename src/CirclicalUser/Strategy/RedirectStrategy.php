@@ -21,13 +21,13 @@ class RedirectStrategy implements DenyStrategyInterface
      * The controller that dispatch should invoke
      * @var string
      */
-    private $controllerClass;
+    protected $controllerClass;
 
     /**
      * This ^ controller's action
      * @var string
      */
-    private $action;
+    protected $action;
 
 
     public function __construct(string $controllerClass, string $action)
