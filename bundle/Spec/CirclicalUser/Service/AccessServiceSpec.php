@@ -25,20 +25,29 @@ use Prophecy\Argument;
 
 class AccessServiceSpec extends ObjectBehavior
 {
-    function let(RoleProviderInterface $roleMapper, GroupPermissionProviderInterface $groupRules, UserPermissionProviderInterface $userRules,
-                 User $user, User $admin, GroupPermissionInterface $rule1, GroupPermissionInterface $rule2, GroupPermissionInterface $rule3,
-                 UserPermissionInterface $userRule1, UserPermissionInterface $userRule2, UserPermissionInterface $userRule3,
-                 ResourceInterface $resourceObject, GroupPermissionInterface $groupActionRule, UserMapper $userMapper, User $someObject)
-    {
+    function let(
+        RoleProviderInterface $roleMapper,
+        GroupPermissionProviderInterface $groupRules,
+        UserPermissionProviderInterface $userRules,
+        User $user,
+        User $admin,
+        GroupPermissionInterface $rule1,
+        GroupPermissionInterface $rule2,
+        GroupPermissionInterface $rule3,
+        UserPermissionInterface $userRule1,
+        UserPermissionInterface $userRule2,
+        UserPermissionInterface $userRule3,
+        ResourceInterface $resourceObject,
+        GroupPermissionInterface $groupActionRule,
+        UserMapper $userMapper,
+        User $someObject
+    ) {
 
-        $userRole = new Role();
+        $userRole = new Role('user', null);
         $userRole->setId(1);
-        $userRole->setName('user');
 
-        $adminRole = new Role();
+        $adminRole = new Role('admin', $userRole);
         $adminRole->setId(2);
-        $adminRole->setName('admin');
-        $adminRole->setParent($userRole);
 
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
         $roleMapper->getRoleWithName(Argument::any())->willReturn(null);

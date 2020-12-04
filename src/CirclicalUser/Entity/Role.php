@@ -29,47 +29,38 @@ class Role implements RoleInterface
     private $name;
 
     /**
-     * @var Role
+     * @var RoleInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $parent;
 
+    public function __construct(string $name, ?RoleInterface $parent)
+    {
+        $this->name = $name;
+        $this->parent = $parent;
+    }
 
-    /**
-     * Get the id.
-     *
-     * @return int
-     */
+
     public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * Set the id.
-     *
-     * @param int $id
-     *
-     * @return void
+     * Probably shouldn't be used, but in case some folks have weird edge conditions, I'll leave it.
      */
-    public function setId($id)
+    public function setId(int $id): void
     {
-        $this->id = (int)$id;
+        $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -77,26 +68,21 @@ class Role implements RoleInterface
     /**
      * Get the parent role
      */
-    public function getParent()
+    public function getParent(): ?RoleInterface
     {
         return $this->parent;
     }
 
     /**
      * Set the parent role.
-     *
-     * @param Role $parent
-     *
-     * @return void
      */
-    public function setParent(Role $parent)
+    public function setParent(?RoleInterface $parent): void
     {
         $this->parent = $parent;
     }
 
     /**
      * Return all inherited roles, including the start role, in this to-root traversal.
-     * @return array
      */
     public function getInheritanceList(): array
     {
