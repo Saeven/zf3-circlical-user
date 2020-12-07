@@ -171,6 +171,25 @@ class AuthenticationService
         $this->identity = $user;
     }
 
+    /**
+     * Implemented for fringe cases where you need conditional behavior.  Recommend relying
+     * on the configuration files wherever possible.
+     */
+    public function setValidateFingerprint(bool $validateFingerprint): void
+    {
+        $this->validateFingerprint = $validateFingerprint;
+    }
+
+    /**
+     * Implemented for fringe cases where you need conditional behavior.  Recommend relying
+     * on the configuration files wherever possible.
+     */
+    public function setValidateIp(bool $validateIp): void
+    {
+        $this->validateIp = $validateIp;
+    }
+
+
     public function getPasswordChecker(): PasswordCheckerInterface
     {
         return $this->passwordChecker;
