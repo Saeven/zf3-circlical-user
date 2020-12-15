@@ -3,8 +3,8 @@
 namespace CirclicalUser\Factory;
 
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
 {

@@ -1,62 +1,63 @@
 {
-  "name": "saeven/zf3-circlical-user",
-  "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
-  "type": "library",
-  "license": "MPL-2.0",
-  "homepage": "https://github.com/Saeven/zf3-circlical-user",
-  "keywords": [
-    "user",
-    "zf3",
-    "user management",
-    "acl",
-    "rbac",
-    "bjyauthorize",
-    "authorization",
-    "auth"
-  ],
-  "authors": [
-    {
-      "name": "Alexandre Lemaire",
-      "email": "alemaire@circlical.com",
-      "homepage": "http://circlical.com/",
-      "role": "Paper Stapler"
+    "name": "saeven/zf3-circlical-user",
+    "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
+    "type": "library",
+    "license": "MPL-2.0",
+    "homepage": "https://github.com/Saeven/zf3-circlical-user",
+    "keywords": [
+        "user",
+        "zf3",
+        "user management",
+        "acl",
+        "rbac",
+        "bjyauthorize",
+        "authorization",
+        "auth"
+    ],
+    "authors": [
+        {
+            "name": "Alexandre Lemaire",
+            "email": "alemaire@circlical.com",
+            "homepage": "http://circlical.com/",
+            "role": "Paper Stapler"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "php": "^7.4.0 | ^8",
+        "laminas/laminas-eventmanager": "^3.0",
+        "laminas/laminas-servicemanager": "^3.0",
+        "laminas/laminas-mvc": "^3.0",
+        "laminas/laminas-console": "^2.6",
+        "laminas/laminas-view": "^2.8",
+        "laminas/laminas-http": "^2.5",
+        "doctrine/doctrine-orm-module": "^1.1||2.1.*",
+        "doctrine/doctrine-module": "^1.2||2.1.*",
+        "doctrine/orm": "^2.5||2.6.*",
+        "paragonie/halite": "^3.3",
+        "ramsey/uuid": "^3.5 | ^4",
+        "ramsey/uuid-doctrine": ">=1.5.0",
+        "laminas/laminas-validator": "2.*",
+        "laminas/laminas-dependency-plugin": "2.1.0"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "6.1.1",
+        "friends-of-phpspec/phpspec-code-coverage": "@stable",
+        "codacy/coverage": "^1.0",
+        "paragonie/passwdqc": "^0.2.0",
+        "bjeavons/zxcvbn-php": "1.1.0"
+    },
+    "suggest": {
+        "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
+        "bjeavons/zxcvbn-php": "Even better password checking!",
+        "laminas/laminas-diactoros": "Recommended to support middleware guards.",
+        "laminas/laminas-psr7bridge": "Recommended to support middleware guards.",
+        "laminas/laminas-stratigility": "Recommended to support middleware guards.",
+        "http-interop/http-middleware": "Recommended to support middleware guards."
+    },
+    "autoload": {
+        "psr-4": {
+            "CirclicalUser\\": "src/CirclicalUser"
+        }
     }
-  ],
-  "require": {
-    "ext-json": "*",
-    "php": "^7.2.0 | ^8",
-    "zendframework/zend-eventmanager": "^3.0",
-    "zendframework/zend-servicemanager": "^3.0",
-    "zendframework/zend-mvc": "^3.0",
-    "zendframework/zend-console": "^2.6",
-    "zendframework/zend-view": "^2.8",
-    "zendframework/zend-http": "^2.5",
-    "doctrine/doctrine-orm-module": "^1.1||2.1.*",
-    "doctrine/doctrine-module": "^1.2||2.1.*",
-    "doctrine/orm": "^2.5||2.6.*",
-    "paragonie/halite": "^3.3",
-    "ramsey/uuid": "^3.5 | ^4",
-    "ramsey/uuid-doctrine": ">=1.5.0",
-    "zendframework/zend-validator": "2.*"
-  },
-  "require-dev": {
-    "phpspec/phpspec": "6.1.1",
-    "friends-of-phpspec/phpspec-code-coverage": "@stable",
-    "codacy/coverage": "^1.0",
-    "paragonie/passwdqc": "^0.2.0",
-    "bjeavons/zxcvbn-php": "1.1.0"
-  },
-  "suggest": {
-    "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
-    "bjeavons/zxcvbn-php": "Even better password checking!",
-    "zendframework/zend-diactoros": "Recommended to support middleware guards.",
-    "zendframework/zend-psr7bridge": "Recommended to support middleware guards.",
-    "zendframework/zend-stratigility": "Recommended to support middleware guards.",
-    "http-interop/http-middleware": "Recommended to support middleware guards."
-  },
-  "autoload": {
-    "psr-4": {
-      "CirclicalUser\\": "src/CirclicalUser"
-    }
-  }
 }

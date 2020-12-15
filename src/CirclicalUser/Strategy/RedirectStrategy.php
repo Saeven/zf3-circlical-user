@@ -4,9 +4,9 @@ namespace CirclicalUser\Strategy;
 
 use CirclicalUser\Provider\DenyStrategyInterface;
 use CirclicalUser\Service\AccessService;
-use Zend\Http\Response;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
+use Laminas\Http\Response;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\RouteMatch;
 
 /**
  * Class RedirectStrategy
@@ -50,7 +50,7 @@ class RedirectStrategy implements DenyStrategyInterface
             ]));
             $event->setParam('authRedirect', true);
 
-            /** @var \Zend\Http\PhpEnvironment\Request $requestData */
+            /** @var \Laminas\Http\PhpEnvironment\Request $requestData */
             $requestData = $event->getRequest();
 
             if ($requestData->getServer('REQUEST_URI')) {

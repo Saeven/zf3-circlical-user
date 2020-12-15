@@ -7,7 +7,7 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Strategy\RedirectStrategy;
 use PhpSpec\Exception\Exception;
 use PhpSpec\ObjectBehavior;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AccessListenerFactorySpec extends ObjectBehavior
 {

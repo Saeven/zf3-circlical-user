@@ -3,7 +3,7 @@
 namespace CirclicalUser\View\Helper;
 
 use CirclicalUser\Service\AccessService;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class ControllerAccessViewHelper extends AbstractHelper
 {

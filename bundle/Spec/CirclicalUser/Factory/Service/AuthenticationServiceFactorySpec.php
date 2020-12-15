@@ -9,7 +9,7 @@ use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Service\PasswordChecker\Zxcvbn;
 use PhpSpec\ObjectBehavior;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AuthenticationServiceFactorySpec extends ObjectBehavior
 {

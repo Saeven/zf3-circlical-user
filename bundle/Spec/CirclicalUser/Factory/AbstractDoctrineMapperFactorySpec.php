@@ -5,7 +5,7 @@ namespace Spec\CirclicalUser\Factory;
 use CirclicalUser\Mapper\RoleMapper;
 use Doctrine\ORM\EntityManager;
 use PhpSpec\ObjectBehavior;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AbstractDoctrineMapperFactorySpec extends ObjectBehavior
 {

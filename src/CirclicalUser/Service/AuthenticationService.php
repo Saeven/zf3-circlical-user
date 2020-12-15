@@ -25,7 +25,7 @@ use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
-use Zend\Http\PhpEnvironment\RemoteAddress;
+use Laminas\Http\PhpEnvironment\RemoteAddress;
 
 
 /**
