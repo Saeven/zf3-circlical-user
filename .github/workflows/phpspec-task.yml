@@ -26,7 +26,7 @@ jobs:
       - name: Composer Install
         uses: php-actions/composer@v5
         with:
-          php-version: ${{ matrix.php-versions }}
+          php_version: ${{ matrix.php-versions }}
           dev: yes
           interaction: no
           args: --prefer-source
