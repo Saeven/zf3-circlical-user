@@ -3,7 +3,7 @@
 namespace CirclicalUser\Validator;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
-use Laminas\Validator\AbstractValidator;
+use Zend\Validator\AbstractValidator;
 
 class PasswordValidator extends AbstractValidator
 {

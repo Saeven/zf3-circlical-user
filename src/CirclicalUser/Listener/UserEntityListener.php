@@ -15,7 +15,7 @@ use CirclicalUser\Entity\UserPermission;
  */
 class UserEntityListener implements EventSubscriber
 {
-    const DEFAULT_ENTITY = 'CirclicalUser\Entity\User';
+    public const DEFAULT_ENTITY = 'CirclicalUser\Entity\User';
 
     private $userEntity;
 

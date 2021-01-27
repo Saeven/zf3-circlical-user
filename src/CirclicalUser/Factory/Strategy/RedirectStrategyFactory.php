@@ -3,7 +3,7 @@
 namespace CirclicalUser\Factory\Strategy;
 
 use CirclicalUser\Strategy\RedirectStrategy;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
 
 class RedirectStrategyFactory implements FactoryInterface
@@ -17,6 +17,5 @@ class RedirectStrategyFactory implements FactoryInterface
         $options = $config['circlical']['user']['deny_strategy']['options'];
 
         return new RedirectStrategy($options['controller'], $options['action']);
-
     }
 }

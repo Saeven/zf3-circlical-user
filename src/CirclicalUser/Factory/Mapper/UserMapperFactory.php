@@ -6,7 +6,7 @@ use CirclicalUser\Exception\ConfigurationException;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\UserInterface;
 use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class UserMapperFactory implements FactoryInterface
 {

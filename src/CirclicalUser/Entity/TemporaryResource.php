@@ -6,11 +6,11 @@ use CirclicalUser\Provider\ResourceInterface;
 
 class TemporaryResource implements ResourceInterface
 {
-    private $class;
+    private string $class;
 
-    private $id;
+    private string $id;
 
-    public function __construct($class, $id)
+    public function __construct(string $class, string $id)
     {
         $this->class = $class;
         $this->id = $id;
@@ -26,4 +26,3 @@ class TemporaryResource implements ResourceInterface
         return $this->id;
     }
 }
-

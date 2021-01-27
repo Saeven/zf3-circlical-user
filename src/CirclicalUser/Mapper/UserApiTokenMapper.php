@@ -5,7 +5,6 @@ namespace CirclicalUser\Mapper;
 use CirclicalUser\Entity\UserApiToken;
 use Ramsey\Uuid\Doctrine\UuidBinaryType;
 
-
 /**
  * Class UserApiTokenMapper
  *

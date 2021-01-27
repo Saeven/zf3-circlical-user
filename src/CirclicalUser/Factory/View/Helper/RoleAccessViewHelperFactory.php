@@ -4,7 +4,7 @@ namespace CirclicalUser\Factory\View\Helper;
 
 use CirclicalUser\Service\AccessService;
 use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\View\Helper\RoleAccessViewHelper;
 
 class RoleAccessViewHelperFactory implements FactoryInterface
@@ -16,4 +16,3 @@ class RoleAccessViewHelperFactory implements FactoryInterface
         );
     }
 }
-

@@ -3,13 +3,11 @@
 namespace CirclicalUser\Factory;
 
 use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
 {
-
-
     /**
      * Determine if we can create a service with name
      *
@@ -36,7 +34,7 @@ class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $mapper = new $requestedName;
+        $mapper = new $requestedName();
         $mapper->setEntityManager($container->get('doctrine.entitymanager.orm_default'));
 
         return $mapper;

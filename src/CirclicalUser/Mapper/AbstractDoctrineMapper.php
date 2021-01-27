@@ -60,6 +60,6 @@ abstract class AbstractDoctrineMapper
 
     public function getPrototype()
     {
-        return new $this->entityName;
+        return new $this->entityName();
     }
 }

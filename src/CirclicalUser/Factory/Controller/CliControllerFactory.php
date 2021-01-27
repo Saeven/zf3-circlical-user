@@ -9,7 +9,7 @@ use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Service\AccessService;
 use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class CliControllerFactory implements FactoryInterface
 {
@@ -18,10 +18,10 @@ class CliControllerFactory implements FactoryInterface
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
 
-        $userProvider = isset($userConfig['providers']['user']) ? $userConfig['providers']['user'] : UserMapper::class;
-        $roleProvider = isset($userConfig['providers']['role']) ? $userConfig['providers']['role'] : RoleMapper::class;
-        $groupRuleProvider = isset($userConfig['providers']['rule']['group']) ? $userConfig['providers']['rule']['group'] : GroupPermissionMapper::class;
-        $userRuleProvider = isset($userConfig['providers']['rule']['user']) ? $userConfig['providers']['rule']['user'] : UserPermissionMapper::class;
+        $userProvider = $userConfig['providers']['user'] ?? UserMapper::class;
+        $roleProvider = $userConfig['providers']['role'] ?? RoleMapper::class;
+        $groupRuleProvider = $userConfig['providers']['rule']['group'] ?? GroupPermissionMapper::class;
+        $userRuleProvider = $userConfig['providers']['rule']['user'] ?? UserPermissionMapper::class;
 
         return new CliController(
             $container->get($userProvider),

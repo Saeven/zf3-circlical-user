@@ -3,7 +3,7 @@
 namespace CirclicalUser\View\Helper;
 
 use CirclicalUser\Service\AccessService;
-use Laminas\View\Helper\AbstractHelper;
+use Zend\View\Helper\AbstractHelper;
 
 class RoleAccessViewHelper extends AbstractHelper
 {
@@ -33,4 +33,3 @@ class RoleAccessViewHelper extends AbstractHelper
         return false;
     }
 }
-

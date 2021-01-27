@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<ruleset name="PHP_CodeSniffer">
+
+    <description>PHPCS configuration file.</description>
+    <!-- check all files in the app directory, feel free to add more files with:
+    <file>FOLDER NAME</file>
+    -->
+    <file>module</file>
+
+    <!-- exclude our migrations directory from the violation check-->
+    <!-- <exclude-pattern></exclude-pattern> -->
+
+    <!-- ignore warnings and display ERRORS only -->
+    <!-- <arg value="np"/> -->
+
+    <!-- Our base rule: set to PSR12-->
+    <rule ref="PSR12"/>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="180"/>
+            <property name="absoluteLineLimit" value="180"/>
+        </properties>
+    </rule>
+
+</ruleset>

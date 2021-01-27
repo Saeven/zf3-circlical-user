@@ -8,5 +8,4 @@ class UnknownResourceTypeException extends \Exception
     {
         parent::__construct("Class $class does not implement ResourceInterface");
     }
-
 }

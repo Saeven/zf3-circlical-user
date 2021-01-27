@@ -20,5 +20,4 @@ interface UserProviderInterface
      * Get a user by ID
      */
     public function getUser($userId): ?UserInterface;
-
 }

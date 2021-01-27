@@ -53,7 +53,7 @@ class Authentication implements AuthenticationRecordInterface
 
 
     /**
-     * @var string
+     * @var \DateTime
      * @ORM\Column(type="datetime", nullable=true )
      */
     protected $reset_expiry;
@@ -136,35 +136,23 @@ class Authentication implements AuthenticationRecordInterface
         $this->session_key = base64_encode($sessionKey);
     }
 
-    /**
-     * @return string
-     */
-    public function getResetHash()
+    public function getResetHash(): string
     {
         return $this->reset_hash;
     }
 
-    /**
-     * @param string $reset_hash
-     */
-    public function setResetHash($reset_hash)
+    public function setResetHash(string $resetHash)
     {
-        $this->reset_hash = $reset_hash;
+        $this->reset_hash = $resetHash;
     }
 
-    /**
-     * @return string
-     */
-    public function getResetExpiry()
+    public function getResetExpiry(): \DateTime
     {
         return $this->reset_expiry;
     }
 
-    /**
-     * @param string $reset_expiry
-     */
-    public function setResetExpiry($reset_expiry)
+    public function setResetExpiry(\DateTime $dateTime): void
     {
-        $this->reset_expiry = $reset_expiry;
+        $this->reset_expiry = $dateTime;
     }
 }

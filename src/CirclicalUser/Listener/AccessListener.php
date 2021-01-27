@@ -5,12 +5,12 @@ namespace CirclicalUser\Listener;
 use Application\Controller\IndexController;
 use Application\Controller\LoginController;
 use CirclicalUser\Service\AccessService;
-use Laminas\EventManager\EventManagerInterface;
-use Laminas\EventManager\ListenerAggregateInterface;
-use Laminas\Http\Response;
-use Laminas\Mvc\MvcEvent;
-use Laminas\View\Model\JsonModel;
-use Laminas\View\Model\ViewModel;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\Http\Response;
+use Zend\Mvc\MvcEvent;
+use Zend\View\Model\JsonModel;
+use Zend\View\Model\ViewModel;
 
 class AccessListener implements ListenerAggregateInterface
 {
@@ -73,7 +73,6 @@ class AccessListener implements ListenerAggregateInterface
                 if (!$requiresAuthentication) {
                     return;
                 }
-
             } else {
                 throw new \LogicException('A controller and action, or middleware are required to verify access!');
             }
@@ -119,9 +118,7 @@ class AccessListener implements ListenerAggregateInterface
 
     public function onDispatchError(MvcEvent $event)
     {
-
         switch ($event->getError()) {
-
             case AccessService::ACCESS_DENIED:
                 $statusCode = 403;
                 break;

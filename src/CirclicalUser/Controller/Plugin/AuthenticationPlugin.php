@@ -10,7 +10,7 @@ use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
-use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class AuthenticationPlugin extends AbstractPlugin
 {
@@ -86,5 +86,4 @@ class AuthenticationPlugin extends AbstractPlugin
     {
         return $this->accessService->isAllowed($resource, $action);
     }
-
 }

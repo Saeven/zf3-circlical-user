@@ -12,7 +12,7 @@ use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
-use Laminas\ServiceManager\ServiceManager;
+use Zend\ServiceManager\ServiceManager;
 use CirclicalUser\Factory\Service\AccessServiceFactory;
 
 class AccessServiceFactorySpec extends ObjectBehavior

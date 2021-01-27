@@ -4,11 +4,10 @@ namespace CirclicalUser\Factory\Listener;
 
 use CirclicalUser\Listener\UserEntityListener;
 use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class UserEntityListenerFactory implements FactoryInterface
 {
-
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');

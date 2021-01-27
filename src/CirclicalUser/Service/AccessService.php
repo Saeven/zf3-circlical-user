@@ -2,14 +2,12 @@
 
 namespace CirclicalUser\Service;
 
-use CirclicalUser\Entity\Role;
 use CirclicalUser\Exception\ExistingAccessException;
 use CirclicalUser\Exception\GuardExpectedException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
 use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
-use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\GuardConfigurationException;
@@ -20,7 +18,6 @@ use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Provider\UserProviderInterface;
-
 
 class AccessService
 {
@@ -36,7 +33,6 @@ class AccessService
     private GroupPermissionProviderInterface $groupPermissions;
     private UserPermissionProviderInterface $userPermissions;
     private ?RoleInterface $superAdminRole;
-
 
     /**
      * The AccessService governs permissions around roles and guards.
@@ -78,7 +74,6 @@ class AccessService
                     }
 
                     if (isset($controllerConfig['actions'])) {
-
                         if (!\is_array($controllerConfig['actions'])) {
                             throw new GuardConfigurationException($controllerName, 'the "actions" setting must be an array');
                         }
@@ -500,7 +495,6 @@ class AccessService
         } else {
             $matchedPermission->addAction($action);
             $this->groupPermissions->update($matchedPermission);
-
         }
     }
 
@@ -571,5 +565,4 @@ class AccessService
         $resourceRule->removeAction($action);
         $this->userPermissions->update($resourceRule);
     }
-
 }

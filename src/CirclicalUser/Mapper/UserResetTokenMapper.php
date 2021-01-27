@@ -4,10 +4,8 @@ namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
-use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
-
 
 /**
  * Class UserResetTokenMapper
@@ -67,10 +65,12 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
             ->set('r.status', UserResetTokenInterface::STATUS_INVALID)
             ->where('r.authentication = :authentication')
             ->andWhere('r.status = :status_unused')
-            ->setParameters([
-                'authentication' => $authenticationRecord,
-                'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
-            ])
+            ->setParameters(
+                [
+                    'authentication' => $authenticationRecord,
+                    'status_unused' => UserResetTokenInterface::STATUS_UNUSED,
+                ]
+            )
             ->getQuery();
 
         $query->execute();
