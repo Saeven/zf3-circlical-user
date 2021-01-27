@@ -24,25 +24,18 @@ use CirclicalUser\Provider\UserProviderInterface;
 
 class AccessService
 {
-    const ACCESS_DENIED = 'ACL_ACCESS_DENIED';
+    public const ACCESS_DENIED = 'ACL_ACCESS_DENIED';
+    public const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
 
-    const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
-
-    private $user;
-
-    private $userProvider;
-
-    private $controllerDefaults;
-
-    private $actions;
-
-    private $userRoles;
-
-    private $roleProvider;
-
-    private $groupPermissions;
-
-    private $userPermissions;
+    private ?User $user;
+    private UserProviderInterface $userProvider;
+    private array $controllerDefaults;
+    private array $actions;
+    private ?array $userRoles;
+    private RoleProviderInterface $roleProvider;
+    private GroupPermissionProviderInterface $groupPermissions;
+    private UserPermissionProviderInterface $userPermissions;
+    private ?RoleInterface $superAdminRole;
 
 
     /**
@@ -53,6 +46,7 @@ class AccessService
      * @param GroupPermissionProviderInterface $groupPermissionProvider
      * @param UserPermissionProviderInterface  $userPermissionProvider
      * @param UserProviderInterface            $userProvider
+     * @param ?RoleInterface                   $superAdminRole Defined through config, a role that is given all access
      *
      * @throws GuardConfigurationException
      */
@@ -61,7 +55,8 @@ class AccessService
         RoleProviderInterface $roleProvider,
         GroupPermissionProviderInterface $groupPermissionProvider,
         UserPermissionProviderInterface $userPermissionProvider,
-        UserProviderInterface $userProvider
+        UserProviderInterface $userProvider,
+        ?RoleInterface $superAdminRole
     ) {
         $this->userProvider = $userProvider;
         $this->roleProvider = $roleProvider;
@@ -69,6 +64,8 @@ class AccessService
         $this->userPermissions = $userPermissionProvider;
         $this->controllerDefaults = [];
         $this->actions = [];
+        $this->userRoles = null;
+        $this->user = null;
 
         foreach ($guardConfiguration as $module => $config) {
             if (isset($config['controllers'])) {
@@ -96,12 +93,13 @@ class AccessService
                 }
             }
         }
+        $this->superAdminRole = $superAdminRole;
     }
 
     public function setUser(User $user): void
     {
         if (!$user->getId()) {
-            throw new UserRequiredException();
+            throw new UserRequiredException("An user object with a persisted ID is required for access management.");
         }
         $this->user = $user;
     }
@@ -111,15 +109,22 @@ class AccessService
         return $this->user !== null;
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->user && $this->superAdminRole && $this->user->hasRole($this->superAdminRole);
+    }
+
     /**
      * Check the guard configuration to see if the current user (or guest) can access a specific controller.
-     * Critical distinction: this method does not invoke action rules, only roles.
+     * Critical distinction: this method does not guard controller-action rules, only roles at the controller-level.
+     * @see AccessService::canAccessAction()
      */
     public function canAccessController(string $controllerName): bool
     {
         if (!isset($this->controllerDefaults[$controllerName])) {
             return false;
         }
+
         $requiredRoles = $this->controllerDefaults[$controllerName];
         if (!$requiredRoles) {
             return true;
@@ -127,6 +132,10 @@ class AccessService
 
         if (!$this->user) {
             return false;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return true;
         }
 
         foreach ($requiredRoles as $role) {
@@ -144,6 +153,10 @@ class AccessService
      */
     public function canAccessAction(string $controllerName, string $action): bool
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         if (isset($this->actions[$controllerName][$action])) {
             if (!$this->actions[$controllerName][$action]) {
                 return true;
@@ -166,6 +179,9 @@ class AccessService
      * Cursory check to see if authentication is required for a controller/action pair.  Assumes
      * that a guard exists, for the controller/action being queried.  Note that this method qualifies
      * the route, and not the user & route relationship.
+     *
+     * Being a super-admin does not excuse you from having to define guards, the definitions should be
+     * complete.
      *
      * @throws GuardExpectedException
      */
@@ -191,10 +207,14 @@ class AccessService
     }
 
     /**
-     * Check if the current user has a given role.
+     * Check if the current user has a given role, considering that roles are **hierarchical**.  This is not the same
+     * as checking of a user has a specific role attached to them.
      *
-     * @return bool True if the role fits, false if there is no user or the role is not accessible in the hierarchy
-     *              of existing user roles.
+     * If this user is 'admin', and 'admin' has 'learner' as a parent role, then this method will return true for
+     * $user->hasRoleWithName('learner').
+     *
+     * @return bool True if the role 'fits' given the existing role hierarchy, otherwise false if there is no user or the
+     *              role is not accessible in the hierarchy of existing user roles.
      */
     public function hasRoleWithName(string $role): bool
     {
@@ -329,7 +349,8 @@ class AccessService
      *
      * This method expects that a user has been set, e.g., by the Factory.
      *
-     * A single permission is returned, since the user can only have one permission set attributed to a given Resource
+     * A single permission is returned, since the user can only have one permission set attributed to a given Resource.  A
+     * permission object is indexed to a multitude of actions.  So in the example above, the UserPermissionInterface is for 'servers'.
      *
      * @throws \Exception
      * @throws UnknownResourceTypeException
@@ -367,23 +388,21 @@ class AccessService
      */
     public function isAllowed($resource, string $action): bool
     {
-        $groupPermissions = $this->getGroupPermissions($resource);
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
 
-        // check roles first
-        foreach ($groupPermissions as $groupPermission) {
+        // check any permissions granted by group membership first
+        foreach ($this->getGroupPermissions($resource) as $groupPermission) {
             if ($groupPermission->can($action) && $this->hasRole($groupPermission->getRole())) {
                 return true;
             }
         }
 
-        if ($this->user !== null) {
-            return $this->isAllowedUser($resource, $action);
-        }
-
-        return false;
+        return $this->isAllowedUser($resource, $action);
     }
 
-    public function isAllowedByResourceClass($resourceClass, $action): bool
+    public function isAllowedByResourceClass(string $resourceClass, string $action): bool
     {
         $actions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
         foreach ($actions as $groupPermission) {
@@ -407,6 +426,14 @@ class AccessService
      */
     public function isAllowedUser($resource, string $action): bool
     {
+        if (!$this->user) {
+            return false;
+        }
+
+        if ($this->superAdminRole && $this->user->hasRole($this->superAdminRole)) {
+            return true; // superadmins can do anything;
+        }
+
         $permission = $this->getUserPermission($resource);
 
         return $permission && $permission->can($action);

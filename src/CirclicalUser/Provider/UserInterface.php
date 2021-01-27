@@ -11,4 +11,8 @@ interface UserInterface
     public function getEmail();
 
     public function addRole(RoleInterface $role);
+
+    public function hasRoleWithName(string $roleName): bool;
+
+    public function hasRole(RoleInterface $roleName): bool;
 }

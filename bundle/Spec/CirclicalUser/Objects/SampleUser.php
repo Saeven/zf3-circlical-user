@@ -7,10 +7,14 @@ use CirclicalUser\Provider\UserInterface;
 
 class SampleUser implements UserInterface
 {
-    private $id;
-    private $roles;
-    private $email;
-    private $name;
+    private int $id;
+
+    /**
+     * @var RoleInterface[]
+     */
+    private array $roles;
+    private string $email;
+    private string $name;
 
     public function __construct(int $id, array $roles, string $email, string $name)
     {
@@ -43,6 +47,28 @@ class SampleUser implements UserInterface
     public function addRole(RoleInterface $role)
     {
         $this->roles[] = $role;
+    }
+
+    public function hasRole(RoleInterface $role): bool
+    {
+        foreach ($this->roles as $userRole) {
+            if ($userRole === $role) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasRoleWithName(string $roleName): bool
+    {
+        foreach ($this->roles as $userRole) {
+            if ($userRole->getName() === $roleName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

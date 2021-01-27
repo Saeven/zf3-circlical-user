@@ -2,10 +2,12 @@
 
 namespace CirclicalUser\Factory\Service;
 
+use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Mapper\GroupPermissionMapper;
 use CirclicalUser\Mapper\RoleMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;
+use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Service\AccessService;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -23,17 +25,32 @@ class AccessServiceFactory implements FactoryInterface
         }
 
         $guards = $userConfig['guards'] ?? [];
-        $userProvider = isset($userConfig['providers']['user']) ? $userConfig['providers']['user'] : UserMapper::class;
-        $roleProvider = isset($userConfig['providers']['role']) ? $userConfig['providers']['role'] : RoleMapper::class;
-        $groupRuleProvider = isset($userConfig['providers']['rule']['group']) ? $userConfig['providers']['rule']['group'] : GroupPermissionMapper::class;
-        $userRuleProvider = isset($userConfig['providers']['rule']['user']) ? $userConfig['providers']['rule']['user'] : UserPermissionMapper::class;
+        $userProviderClass = $userConfig['providers']['user'] ?? UserMapper::class;
+
+        /** @var RoleProviderInterface $roleProvider */
+        $roleProviderClass = $userConfig['providers']['role'] ?? RoleMapper::class;
+        $roleProvider = $container->get($roleProviderClass);
+        $groupRuleProviderClass = $userConfig['providers']['rule']['group'] ?? GroupPermissionMapper::class;
+        $userRuleProviderClass = $userConfig['providers']['rule']['user'] ?? UserPermissionMapper::class;
+
+        $superAdminRole = null;
+        if (!empty($userConfig['access']['superadmin']['role_name'])) {
+            $superAdminRole = $roleProvider->getRoleWithName($userConfig['access']['superadmin']['role_name']);
+            if ($userConfig['access']['superadmin']['throw_exception_when_missing'] ?? false) {
+                throw new InvalidRoleException(
+                    'A super-admin role was configured in the application files, yet could not be found in the database. Please create this role, or disable exceptions in config.'
+                );
+            }
+        }
+
 
         $accessService = new AccessService(
             $guards,
-            $container->get($roleProvider),
-            $container->get($groupRuleProvider),
-            $container->get($userRuleProvider),
-            $container->get($userProvider)
+            $roleProvider,
+            $container->get($groupRuleProviderClass),
+            $container->get($userRuleProviderClass),
+            $container->get($userProviderClass),
+            $superAdminRole
         );
 
         $authenticationService = $container->get(AuthenticationService::class);
