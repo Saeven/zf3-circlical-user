@@ -1,0 +1,44 @@
+name: PHPSpec-Tests
+
+on: push
+
+jobs:
+  phpspec-tests:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ ubuntu-18.04 ]
+        php-versions: [ '7.4' ]
+    name: Evaluate Behavior, ${{ matrix.php-versions }} on ${{ matrix.operating-system }}
+    steps:
+      # Get the source code
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Prepare PHP
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: xdebug
+        env:
+          fail-fast: false
+      # Composer Install
+      - name: Composer Install
+        uses: php-actions/composer@v5
+        with:
+          php_version: ${{ matrix.php-versions }}
+          dev: yes
+          interaction: no
+          args: --prefer-source
+          version: 2
+      # Execute PHPSpec
+      - name: Execute PHPSpec
+        run: XDEBUG_MODE=coverage vendor/bin/phpspec --config=phpspec.yml run
+      # Push Coverage
+      - name: Push Coverage
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: vendor/bin/codacycoverage clover build/coverage.xml
+
+
+
