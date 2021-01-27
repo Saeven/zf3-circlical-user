@@ -7,7 +7,7 @@ use Zend\View\Helper\AbstractHelper;
 
 class RoleAccessViewHelper extends AbstractHelper
 {
-    private $accessService;
+    private AccessService $accessService;
 
     public function __construct(AccessService $accessService)
     {
@@ -15,7 +15,7 @@ class RoleAccessViewHelper extends AbstractHelper
     }
 
     /**
-     * hasRole
+     * Invoked via 'hasRole' from a template
      */
     public function __invoke($roleNameOrList): bool
     {

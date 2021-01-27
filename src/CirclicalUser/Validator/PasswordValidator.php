@@ -13,8 +13,9 @@ class PasswordValidator extends AbstractValidator
         self::WEAK_PASSWORD => 'That password is common, or could be easily guessed or generated. Please create a stronger password.',
     ];
 
-    private $passwordChecker;
-    private $options;
+    private PasswordCheckerInterface $passwordChecker;
+
+    private array $options;
 
     public function __construct(PasswordCheckerInterface $passwordChecker, array $options = null)
     {

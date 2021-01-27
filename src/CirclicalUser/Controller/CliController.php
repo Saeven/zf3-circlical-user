@@ -15,7 +15,7 @@ use Zend\Mvc\Controller\AbstractActionController;
 
 class CliController extends AbstractActionController
 {
-    private UserMapper $userMapper;
+    private UserProviderInterface $userMapper;
     private GroupPermissionProviderInterface $groupPermissionMapper;
     private UserPermissionProviderInterface $userPermissionMapper;
     private AccessService $accessService;

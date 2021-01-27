@@ -27,8 +27,9 @@ class AccessServiceFactory implements FactoryInterface
         $guards = $userConfig['guards'] ?? [];
         $userProviderClass = $userConfig['providers']['user'] ?? UserMapper::class;
 
-        /** @var RoleProviderInterface $roleProvider */
         $roleProviderClass = $userConfig['providers']['role'] ?? RoleMapper::class;
+
+        /** @var RoleProviderInterface $roleProvider */
         $roleProvider = $container->get($roleProviderClass);
         $groupRuleProviderClass = $userConfig['providers']['rule']['group'] ?? GroupPermissionMapper::class;
         $userRuleProviderClass = $userConfig['providers']['rule']['user'] ?? UserPermissionMapper::class;
