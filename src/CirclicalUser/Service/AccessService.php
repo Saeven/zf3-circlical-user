@@ -6,6 +6,7 @@ use CirclicalUser\Exception\ExistingAccessException;
 use CirclicalUser\Exception\GuardExpectedException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
+use CirclicalUser\Exception\PrivilegeEscalationException;
 use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
@@ -109,6 +110,11 @@ class AccessService
         return $this->user && $this->superAdminRole && $this->user->hasRole($this->superAdminRole);
     }
 
+    public function getSuperAdminRole(): ?RoleInterface
+    {
+        return $this->superAdminRole;
+    }
+
     /**
      * Check the guard configuration to see if the current user (or guest) can access a specific controller.
      * Critical distinction: this method does not guard controller-action rules, only roles at the controller-level.
@@ -168,7 +174,6 @@ class AccessService
 
         return $this->canAccessController($controllerName);
     }
-
 
     /**
      * Cursory check to see if authentication is required for a controller/action pair.  Assumes
@@ -263,6 +268,10 @@ class AccessService
 
         if (!$role) {
             throw new InvalidRoleException($roleName);
+        }
+
+        if ($role === $this->superAdminRole) {
+            throw new PrivilegeEscalationException();
         }
 
         $this->user->addRole($role);
