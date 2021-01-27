@@ -74,7 +74,7 @@ class AccessListener implements ListenerAggregateInterface
                     return;
                 }
             } else {
-                throw new \LogicException('A controller and action, or middleware are required to verify access!');
+                throw new \LogicException('A controller-action pair or middleware are required to verify access!');
             }
         }
 
