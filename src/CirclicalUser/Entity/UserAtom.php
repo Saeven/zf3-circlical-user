@@ -83,5 +83,4 @@ class UserAtom
     {
         $this->value = $value;
     }
-
 }

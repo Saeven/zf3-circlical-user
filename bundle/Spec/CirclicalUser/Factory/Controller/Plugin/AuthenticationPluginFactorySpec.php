@@ -6,14 +6,14 @@ use CirclicalUser\Controller\Plugin\AuthenticationPlugin;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use PhpSpec\ObjectBehavior;
-use Zend\Mvc\Controller\PluginManager;
 use Zend\ServiceManager\ServiceManager;
+use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
 
 class AuthenticationPluginFactorySpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
-        $this->shouldHaveType('CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory');
+        $this->shouldHaveType(AuthenticationPluginFactory::class);
     }
 
     function it_supports_factory_interface(ServiceManager $serviceLocator, AuthenticationService $authenticationService, AccessService $accessService)

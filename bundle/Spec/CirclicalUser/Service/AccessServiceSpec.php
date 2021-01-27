@@ -25,6 +25,8 @@ use Prophecy\Argument;
 
 class AccessServiceSpec extends ObjectBehavior
 {
+    private $superAdminRole;
+
     function let(
         RoleProviderInterface $roleMapper,
         GroupPermissionProviderInterface $groupRules,
@@ -40,7 +42,8 @@ class AccessServiceSpec extends ObjectBehavior
         ResourceInterface $resourceObject,
         GroupPermissionInterface $groupActionRule,
         UserMapper $userMapper,
-        User $someObject
+        User $someObject,
+        User $superAdmin
     ) {
 
         $userRole = new Role('user', null);
@@ -49,10 +52,14 @@ class AccessServiceSpec extends ObjectBehavior
         $adminRole = new Role('admin', $userRole);
         $adminRole->setId(2);
 
+        $this->superAdminRole = new Role('superadmin', null);
+        $this->superAdminRole->setId(3);
+
         $roleMapper->getAllRoles()->willReturn([$userRole, $adminRole]);
         $roleMapper->getRoleWithName(Argument::any())->willReturn(null);
         $roleMapper->getRoleWithName('admin')->willReturn($adminRole);
         $roleMapper->getRoleWithName('user')->willReturn($userRole);
+        $roleMapper->getRoleWithName('superadmin')->willReturn($this->superAdminRole);
 
 
         /*
@@ -130,7 +137,6 @@ class AccessServiceSpec extends ObjectBehavior
         // to test a case, where a user implementation returns complete garbage
         $userRules->getUserPermission('badresult', $user)->willReturn($someObject);
 
-
         $groupRules->getPermissions('beer')->willReturn([$rule1, $rule2, $rule3]);
         $groupRules->getResourcePermissions($resourceObject)->willReturn([$groupActionRule]);
         $groupRules->getResourcePermissionsByClass('ResourceObject')->willReturn([$groupActionRule]);
@@ -170,7 +176,7 @@ class AccessServiceSpec extends ObjectBehavior
             ],
         ];
 
-        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules, $userMapper);
+        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules, $userMapper, null);
 
         $user->getId()->willReturn(100);
         $user->getRoles()->willReturn([$userRole]);
@@ -178,6 +184,10 @@ class AccessServiceSpec extends ObjectBehavior
 
         $admin->getId()->willReturn(101);
         $admin->getRoles()->willReturn([$adminRole]);
+
+        $superAdmin->getId()->willReturn(102);
+        $superAdmin->getRoles()->willReturn([$this->superAdminRole, $userRole]);
+        $superAdmin->hasRole($this->superAdminRole)->willReturn(true);
     }
 
     function it_is_initializable()
@@ -200,7 +210,7 @@ class AccessServiceSpec extends ObjectBehavior
         $groupMapper = new GroupPermissionMapper();
         $userPermissionMapper = new UserPermissionMapper();
         $userMapper = new UserMapper('Foo');
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper, null]);
     }
 
     function it_requires_an_array_as_action_config()
@@ -219,7 +229,7 @@ class AccessServiceSpec extends ObjectBehavior
         $groupMapper = new GroupPermissionMapper();
         $userPermissionMapper = new UserPermissionMapper();
         $userMapper = new UserMapper('Foo');
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper, null]);
     }
 
     function it_requires_an_array_as_action_roles_config()
@@ -240,7 +250,7 @@ class AccessServiceSpec extends ObjectBehavior
         $groupMapper = new GroupPermissionMapper();
         $userPermissionMapper = new UserPermissionMapper();
         $userMapper = new UserMapper('Foo');
-        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper]);
+        $this->shouldThrow(GuardConfigurationException::class)->during('__construct', [$config, $roleMapper, $groupMapper, $userPermissionMapper, $userMapper, null]);
     }
 
     function it_accepts_a_user_with_an_id(User $testUser)
@@ -255,7 +265,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->shouldThrow(UserRequiredException::class)->during('setUser', [$noUser]);
     }
 
-    function it_compiles_roles_properly_1($admin)
+    function it_compiles_roles_properly_1(User $admin)
     {
         $this->setUser($admin);
         $roles = $this->getRoles();
@@ -263,7 +273,7 @@ class AccessServiceSpec extends ObjectBehavior
         $roles->shouldContain('user');
     }
 
-    function it_adds_roles($user)
+    function it_adds_roles(User $user)
     {
         $this->setUser($user);
         $this->hasRoleWithName('admin')->shouldBe(false);
@@ -271,7 +281,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->hasRoleWithName('admin')->shouldBe(true);
     }
 
-    function it_compiles_roles_properly_2($user)
+    function it_compiles_roles_properly_2(User $user)
     {
         $this->setUser($user);
         $roles = $this->getRoles();
@@ -283,20 +293,20 @@ class AccessServiceSpec extends ObjectBehavior
         $this->shouldThrow(UserRequiredException::class)->during('addRoleByName', ['admin']);
     }
 
-    function it_bails_if_you_try_to_add_roles_already_added($admin, $roleMapper)
+    function it_bails_if_you_try_to_add_roles_already_added(User $admin, $roleMapper)
     {
         $this->setUser($admin);
         $roleMapper->getRoleWithName('admin')->shouldNotBeCalled();
         $this->addRoleByName('admin');
     }
 
-    function it_bails_if_you_try_to_add_roles_that_dont_exist($admin)
+    function it_bails_if_you_try_to_add_roles_that_dont_exist(User $admin)
     {
         $this->setUser($admin);
         $this->shouldThrow(InvalidRoleException::class)->during('addRoleByName', ['whatisthis']);
     }
 
-    function it_performs_user_module_access($user)
+    function it_performs_user_module_access(User $user)
     {
         $this->setUser($user);
         $this->canAccessController('Foo\Controller\ThisController')->shouldBe(true);
@@ -307,7 +317,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->canAccessController('Foo\Controller\ThisController')->shouldBe(false);
     }
 
-    function it_rejects_module_access_with_insufficient_rights($user)
+    function it_rejects_module_access_with_insufficient_rights(User $user)
     {
         $this->setUser($user);
         $this->canAccessController('Foo\Controller\AdminController')->shouldBe(false);
@@ -323,7 +333,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->canAccessController('Foo\Controller\FreeForAll')->shouldBe(true);
     }
 
-    function it_permits_relaxed_actions($user)
+    function it_permits_relaxed_actions(User $user)
     {
         $this->setUser($user);
         $this->canAccessAction('Foo\Controller\AdminController', 'oddity')->shouldBe(true);
@@ -344,13 +354,13 @@ class AccessServiceSpec extends ObjectBehavior
         $this->shouldThrow(GuardExpectedException::class)->during('requiresAuthentication', ['foo', 'bar']);
     }
 
-    function it_permits_rigorous_actions($admin)
+    function it_permits_rigorous_actions(User $admin)
     {
         $this->setUser($admin);
         $this->canAccessAction('Foo\Controller\ThisController', 'userList')->shouldBe(true);
     }
 
-    function it_gates_rigorous_actions($user)
+    function it_gates_rigorous_actions(User $user)
     {
         $this->setUser($user);
         $this->canAccessAction('Foo\Controller\ThisController', 'userList')->shouldBe(false);
@@ -367,38 +377,38 @@ class AccessServiceSpec extends ObjectBehavior
         $this->getRoles()->shouldHaveCount(0);
     }
 
-    function it_returns_roles_when_users_are_set($admin)
+    function it_returns_roles_when_users_are_set(User $admin)
     {
         $this->setUser($admin);
         $this->getRoles()->shouldBeArray();
         $this->getRoles()->shouldHaveCount(2);
     }
 
-    function it_accepts_user_verbs($user)
+    function it_accepts_user_verbs(User $user)
     {
         $this->setUser($user);
         $this->isAllowed('beer', 'consume')->shouldBe(true);
     }
 
-    function it_declines_user_verbs($user)
+    function it_declines_user_verbs(User $user)
     {
         $this->setUser($user);
         $this->isAllowed('beer', 'pourout')->shouldBe(false);
     }
 
-    function it_accepts_hierarchical_user_verbs($admin)
+    function it_accepts_hierarchical_user_verbs(User $admin)
     {
         $this->setUser($admin);
         $this->isAllowed('beer', 'consume')->shouldBe(true);
     }
 
-    function it_works_in_a_multiverb_situation_a($admin)
+    function it_works_in_a_multiverb_situation_a(User $admin)
     {
         $this->setUser($admin);
         $this->isAllowed('beer', 'pour')->shouldBe(true);
     }
 
-    function it_uses_user_exceptions($admin)
+    function it_uses_user_exceptions(User $admin)
     {
         $this->setUser($admin);
         $this->isAllowed('beer', 'buy')->shouldBe(true);
@@ -409,19 +419,19 @@ class AccessServiceSpec extends ObjectBehavior
         $this->isAllowed('beer', 'consume')->shouldBe(false);
     }
 
-    function it_declines_nonexistent_verbs($user)
+    function it_declines_nonexistent_verbs(User $user)
     {
         $this->setUser($user);
         $this->isAllowed('beer', 'pourout')->shouldBe(false);
     }
 
-    function it_defers_to_controllers_when_actions_are_not_configured($user)
+    function it_defers_to_controllers_when_actions_are_not_configured(User $user)
     {
         $this->setUser($user);
         $this->canAccessAction('Foo\Controller\ThisController', 'notConfigured')->shouldBe(true);
     }
 
-    function it_can_grant_users_access_to_strings($user, $userRules, $userRule2)
+    function it_can_grant_users_access_to_strings(User $user, $userRules, $userRule2)
     {
         $this->setUser($user);
         $this->isAllowed('beer', 'buy')->shouldBe(false);
@@ -430,14 +440,14 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantUserAccess('beer', 'buy');
     }
 
-    function it_can_grant_users_access_to_new_resources($user, $resourceObject)
+    function it_can_grant_users_access_to_new_resources(User $user, ResourceInterface $resourceObject)
     {
         $this->setUser($user);
         $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
         $this->grantUserAccess($resourceObject, 'foo');
     }
 
-    function it_can_grant_users_access_to_existing_resources($user, $resourceObject)
+    function it_can_grant_users_access_to_existing_resources(User $user, ResourceInterface $resourceObject)
     {
         $this->setUser($user);
         $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
@@ -454,26 +464,26 @@ class AccessServiceSpec extends ObjectBehavior
         $this->shouldThrow(UserRequiredException::class)->during('getUserPermission', [null]);
     }
 
-    function it_throws_exceptions_when_user_actions_are_requested_for_bad_resources($user)
+    function it_throws_exceptions_when_user_actions_are_requested_for_bad_resources(User $user)
     {
         $this->setUser($user);
         $this->shouldThrow(UnknownResourceTypeException::class)->during('getUserPermission', [null]);
     }
 
-    function it_returns_allowed_rules_by_class($user, $groupActionRule)
+    function it_returns_allowed_rules_by_class(User $user, $groupActionRule)
     {
         // 1234, is the ID of the sole mocked object whose class is ResourceObject
         $this->setUser($user);
         $this->listAllowedByClass('ResourceObject')->shouldContain("1234");
     }
 
-    function it_can_check_actions_by_resource_class($user)
+    function it_can_check_actions_by_resource_class(User $user)
     {
         $this->setUser($user);
         $this->isAllowedByResourceClass('ResourceObject', 'bar')->shouldBe(true);
     }
 
-    function it_can_check_declined_actions_by_resource_class($user)
+    function it_can_check_declined_actions_by_resource_class(User $user)
     {
         $this->setUser($user);
         $this->isAllowedByResourceClass('ResourceObject', 'fizzbuzz')->shouldBe(false);
@@ -482,7 +492,7 @@ class AccessServiceSpec extends ObjectBehavior
     /**
      * Give a role, access to a resource
      */
-    function it_can_grant_access_to_roles_by_appending_actions($resourceObject, $groupRules, $groupActionRule)
+    function it_can_grant_access_to_roles_by_appending_actions(ResourceInterface $resourceObject, $groupRules, $groupActionRule)
     {
         $role = $this->getRoleWithName('user');
         $groupRules->update(Argument::any())->shouldBeCalled();
@@ -490,7 +500,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantRoleAccess($role, $resourceObject, 'foo');
     }
 
-    function it_wont_grant_permissions_we_already_have($resourceObject, $groupRules)
+    function it_wont_grant_permissions_we_already_have(ResourceInterface $resourceObject, $groupRules)
     {
         $role = $this->getRoleWithName('user');
         $this->shouldThrow(ExistingAccessException::class)->during('grantRoleAccess', [$role, $resourceObject, 'bar']);
@@ -511,7 +521,7 @@ class AccessServiceSpec extends ObjectBehavior
         $this->requiresAuthentication('Foo\Controller\FreeForAll', 'bar')->shouldBe(false);
     }
 
-    function it_reports_that_it_has_users($user)
+    function it_reports_that_it_has_users(User $user)
     {
         $this->setUser($user);
         $this->hasUser()->shouldBe(true);
@@ -522,4 +532,58 @@ class AccessServiceSpec extends ObjectBehavior
         $this->hasUser()->shouldBe(false);
     }
 
+    /**
+     * Superadmin tests
+     */
+    function it_understands_super_admin_rights(
+        RoleProviderInterface $roleMapper,
+        GroupPermissionProviderInterface $groupRules,
+        UserPermissionProviderInterface $userRules,
+        UserMapper $userMapper,
+        User $superAdmin,
+        User $otherUser
+    ) {
+        $config = [
+            'Foo' => [
+                'controllers' => [
+                    'Foo\Controller\ThisController' => [
+                        'default' => ['user'],
+                        'actions' => [
+                            'index' => ['user'],
+                            'userList' => ['admin'],
+                        ],
+                    ],
+                    'Foo\Controller\AdminController' => [
+                        'default' => ['admin'],
+                        'actions' => [
+                            'oddity' => ['user'],
+                            'superodd' => [],
+                        ],
+                    ],
+                    'Foo\Controller\FreeForAll' => [
+                        'default' => [],
+                        'actions' => [
+                            'get-name' => ['user'],
+                        ],
+                    ],
+                    'Foo\Controller\IndexController' => [
+                        'default' => ['user'],
+                        'actions' => [
+                            'home' => [],
+                            'login' => [],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $this->beConstructedWith($config, $roleMapper, $groupRules, $userRules, $userMapper, $this->superAdminRole);
+
+        $this->setUser($superAdmin);
+        $this->isAllowed('beer', 'fizzbuzz')->shouldBe(true);
+
+        $otherUser->getId()->willReturn(500);
+        $otherUser->hasRole($this->superAdminRole)->willReturn(false);
+        $this->setUser($otherUser);
+        $this->isAllowed('beer', 'fizzbuzz')->shouldBe(false);
+    }
 }

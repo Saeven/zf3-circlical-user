@@ -4,6 +4,26 @@ return [
     'circlical' => [
         'user' => [
 
+            /**
+             * Configuration settings for the access service
+             */
+            'access' => [
+
+                'superadmin' => [
+
+                    /**
+                     * Superadmin role name, will be sought in the DB when configured.  Please ensure that your
+                     * Role entity with this name exists prior to configuration.
+                     */
+                    'role_name' => null,
+
+                    /**
+                     * If the role was named in config, yet the entity was missing, do we crash and burn?
+                     */
+                    'throw_exception_when_missing' => false,
+                ],
+            ],
+
 
             /*
              * If you are using Doctrine, you simply to specify the Entity you plan to use. It'll get substituted into
@@ -80,7 +100,7 @@ return [
              * This user module provides a simple 'Redirect' strategy, but you can also roll your own
              */
 
-             'deny_strategy' => [
+            'deny_strategy' => [
 
                 /*
                  * The strategy provider, that implements CirclicalUser\Provider\DenyStrategyInterface
@@ -95,7 +115,7 @@ return [
 //                    'controller' => \Application\Controller\LoginController::class,
 //                    'action' => 'index',
 //                ]
-             ],
+            ],
 
 
             /*

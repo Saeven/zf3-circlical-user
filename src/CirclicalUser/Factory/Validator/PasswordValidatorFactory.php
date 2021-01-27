@@ -9,10 +9,8 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 
 class PasswordValidatorFactory implements FactoryInterface
 {
-
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         return new PasswordValidator($container->get(PasswordCheckerInterface::class), $options);
     }
 }
-

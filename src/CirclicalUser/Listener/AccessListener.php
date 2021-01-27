@@ -73,9 +73,8 @@ class AccessListener implements ListenerAggregateInterface
                 if (!$requiresAuthentication) {
                     return;
                 }
-
             } else {
-                throw new \LogicException('A controller and action, or middleware are required to verify access!');
+                throw new \LogicException('A controller-action pair or middleware are required to verify access!');
             }
         }
 
@@ -119,9 +118,7 @@ class AccessListener implements ListenerAggregateInterface
 
     public function onDispatchError(MvcEvent $event)
     {
-
         switch ($event->getError()) {
-
             case AccessService::ACCESS_DENIED:
                 $statusCode = 403;
                 break;

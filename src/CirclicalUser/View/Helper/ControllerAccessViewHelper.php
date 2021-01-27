@@ -7,7 +7,7 @@ use Zend\View\Helper\AbstractHelper;
 
 class ControllerAccessViewHelper extends AbstractHelper
 {
-    private $accessService;
+    private AccessService $accessService;
 
     public function __construct(AccessService $accessService)
     {
@@ -15,11 +15,10 @@ class ControllerAccessViewHelper extends AbstractHelper
     }
 
     /**
-     * canAccessController
+     * Invoked via 'canAccessController' at the template level
      */
     public function __invoke(string $controllerName): bool
     {
         return $this->accessService->canAccessController($controllerName);
     }
 }
-

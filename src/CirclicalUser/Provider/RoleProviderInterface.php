@@ -24,5 +24,4 @@ interface RoleProviderInterface
      * @return RoleInterface
      */
     public function getRoleWithName(string $name): ?RoleInterface;
-
 }

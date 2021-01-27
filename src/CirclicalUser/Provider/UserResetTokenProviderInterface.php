@@ -2,8 +2,6 @@
 
 namespace CirclicalUser\Provider;
 
-use CirclicalUser\Entity\UserResetToken;
-
 interface UserResetTokenProviderInterface
 {
     /**

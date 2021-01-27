@@ -86,5 +86,4 @@ class AuthenticationPlugin extends AbstractPlugin
     {
         return $this->accessService->isAllowed($resource, $action);
     }
-
 }

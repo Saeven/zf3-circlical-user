@@ -79,22 +79,34 @@ class UserResetToken implements UserResetTokenInterface
         $fingerprint = $this->getFingerprint();
 
         $key = new EncryptionKey(new HiddenString($authentication->getRawSessionKey()));
-        $this->token = base64_encode(Crypto::encrypt(new HiddenString(json_encode([
-            'fingerprint' => $fingerprint,
-            'timestamp' => $this->request_time->format('U'),
-            'userId' => $authentication->getUserId(),
-        ])), $key));
+        $this->token = base64_encode(
+            Crypto::encrypt(
+                new HiddenString(
+                    json_encode(
+                        [
+                            'fingerprint' => $fingerprint,
+                            'timestamp' => $this->request_time->format('U'),
+                            'userId' => $authentication->getUserId(),
+                        ]
+                    )
+                ),
+                $key
+            )
+        );
     }
 
     public function getFingerprint(): string
     {
-        return implode(':', [
-            $_SERVER['HTTP_USER_AGENT'] ?? 'na',
-            $_SERVER['HTTP_ACCEPT'] ?? 'na',
-            $_SERVER['HTTP_ACCEPT_CHARSET'] ?? 'na',
-            $_SERVER['HTTP_ACCEPT_ENCODING'] ?? 'na',
-            $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'na',
-        ]);
+        return implode(
+            ':',
+            [
+                $_SERVER['HTTP_USER_AGENT'] ?? 'na',
+                $_SERVER['HTTP_ACCEPT'] ?? 'na',
+                $_SERVER['HTTP_ACCEPT_CHARSET'] ?? 'na',
+                $_SERVER['HTTP_ACCEPT_ENCODING'] ?? 'na',
+                $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'na',
+            ]
+        );
     }
 
     public function getToken(): string
@@ -117,7 +129,6 @@ class UserResetToken implements UserResetTokenInterface
 
     public function isValid(AuthenticationRecordInterface $authenticationRecord, string $checkToken, string $requestingIpAddress, bool $validateFingerprint, bool $validateIp): bool
     {
-
         if ($this->token !== $checkToken) {
             return false;
         }
@@ -136,7 +147,6 @@ class UserResetToken implements UserResetTokenInterface
 
         $json = @json_decode($jsonString);
         if (json_last_error() === JSON_ERROR_NONE) {
-
             if (!isset($json->fingerprint, $json->timestamp, $json->userId)) {
                 throw new InvalidResetTokenException();
             }
@@ -155,6 +165,5 @@ class UserResetToken implements UserResetTokenInterface
         }
 
         return true;
-
     }
 }

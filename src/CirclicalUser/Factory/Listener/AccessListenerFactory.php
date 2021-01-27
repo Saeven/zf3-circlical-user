@@ -9,7 +9,6 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 
 class AccessListenerFactory implements FactoryInterface
 {
-
     /**
      * Create an object
      *

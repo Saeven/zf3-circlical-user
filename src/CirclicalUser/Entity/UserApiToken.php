@@ -18,9 +18,9 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UserApiToken
 {
-    public const SCOPE_NONE = 0;
-
     use SecretIdPublicUuidTrait;
+
+    public const SCOPE_NONE = 0;
 
     /**
      * @var UserInterface

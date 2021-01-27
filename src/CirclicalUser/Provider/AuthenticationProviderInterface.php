@@ -39,5 +39,4 @@ interface AuthenticationProviderInterface
     public function save($record);
 
     public function create($userId, string $username, string $hash, string $rawKey): AuthenticationRecordInterface;
-
 }

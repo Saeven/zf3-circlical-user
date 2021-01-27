@@ -5,7 +5,6 @@ namespace CirclicalUser\Mapper;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Entity\UserAtom;
 
-
 /**
  * Class UserAtomMapper
  *
@@ -46,7 +45,6 @@ class UserAtomMapper extends AbstractDoctrineMapper
      */
     public function setAtom(User $user, string $key, string $value): void
     {
-
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare('INSERT INTO users_atoms ( user_id, `key`, `value`) VALUES( ?, ?, ? ) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)');
 
@@ -64,6 +62,4 @@ class UserAtomMapper extends AbstractDoctrineMapper
     {
         return $this->getRepository()->findBy(['key' => $key, 'value' => $value]);
     }
-
-
 }

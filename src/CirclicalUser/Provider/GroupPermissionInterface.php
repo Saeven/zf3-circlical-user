@@ -2,7 +2,6 @@
 
 namespace CirclicalUser\Provider;
 
-
 /**
  * Interface GroupPermissionInterface
  *
@@ -28,5 +27,4 @@ interface GroupPermissionInterface
     public function addAction($action);
 
     public function removeAction($action);
-
 }

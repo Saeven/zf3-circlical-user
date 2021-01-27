@@ -2,7 +2,6 @@
 
 namespace CirclicalUser;
 
-use CirclicalUser\Entity\UserAuthenticationLog;
 use CirclicalUser\Listener\AccessListener;
 use Doctrine\DBAL\Types\Type;
 use Ramsey\Uuid\Doctrine\UuidBinaryType;
@@ -11,7 +10,6 @@ use Zend\Mvc\MvcEvent;
 
 class Module
 {
-
     public function getConfig()
     {
         return include __DIR__ . '/../../config/module.config.php';
@@ -49,5 +47,4 @@ class Module
 //            }
 //        });
     }
-
 }

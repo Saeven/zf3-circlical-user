@@ -39,15 +39,18 @@ class RedirectStrategy implements DenyStrategyInterface
     public function handle(MvcEvent $event, string $eventError): bool
     {
         if ($eventError === AccessService::ACCESS_UNAUTHORIZED && empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-
             $response = $event->getResponse();
             if ($response instanceof Response) {
                 $response->setStatusCode(403);
             }
-            $event->setRouteMatch(new RouteMatch([
-                'controller' => $this->controllerClass,
-                'action' => $this->action,
-            ]));
+            $event->setRouteMatch(
+                new RouteMatch(
+                    [
+                        'controller' => $this->controllerClass,
+                        'action' => $this->action,
+                    ]
+                )
+            );
             $event->setParam('authRedirect', true);
 
             /** @var \Zend\Http\PhpEnvironment\Request $requestData */

@@ -16,4 +16,3 @@ class ControllerAccessViewHelperFactory implements FactoryInterface
         );
     }
 }
-

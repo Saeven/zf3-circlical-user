@@ -18,7 +18,6 @@ use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Listener\UserEntityListener;
 use CirclicalUser\Mapper\GroupPermissionMapper;
 use CirclicalUser\Mapper\RoleMapper;
-use CirclicalUser\Mapper\UserAuthenticationLogMapper;
 use CirclicalUser\Factory\Controller\Plugin\AuthenticationPluginFactory;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserPermissionMapper;

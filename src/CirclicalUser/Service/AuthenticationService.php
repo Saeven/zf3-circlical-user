@@ -2,7 +2,6 @@
 
 namespace CirclicalUser\Service;
 
-
 use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\PasswordResetProhibitedException;
@@ -27,7 +26,6 @@ use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
 use Zend\Http\PhpEnvironment\RemoteAddress;
 
-
 /**
  * Cookie-based authentication service that gives the option of using transient sessions.  It also allows
  * you to log in using email or username.  Note, if you permit an auth model where you allow users to register
@@ -40,23 +38,23 @@ class AuthenticationService
     /**
      * User cookie, which is verified by COOKIE_VERIFY_A, and contains the name of a randomly generated cookie
      */
-    const COOKIE_USER = '_sessiona';
+    public const COOKIE_USER = '_sessiona';
 
     /**
      * SHA256 hmac combination that verifies COOKIE_VERIFY_A
      */
-    const COOKIE_VERIFY_A = '_sessionb';
+    public const COOKIE_VERIFY_A = '_sessionb';
 
     /**
      * SHA256 hmac combination that verifies a randomly generated cookie
      */
-    const COOKIE_VERIFY_B = '_sessionc';
+    public const COOKIE_VERIFY_B = '_sessionc';
 
 
     /**
      * Prefix for hash cookies, mmm.
      */
-    const COOKIE_HASH_PREFIX = '__cu';
+    public const COOKIE_HASH_PREFIX = '__cu';
 
     /**
      * Stores the user identity after having been authenticated.
@@ -218,7 +216,6 @@ class AuthenticationService
         }
 
         if (password_verify($password, $auth->getHash())) {
-
             // might have been discovered earlier
             if (!$user) {
                 $user = $this->userProvider->getUser($auth->getUserId());
@@ -382,7 +379,6 @@ class AuthenticationService
         // 2. If the user cookie was not tampered with, decrypt its contents with the system key
         //
         try {
-
             $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey);
 
             if (strpos($userTuple, ':') === false) {
@@ -446,7 +442,6 @@ class AuthenticationService
 
                 return $this->identity;
             }
-
         } catch (\Exception $x) {
             $this->purgeHashCookies();
         }
@@ -521,7 +516,6 @@ class AuthenticationService
      */
     public function verifyPassword(User $user, string $password): bool
     {
-
         $auth = $this->authenticationProvider->findByUserId($user->getId());
         if (!$auth) {
             throw new NoSuchUserException();
@@ -711,5 +705,4 @@ class AuthenticationService
         $resetToken->setStatus(UserResetTokenInterface::STATUS_USED);
         $this->resetTokenProvider->update($resetToken);
     }
-
 }

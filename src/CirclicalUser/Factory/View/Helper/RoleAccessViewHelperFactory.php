@@ -16,4 +16,3 @@ class RoleAccessViewHelperFactory implements FactoryInterface
         );
     }
 }
-

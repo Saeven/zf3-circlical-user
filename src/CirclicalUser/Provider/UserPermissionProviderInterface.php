@@ -2,7 +2,6 @@
 
 namespace CirclicalUser\Provider;
 
-
 /**
  * Interface UserPermissionProviderInterface
  *

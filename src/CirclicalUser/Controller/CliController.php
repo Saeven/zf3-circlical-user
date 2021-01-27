@@ -1,9 +1,9 @@
 <?php
 
-
 namespace CirclicalUser\Controller;
 
 use CirclicalUser\Entity\TemporaryResource;
+use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
@@ -15,20 +15,19 @@ use Zend\Mvc\Controller\AbstractActionController;
 
 class CliController extends AbstractActionController
 {
-    private $userMapper;
+    private UserProviderInterface $userMapper;
+    private GroupPermissionProviderInterface $groupPermissionMapper;
+    private UserPermissionProviderInterface $userPermissionMapper;
+    private AccessService $accessService;
+    private RoleProviderInterface $roleProvider;
 
-    private $groupPermissionMapper;
-
-    private $userPermissionMapper;
-
-    private $accessService;
-
-    private $roleProvider;
-
-    public function __construct(UserProviderInterface $userMapper, RoleProviderInterface $roleProvider,
-                                GroupPermissionProviderInterface $groupPermissionMapper, UserPermissionProviderInterface $userPermissionMapper,
-                                AccessService $accessService)
-    {
+    public function __construct(
+        UserProviderInterface $userMapper,
+        RoleProviderInterface $roleProvider,
+        GroupPermissionProviderInterface $groupPermissionMapper,
+        UserPermissionProviderInterface $userPermissionMapper,
+        AccessService $accessService
+    ) {
         $this->roleProvider = $roleProvider;
         $this->userMapper = $userMapper;
         $this->groupPermissionMapper = $groupPermissionMapper;

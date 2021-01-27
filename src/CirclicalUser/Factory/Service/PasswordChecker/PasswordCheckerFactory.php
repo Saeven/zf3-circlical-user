@@ -10,7 +10,6 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 
 class PasswordCheckerFactory implements FactoryInterface
 {
-
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
@@ -23,7 +22,7 @@ class PasswordCheckerFactory implements FactoryInterface
                 }
                 $checkerImplementation = new $userConfig['password_strength_checker']['implementation']($userConfig['password_strength_checker']['config']);
             } else {
-                $checkerImplementation = new $userConfig['password_strength_checker'];
+                $checkerImplementation = new $userConfig['password_strength_checker']();
             }
 
             if (!$checkerImplementation instanceof PasswordCheckerInterface) {
@@ -36,4 +35,3 @@ class PasswordCheckerFactory implements FactoryInterface
         return new PasswordNotChecked();
     }
 }
-
