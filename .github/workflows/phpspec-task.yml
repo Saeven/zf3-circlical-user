@@ -36,7 +36,7 @@ jobs:
         run: XDEBUG_MODE=coverage vendor/bin/phpspec --config=phpspec.yml run
       # Push Coverage
       - name: Push Coverage
-        run: vendor/bin/codacycoverate clover build/coverage.xml
+        run: vendor/bin/codacycoverage clover build/coverage.xml
 
 
 
