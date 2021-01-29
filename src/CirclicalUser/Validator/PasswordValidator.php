@@ -30,7 +30,7 @@ class PasswordValidator extends AbstractValidator
         $userData = [];
         if (is_array($context) && is_array($this->options) && isset($this->options['user_data']) && is_array($this->options['user_data'])) {
             foreach ($this->options['user_data'] as $key) {
-                if (is_string($context[$key])) {
+                if (is_string($context[$key] ?? null)) {
                     $userData[] = $context[$key];
                 }
             }
