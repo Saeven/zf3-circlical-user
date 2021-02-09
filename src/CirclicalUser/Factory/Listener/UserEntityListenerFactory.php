@@ -13,7 +13,7 @@ class UserEntityListenerFactory implements FactoryInterface
         $config = $container->get('config');
 
         if (!isset($config['circlical']['user']['doctrine']['entity'])) {
-            throw new \Exception("CirclicalUser > You must specify the user Entity that CirclicalUser will use!");
+            throw new \DomainException("CirclicalUser > You must specify the user Entity that CirclicalUser will use!");
         }
 
         return new UserEntityListener($config['circlical']['user']['doctrine']['entity']);

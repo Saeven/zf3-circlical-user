@@ -12,10 +12,10 @@ class RedirectStrategyFactory implements FactoryInterface
     {
         $config = $container->get('config');
         if (!isset($config['circlical']['user']['deny_strategy']['options'])) {
-            throw new \Exception("CirclicalUser > Please check your config. You specified the module-provided redirect strategy, but didn't include the provided configuration.");
+            throw new \InvalidArgumentException("CirclicalUser > Please check your config. You specified the module-provided redirect strategy, but didn't include the provided configuration.");
         }
-        $options = $config['circlical']['user']['deny_strategy']['options'];
+        $appliedOptions = $config['circlical']['user']['deny_strategy']['options'];
 
-        return new RedirectStrategy($options['controller'], $options['action']);
+        return new RedirectStrategy($appliedOptions['controller'], $appliedOptions['action']);
     }
 }

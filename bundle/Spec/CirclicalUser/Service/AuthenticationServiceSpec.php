@@ -98,7 +98,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
     {
         try {
             $this->setIdentity();
-            throw new \Exception("The setIdentity method should not exist!");
+            throw new \DomainException("The setIdentity method should not exist!");
         } catch (MethodNotVisibleException $x) {
             // do nothing
         }

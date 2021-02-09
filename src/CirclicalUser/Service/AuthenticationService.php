@@ -3,6 +3,8 @@
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\UserResetToken;
+use CirclicalUser\Exception\AuthenticationDataException;
+use CirclicalUser\Exception\AuthenticationHashException;
 use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
@@ -382,17 +384,17 @@ class AuthenticationService
             $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey);
 
             if (strpos($userTuple, ':') === false) {
-                throw new \Exception();
+                throw new \LogicException();
             }
 
             // paranoid, make sure we have everything we need
             @list($cookieUserId, $hashCookieSuffix) = @explode(":", $userTuple, 2);
             if (!is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
-                throw new \Exception();
+                throw new AuthenticationDataException();
             }
 
             if (!($auth = $this->authenticationProvider->findByUserId($cookieUserId))) {
-                throw new \Exception();
+                throw new NoSuchUserException();
             }
 
             $hashCookieName = self::COOKIE_HASH_PREFIX . $hashCookieSuffix;
@@ -401,7 +403,7 @@ class AuthenticationService
             // 2. Check the hashCookie for corroborating data
             //
             if (!isset($_COOKIE[$hashCookieName])) {
-                throw new \Exception();
+                throw new AuthenticationDataException();
             }
 
             $userKey = new EncryptionKey(new HiddenString($auth->getRawSessionKey()));
@@ -411,7 +413,7 @@ class AuthenticationService
             );
 
             if (!$hashPass) {
-                throw new \Exception();
+                throw new AuthenticationHashException();
             }
 
             //
@@ -419,16 +421,16 @@ class AuthenticationService
             //
             $hashedCookieContents = Crypto::decrypt(base64_decode($_COOKIE[$hashCookieName]), $userKey);
             if (!(substr_count($hashedCookieContents, ':') === 2)) {
-                throw new \Exception();
+                throw new AuthenticationDataException();
             }
 
             [, $hashedUserId, $hashedUsername] = explode(':', $hashedCookieContents);
             if ($hashedUserId !== $cookieUserId) {
-                throw new \Exception();
+                throw new AuthenticationHashException();
             }
 
             if ($hashedUsername !== $auth->getUsername()) {
-                throw new \Exception();
+                throw new AuthenticationHashException();
             }
 
             $this->purgeHashCookies($hashCookieName);

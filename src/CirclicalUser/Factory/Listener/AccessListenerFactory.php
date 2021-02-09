@@ -26,7 +26,7 @@ class AccessListenerFactory implements FactoryInterface
         if (!empty($config['circlical']['user']['deny_strategy']['class'])) {
             $strategyClass = $config['circlical']['user']['deny_strategy']['class'];
             if (!class_exists($strategyClass)) {
-                throw new \Exception("CirclicalUser > A deny strategy was specified, but the class you specified ('{$strategyClass}') does not exist. Please fix your config.");
+                throw new \InvalidArgumentException("CirclicalUser > A deny strategy was specified, but the class you specified ('{$strategyClass}') does not exist. Please fix your config.");
             }
             $strategy = $container->get($strategyClass);
         }

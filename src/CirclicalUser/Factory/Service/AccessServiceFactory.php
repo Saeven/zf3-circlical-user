@@ -21,7 +21,7 @@ class AccessServiceFactory implements FactoryInterface
         $userConfig = $config['circlical']['user'];
 
         if (!isset($userConfig['guards'])) {
-            throw new \Exception("You don't have any guards set up! Please follow the steps in the readme.  Define an empty guards definition to get rid of this error.");
+            throw new \LogicException("You don't have any guards set up! Please follow the steps in the README.  Define an empty guards definition to get rid of this error.");
         }
 
         $guards = $userConfig['guards'] ?? [];
