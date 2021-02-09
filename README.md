@@ -215,3 +215,4 @@ Scope (as defined by your application) is defined with bit flags
 * Working with Doctrine? [Click Here](INSTALL_DOCTRINE.md)
 * Want to roll your own Providers? [Click Here](INSTALL_CUSTOM.md)
 
+.
