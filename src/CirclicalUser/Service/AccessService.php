@@ -309,10 +309,10 @@ class AccessService
         }
 
         $roleExpansion = [];
-        $userRoles = $this->user->getRoles();
-        if ($userRoles) {
+        $examinedUserRoles = $this->user->getRoles();
+        if ($examinedUserRoles) {
             /** @var RoleInterface $userRole */
-            foreach ($userRoles as $userRole) {
+            foreach ($examinedUserRoles as $userRole) {
                 $roleExpansion[] = $userRole->getName();
 
                 $parentRole = $userRole->getParent();
@@ -408,8 +408,8 @@ class AccessService
 
     public function isAllowedByResourceClass(string $resourceClass, string $action): bool
     {
-        $actions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
-        foreach ($actions as $groupPermission) {
+        $examinedActions = $this->groupPermissions->getResourcePermissionsByClass($resourceClass);
+        foreach ($examinedActions as $groupPermission) {
             if ($groupPermission->can($action)) {
                 return true;
             }

@@ -14,7 +14,7 @@ class PasswordCheckerFactory implements FactoryInterface
     {
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
-        $passwordChecker = null;
+
         if (!empty($userConfig['password_strength_checker'])) {
             if (is_array($userConfig['password_strength_checker'])) {
                 if (!is_string($userConfig['password_strength_checker']['implementation'] ?? null) || !is_array($userConfig['password_strength_checker']['config'] ?? null)) {
