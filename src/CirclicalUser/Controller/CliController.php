@@ -3,7 +3,6 @@
 namespace CirclicalUser\Controller;
 
 use CirclicalUser\Entity\TemporaryResource;
-use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;

@@ -74,7 +74,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new PasswordNotChecked(),
             true,
-            true
+            true,
+            'None'
         );
     }
 
@@ -321,7 +322,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
         foreach ($results as $combinations) {
             $comboCount = count($combinations);
             if ($comboCount != 0 && $comboCount < 4) {
-
                 foreach ($cookieTypes as $c) {
                     unset($_COOKIE[$c]);
                 }
@@ -418,7 +418,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_wont_create_auth_when_email_usernames_belong_to_user_records($authenticationMapper, User $user5)
     {
-
         $user5->getId()->willReturn(5);
         $user5->getEmail()->willReturn('alex@circlical.com');
         $this->shouldThrow(EmailUsernameTakenException::class)->during('create', [$user5, 'alex@circlical.com', 'pepperspray']);
@@ -455,7 +454,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new Passwdqc(),
             true,
-            true
+            true,
+            'None'
         );
 
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
@@ -479,7 +479,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new Passwdqc(),
             true,
-            true
+            true,
+            'None'
         );
 
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
@@ -505,7 +506,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new Zxcvbn([]),
             true,
-            true
+            true,
+            'None'
         );
 
         // Required, since the array-cast can't support closures which are passed by phpspec, even with getWrappedObject()
@@ -563,7 +565,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new PasswordNotChecked(),
             true,
-            true
+            true,
+            'None'
         );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
     }
@@ -579,7 +582,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             false,
             new PasswordNotChecked(),
             true,
-            true
+            true,
+            'None'
         );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }

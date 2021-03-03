@@ -75,6 +75,10 @@ return [
                  */
                 'secure_cookies' => false,
 
+                /*
+                 * What SameSite policy do we give cookies?  Can be set to null 'Strict, 'Lax' or 'None'
+                 */
+                'samesite_policy' => 'None',
 
                 /*
                  * Forgot password functionality

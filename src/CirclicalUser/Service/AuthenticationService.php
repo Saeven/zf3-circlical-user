@@ -52,7 +52,6 @@ class AuthenticationService
      */
     public const COOKIE_VERIFY_B = '_sessionc';
 
-
     /**
      * Prefix for hash cookies, mmm.
      */
@@ -60,61 +59,46 @@ class AuthenticationService
 
     /**
      * Stores the user identity after having been authenticated.
-     *
-     * @var ?User
      */
-    private $identity;
+    private ?User $identity;
+
+    private AuthenticationProviderInterface $authenticationProvider;
+
+    private UserProviderInterface $userProvider;
 
     /**
-     * @var AuthenticationProviderInterface
+     * A config-defined key that's used to encrypt ID cookie
      */
-    private $authenticationProvider;
+    private HiddenString $systemEncryptionKey;
 
     /**
-     * @var UserProviderInterface
+     * Should the cookie expire at the end of the session?
      */
-    private $userProvider;
+    private bool $transient;
 
     /**
-     * @var HiddenString A config-defined key that's used to encrypt ID cookie
+     * Should the cookie be marked as secure?
      */
-    private $systemEncryptionKey;
+    private bool $secure;
+
+    private PasswordCheckerInterface $passwordChecker;
+
+    private ?UserResetTokenProviderInterface $resetTokenProvider;
 
     /**
-     * @var bool Should the cookie expire at the end of the session?
-     */
-    private $transient;
-
-    /**
-     * @var bool Should the cookie be marked as https only?
-     */
-    private $secure;
-
-
-    /**
-     * @var PasswordCheckerInterface
-     */
-    private $passwordChecker;
-
-
-    /**
-     * @var ?UserResetTokenProviderInterface
-     */
-    private $resetTokenProvider;
-
-
-    /**
-     * @var boolean
      * If password reset is enabled, do we validate the browser fingerprint?
      */
-    private $validateFingerprint;
-
+    private bool $validateFingerprint;
 
     /**
-     * @var boolean
      * If password reset is enabled, do we validate the user IP address?
      */
-    private $validateIp;
+    private bool $validateIp;
+
+    /**
+     * Samesite cookie attribute
+     */
+    private string $sameSite;
 
 
     /**
@@ -129,6 +113,7 @@ class AuthenticationService
      * @param PasswordCheckerInterface         $passwordChecker     Optional, a password checker implementation
      * @param bool                             $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
      * @param bool                             $validateIp          If password reset is enabled, do we validate the user IP address?
+     * @param string                           $sameSite            Should be one of 'None', 'Lax' or 'Strict'.
      */
     public function __construct(
         AuthenticationProviderInterface $authenticationProvider,
@@ -139,8 +124,10 @@ class AuthenticationService
         bool $secure,
         PasswordCheckerInterface $passwordChecker,
         bool $validateFingerprint,
-        bool $validateIp
+        bool $validateIp,
+        string $sameSite
     ) {
+        $this->identity = null;
         $this->authenticationProvider = $authenticationProvider;
         $this->userProvider = $userProvider;
         $this->systemEncryptionKey = new HiddenString($systemEncryptionKey);
@@ -150,6 +137,7 @@ class AuthenticationService
         $this->resetTokenProvider = $resetTokenProvider;
         $this->validateFingerprint = $validateFingerprint;
         $this->validateIp = $validateIp;
+        $this->sameSite = $sameSite;
     }
 
     /**
@@ -331,11 +319,14 @@ class AuthenticationService
         setcookie(
             $name,
             $value,
-            $expiry,
-            '/',
-            $sessionParameters['domain'],
-            $this->secure,
-            true
+            [
+                'expires' => $expiry,
+                'path' => '/',
+                'domain' => $sessionParameters['domain'],
+                'secure' => $this->secure,
+                'httponly' => true,
+                'samesite' => $this->sameSite,
+            ]
         );
     }
 
