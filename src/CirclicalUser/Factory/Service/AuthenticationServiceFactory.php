@@ -33,13 +33,25 @@ class AuthenticationServiceFactory implements FactoryInterface
             $resetTokenProvider = $userConfig['providers']['reset'] ?? UserResetTokenMapper::class;
         }
 
+        $secure = false;
+        if (isset($userConfig['auth']['secure_cookies'])) {
+            if (is_callable($userConfig['auth']['secure_cookies'] ?? null)) {
+                $secure = $userConfig['auth']['secure_cookies']();
+                if (!is_bool($secure)) {
+                    throw new \RuntimeException("The secure_cookies callback for CirclicalUser must return a boolean value.");
+                }
+            } else {
+                $secure = $userConfig['auth']['secure_cookies'];
+            }
+        }
+
         return new AuthenticationService(
             $container->get($authMapper),
             $container->get($userProvider),
             $resetTokenProvider ? $container->get($resetTokenProvider) : null,
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
-            false,
+            $secure,
             $container->get(PasswordCheckerInterface::class),
             $userConfig['password_reset_tokens']['validate_fingerprint'] ?? true,
             $userConfig['password_reset_tokens']['validate_ip'] ?? false
