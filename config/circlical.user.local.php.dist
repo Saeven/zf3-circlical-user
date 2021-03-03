@@ -71,6 +71,12 @@ return [
 
 
                 /*
+                 * Cookies should have the 'secure' flag set to this (accepts bool, or a closure for more advanced discovery)
+                 */
+                'secure_cookies' => false,
+
+
+                /*
                  * Forgot password functionality
                  */
                 'password_reset_tokens' => [

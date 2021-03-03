@@ -211,6 +211,11 @@ Scope (as defined by your application) is defined with bit flags
 
     $token->addScope(FooApi::SCOPE_QUERY);
 
+# Cookie Security
+
+You can configure whether or not your cookies should have the secure flag set to 'true' by adjusting the auth/secure_cookies configuration value. This value accepts a boolean or closure if you need to run a discovery method on your server, perhaps, for example, to check if the current request is
+coming through SSL.
+
 # Installation
 
 * Working with Doctrine? [Click Here](INSTALL_DOCTRINE.md)
