@@ -1,6 +1,6 @@
 {
     "name": "saeven/zf3-circlical-user",
-    "description": "Complete user entity, rights, and access module for ZF2 and ZF3",
+    "description": "Complete user entity, rights, and access module for Laminas",
     "type": "library",
     "license": "MPL-2.0",
     "homepage": "https://github.com/Saeven/zf3-circlical-user",
