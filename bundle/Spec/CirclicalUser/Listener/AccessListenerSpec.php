@@ -6,13 +6,13 @@ use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Service\AccessService;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Zend\EventManager\EventManagerInterface;
-use Zend\Http\Response;
-use Zend\Mvc\Application;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\EventManager\EventManagerInterface;
+use Laminas\Http\Response;
+use Laminas\Mvc\Application;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\RouteMatch;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class AccessListenerSpec extends ObjectBehavior
 {

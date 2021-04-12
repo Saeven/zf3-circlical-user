@@ -26,7 +26,7 @@ use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
-use Zend\Http\PhpEnvironment\RemoteAddress;
+use Laminas\Http\PhpEnvironment\RemoteAddress;
 
 /**
  * Cookie-based authentication service that gives the option of using transient sessions.  It also allows

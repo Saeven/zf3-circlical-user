@@ -4,7 +4,7 @@ namespace CirclicalUser\Factory\Listener;
 
 use CirclicalUser\Listener\UserEntityListener;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class UserEntityListenerFactory implements FactoryInterface
 {

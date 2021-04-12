@@ -2,7 +2,7 @@
 
 namespace CirclicalUser\Provider;
 
-use Zend\Mvc\MvcEvent;
+use Laminas\Mvc\MvcEvent;
 
 interface DenyStrategyInterface
 {

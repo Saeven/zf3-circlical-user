@@ -5,7 +5,7 @@ namespace CirclicalUser\Factory\Validator;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Validator\PasswordValidator;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class PasswordValidatorFactory implements FactoryInterface
 {

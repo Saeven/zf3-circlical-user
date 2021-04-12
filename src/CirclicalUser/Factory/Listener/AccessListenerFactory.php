@@ -5,7 +5,7 @@ namespace CirclicalUser\Factory\Listener;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Service\AccessService;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class AccessListenerFactory implements FactoryInterface
 {
