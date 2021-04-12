@@ -6,11 +6,11 @@ use CirclicalUser\Service\AccessService;
 use CirclicalUser\Strategy\RedirectStrategy;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\Response;
-use Zend\Mvc\Application;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\Response;
+use Laminas\Mvc\Application;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\RouteMatch;
 
 class RedirectStrategySpec extends ObjectBehavior
 {

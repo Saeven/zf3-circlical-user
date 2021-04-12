@@ -5,7 +5,7 @@ namespace CirclicalUser\Factory\Service;
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;

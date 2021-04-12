@@ -4,11 +4,11 @@ namespace Spec\CirclicalUser;
 
 use CirclicalUser\Listener\AccessListener;
 use PhpSpec\ObjectBehavior;
-use Zend\Console\Console;
-use Zend\EventManager\EventManager;
-use Zend\Mvc\Application;
-use Zend\Mvc\MvcEvent;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\Console\Console;
+use Laminas\EventManager\EventManager;
+use Laminas\Mvc\Application;
+use Laminas\Mvc\MvcEvent;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class ModuleSpec extends ObjectBehavior
 {

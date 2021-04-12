@@ -10,7 +10,7 @@ use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Service\AccessService;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\Service\AuthenticationService;
 
 class AccessServiceFactory implements FactoryInterface

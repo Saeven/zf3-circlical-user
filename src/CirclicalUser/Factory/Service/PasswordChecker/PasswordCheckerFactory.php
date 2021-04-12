@@ -6,7 +6,7 @@ use CirclicalUser\Exception\PasswordStrengthCheckerException;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class PasswordCheckerFactory implements FactoryInterface
 {

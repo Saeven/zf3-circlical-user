@@ -8,9 +8,9 @@ use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserProviderInterface;
 use CirclicalUser\Service\AccessService;
-use Zend\Console\Exception\RuntimeException;
-use Zend\Console\Request as ConsoleRequest;
-use Zend\Mvc\Controller\AbstractActionController;
+use Laminas\Console\Exception\RuntimeException;
+use Laminas\Console\Request as ConsoleRequest;
+use Laminas\Mvc\Controller\AbstractActionController;
 
 class CliController extends AbstractActionController
 {

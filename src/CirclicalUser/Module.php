@@ -5,8 +5,8 @@ namespace CirclicalUser;
 use CirclicalUser\Listener\AccessListener;
 use Doctrine\DBAL\Types\Type;
 use Ramsey\Uuid\Doctrine\UuidBinaryType;
-use Zend\Console\Console;
-use Zend\Mvc\MvcEvent;
+use Laminas\Console\Console;
+use Laminas\Mvc\MvcEvent;
 
 class Module
 {

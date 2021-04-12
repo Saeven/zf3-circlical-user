@@ -5,7 +5,7 @@ namespace CirclicalUser\Factory\Controller\Plugin;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use CirclicalUser\Controller\Plugin\AuthenticationPlugin;
 
 class AuthenticationPluginFactory implements FactoryInterface
