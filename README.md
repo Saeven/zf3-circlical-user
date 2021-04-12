@@ -1,7 +1,7 @@
 # Authentication, Identity, and RBAC for the Laminas Framework
 
-[![Build Status](https://travis-ci.org/Saeven/zf3-circlical-user.svg?branch=master)](https://travis-ci.org/Saeven/zf3-circlical-user)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://github.com/saeven/zf3-circlical-autowire/actions/workflows/phpspec-task.yml/badge.svg)](https://travis-ci.org/Saeven/zf3-circlical-user)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/74a8233ff1464fada1a333104770705f)](https://www.codacy.com/gh/Saeven/zf3-circlical-autowire/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-autowire&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Coverage)
 [![Latest Stable Version](https://poser.pugx.org/saeven/zf3-circlical-user/v/stable)](https://packagist.org/packages/saeven/zf3-circlical-user)
 [![Total Downloads](https://poser.pugx.org/saeven/zf3-circlical-user/downloads)](https://packagist.org/packages/saeven/zf3-circlical-user)
