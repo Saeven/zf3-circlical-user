@@ -1,4 +1,4 @@
-# Authentication, Identity, and RBAC for Zend Framework 3
+# Authentication, Identity, and RBAC for the Laminas Framework
 
 [![Build Status](https://travis-ci.org/Saeven/zf3-circlical-user.svg?branch=master)](https://travis-ci.org/Saeven/zf3-circlical-user)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Grade)
@@ -8,7 +8,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Saeven_zf3-circlical-user&metric=alert_status)](https://sonarcloud.io/dashboard?id=Saeven_zf3-circlical-user)
 [![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/Circlical/zf3-circlical-user?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Plug and play authentication, roles, resource, and action control for Zend Framework 3.
+Plug and play authentication, roles, resource, and action control for Laminas.
 
 Quickly Installs:
 
