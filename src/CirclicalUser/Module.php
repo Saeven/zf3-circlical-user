@@ -10,6 +10,25 @@ use Laminas\Mvc\MvcEvent;
 
 class Module
 {
+    protected static $isConsole;
+
+    public static function isConsole(): bool
+    {
+        if (null === static::$isConsole) {
+            static::$isConsole = (PHP_SAPI === 'cli');
+        }
+
+        return static::$isConsole;
+    }
+
+    public static function overrideIsConsole($flag): void
+    {
+        if (null !== $flag) {
+            $flag = (bool)$flag;
+        }
+        static::$isConsole = $flag;
+    }
+
     public function getConfig()
     {
         return include __DIR__ . '/../../config/module.config.php';
@@ -21,7 +40,7 @@ class Module
             Type::addType('uuid_binary', UuidBinaryType::class);
         }
 
-        if (Console::isConsole()) {
+        if (static::isConsole()) {
             return;
         }
 

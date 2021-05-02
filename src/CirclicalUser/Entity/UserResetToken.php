@@ -127,8 +127,13 @@ class UserResetToken implements UserResetTokenInterface
         $this->status = $status;
     }
 
-    public function isValid(AuthenticationRecordInterface $authenticationRecord, string $checkToken, string $requestingIpAddress, bool $validateFingerprint, bool $validateIp): bool
-    {
+    public function isValid(
+        AuthenticationRecordInterface $authenticationRecord,
+        string $checkToken,
+        string $requestingIpAddress,
+        bool $validateFingerprint,
+        bool $validateIp
+    ): bool {
         if ($this->token !== $checkToken) {
             return false;
         }
@@ -139,8 +144,9 @@ class UserResetToken implements UserResetTokenInterface
 
         try {
             $encryptedJson = @base64_decode($checkToken);
-            $key = new EncryptionKey(new HiddenString($authenticationRecord->getRawSessionKey()));
-            $jsonString = Crypto::decrypt($encryptedJson, $key);
+            $sessionKey = new HiddenString($authenticationRecord->getRawSessionKey());
+            $key = new EncryptionKey($sessionKey);
+            $jsonString = Crypto::decrypt($encryptedJson, $key)->getString();
         } catch (\Exception $x) {
             throw new InvalidResetTokenException();
         }

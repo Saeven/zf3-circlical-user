@@ -272,7 +272,7 @@ class AuthenticationService
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $sessionKey = new HiddenString($authentication->getRawSessionKey());
         $userKey = new EncryptionKey($sessionKey);
-        $hashCookieName = hash_hmac('sha256', $sessionKey . $authentication->getUsername(), $systemKey);
+        $hashCookieName = hash_hmac('sha256', $sessionKey->getString() . $authentication->getUsername(), $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername()), $userKey));
 
@@ -372,7 +372,7 @@ class AuthenticationService
         // 2. If the user cookie was not tampered with, decrypt its contents with the system key
         //
         try {
-            $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey);
+            $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey)->getString();
 
             if (strpos($userTuple, ':') === false) {
                 throw new \LogicException();
@@ -410,7 +410,7 @@ class AuthenticationService
             //
             // 3. Decrypt the hash cookie with the user key
             //
-            $hashedCookieContents = Crypto::decrypt(base64_decode($_COOKIE[$hashCookieName]), $userKey);
+            $hashedCookieContents = Crypto::decrypt(base64_decode($_COOKIE[$hashCookieName]), $userKey)->getString();
             if (!(substr_count($hashedCookieContents, ':') === 2)) {
                 throw new AuthenticationDataException();
             }
