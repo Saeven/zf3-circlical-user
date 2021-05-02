@@ -3,8 +3,8 @@
 namespace Spec\CirclicalUser;
 
 use CirclicalUser\Listener\AccessListener;
+use CirclicalUser\Module;
 use PhpSpec\ObjectBehavior;
-use Laminas\Console\Console;
 use Laminas\EventManager\EventManager;
 use Laminas\Mvc\Application;
 use Laminas\Mvc\MvcEvent;
@@ -22,10 +22,14 @@ class ModuleSpec extends ObjectBehavior
         $this->getConfig()->shouldBeArray();
     }
 
-    public function it_has_a_bootstrap_method(MvcEvent $event, Application $application, ServiceLocatorInterface $serviceLocator,
-                                              AccessListener $listener, EventManager $eventManager )
-    {
-        Console::overrideIsConsole(false);
+    public function it_has_a_bootstrap_method(
+        MvcEvent $event,
+        Application $application,
+        ServiceLocatorInterface $serviceLocator,
+        AccessListener $listener,
+        EventManager $eventManager
+    ) {
+        Module::overrideIsConsole(false);
         $application->getEventManager()->willReturn($eventManager);
         $serviceLocator->get(AccessListener::class)->willReturn($listener);
         $application->getServiceManager()->willReturn($serviceLocator);
@@ -36,11 +40,14 @@ class ModuleSpec extends ObjectBehavior
         $this->onBootstrap($event);
     }
 
-    public function it_aborts_bootstrap_on_console(MvcEvent $event, Application $application, ServiceLocatorInterface $serviceLocator,
-                                              AccessListener $listener, EventManager $eventManager )
-    {
-
-        Console::overrideIsConsole(true);
+    public function it_aborts_bootstrap_on_console(
+        MvcEvent $event,
+        Application $application,
+        ServiceLocatorInterface $serviceLocator,
+        AccessListener $listener,
+        EventManager $eventManager
+    ) {
+        Module::overrideIsConsole(true);
         $application->getEventManager()->willReturn($eventManager);
         $serviceLocator->get(AccessListener::class)->willReturn($listener);
         $application->getServiceManager()->willReturn($serviceLocator);
@@ -50,6 +57,5 @@ class ModuleSpec extends ObjectBehavior
 
         $this->onBootstrap($event);
     }
-
 
 }

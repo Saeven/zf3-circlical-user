@@ -443,8 +443,41 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(PersistedUserRequiredException::class)->during('create', [$otherUser, 'whoami', 'nobody']);
     }
 
-    public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
-    {
+//
+// Test paused, as passwdqc does not yet have php8 support
+//
+//    public function it_will_create_new_auth_records_with_strong_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, $userMapper, $tokenMapper)
+//    {
+//        $this->beConstructedWith(
+//            $authenticationMapper,
+//            $userMapper,
+//            $tokenMapper,
+//            $this->systemEncryptionKey->getRawKeyMaterial(),
+//            false,
+//            false,
+//            new Passwdqc(),
+//            true,
+//            true,
+//            'None'
+//        );
+//
+//        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
+//        $newAuth->getUsername()->willReturn('email');
+//        $newAuth->getUserId()->willReturn(5);
+//        $user5->getId()->willReturn(5);
+//
+//        $authenticationMapper->save(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
+//        $authenticationMapper->create(Argument::type('integer'), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
+//        $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
+//    }
+
+    public function it_wont_create_new_auth_records_with_weak_passwords(
+        AuthenticationMapper $authenticationMapper,
+        User $user5,
+        AuthenticationRecordInterface $newAuth,
+        UserMapper $userMapper,
+        UserResetTokenMapper $tokenMapper
+    ) {
         $this->beConstructedWith(
             $authenticationMapper,
             $userMapper,
@@ -452,32 +485,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
             $this->systemEncryptionKey->getRawKeyMaterial(),
             false,
             false,
-            new Passwdqc(),
-            true,
-            true,
-            'None'
-        );
-
-        $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
-        $newAuth->getUsername()->willReturn('email');
-        $newAuth->getUserId()->willReturn(5);
-        $user5->getId()->willReturn(5);
-
-        $authenticationMapper->save(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
-        $authenticationMapper->create(Argument::type('integer'), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
-        $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
-    }
-
-    public function it_wont_create_new_auth_records_with_weak_passwords($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth, UserMapper $userMapper, UserResetTokenMapper $tokenMapper)
-    {
-        $this->beConstructedWith(
-            $authenticationMapper,
-            $userMapper,
-            $tokenMapper,
-            $this->systemEncryptionKey->getRawKeyMaterial(),
-            false,
-            false,
-            new Passwdqc(),
+            new Zxcvbn([]),
             true,
             true,
             'None'
