@@ -124,6 +124,7 @@ return [
 //                'options' => [
 //                    'controller' => \Application\Controller\LoginController::class,
 //                    'action' => 'index',
+//                    'name' => 'login',
 //                ]
             ],
 

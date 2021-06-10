@@ -23,7 +23,7 @@ class RedirectStrategySpec extends ObjectBehavior
 
     function let(Request $request)
     {
-        $this->beConstructedWith('Controller', 'Action');
+        $this->beConstructedWith('Controller', 'Action', 'Login');
         $request->getServer('REQUEST_URI')->willReturn(static::$requestUri);
     }
 
@@ -32,10 +32,7 @@ class RedirectStrategySpec extends ObjectBehavior
         unset($_SERVER['HTTP_X_REQUESTED_WITH']);
         $event->getTarget()->willReturn($application);
         $event->getRequest()->willReturn($request);
-        $event->setRouteMatch(new RouteMatch([
-            'controller' => 'Controller',
-            'action' => 'Action',
-        ]))->shouldBeCalled();
+        $event->setRouteMatch(Argument::type(RouteMatch::class))->shouldBeCalled();
         $event->setParam('authRedirect', true)->shouldBeCalled();
         $event->setParam('authRedirectTo', static::$requestUri)->shouldBeCalled();
         $response->setStatusCode(403)->shouldBeCalled();
