@@ -16,6 +16,6 @@ class RedirectStrategyFactory implements FactoryInterface
         }
         $appliedOptions = $config['circlical']['user']['deny_strategy']['options'];
 
-        return new RedirectStrategy($appliedOptions['controller'], $appliedOptions['action']);
+        return new RedirectStrategy($appliedOptions['controller'], $appliedOptions['action'], $appliedOptions['name'] ?? 'login-redirect');
     }
 }

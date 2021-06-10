@@ -59,7 +59,7 @@
     "laminas/laminas-cache-storage-adapter-zend-server": "*"
   },
   "require-dev": {
-    "phpspec/phpspec": "6.1.1 | 7.0.1",
+    "phpspec/phpspec": "7.0.1",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0"

@@ -19,21 +19,22 @@ class RedirectStrategy implements DenyStrategyInterface
 {
     /**
      * The controller that dispatch should invoke
-     * @var string
      */
-    protected $controllerClass;
+    protected string $controllerClass;
 
     /**
      * This ^ controller's action
-     * @var string
      */
-    protected $action;
+    protected string $action;
+
+    private string $routeName;
 
 
-    public function __construct(string $controllerClass, string $action)
+    public function __construct(string $controllerClass, string $action, string $routeName)
     {
         $this->controllerClass = $controllerClass;
         $this->action = $action;
+        $this->routeName = $routeName;
     }
 
     public function handle(MvcEvent $event, string $eventError): bool
@@ -43,14 +44,13 @@ class RedirectStrategy implements DenyStrategyInterface
             if ($response instanceof Response) {
                 $response->setStatusCode(403);
             }
-            $event->setRouteMatch(
-                new RouteMatch(
-                    [
-                        'controller' => $this->controllerClass,
-                        'action' => $this->action,
-                    ]
-                )
-            );
+
+            $routeMatch = new RouteMatch([
+                'controller' => $this->controllerClass,
+                'action' => $this->action,
+            ]);
+            $routeMatch->setMatchedRouteName($this->routeName);
+            $event->setRouteMatch($routeMatch);
             $event->setParam('authRedirect', true);
 
             /** @var \Laminas\Http\PhpEnvironment\Request $requestData */
