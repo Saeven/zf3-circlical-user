@@ -2,8 +2,6 @@
 
 namespace CirclicalUser\Provider;
 
-use CirclicalUser\Entity\UserAtom;
-
 interface UserInterface
 {
     public function getId();
@@ -22,4 +20,8 @@ interface UserInterface
     public function hasRoleWithName(string $roleName): bool;
 
     public function hasRole(RoleInterface $roleName): bool;
+
+    public function setAuthenticationRecord(?AuthenticationRecordInterface $authentication): void;
+
+    public function getAuthenticationRecord(): ?AuthenticationRecordInterface;
 }

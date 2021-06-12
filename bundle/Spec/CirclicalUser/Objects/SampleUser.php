@@ -2,6 +2,7 @@
 
 namespace Spec\CirclicalUser\Objects;
 
+use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\UserInterface;
 
@@ -13,8 +14,12 @@ class SampleUser implements UserInterface
      * @var RoleInterface[]
      */
     private array $roles;
+
     private string $email;
+
     private string $name;
+
+    private ?AuthenticationRecordInterface $authenticationRecord;
 
     public function __construct(int $id, array $roles, string $email, string $name)
     {
@@ -69,6 +74,16 @@ class SampleUser implements UserInterface
         }
 
         return false;
+    }
+
+    public function setAuthenticationRecord(?AuthenticationRecordInterface $authentication): void
+    {
+        $this->authenticationRecord = $authentication;
+    }
+
+    public function getAuthenticationRecord(): ?AuthenticationRecordInterface
+    {
+        return $this->authenticationRecord;
     }
 }
 
