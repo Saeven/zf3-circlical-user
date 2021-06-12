@@ -32,12 +32,10 @@ class UserAtomMapperSpec extends ObjectBehavior
     {
         $user->getId()->willReturn(1);
         $key = 'test';
-        $entityRepository->findOneBy(
-            [
-                'user_id' => 1,
-                'key' => $key,
-            ]
-        )->willReturn($atom);
+        $entityRepository->findOneBy([
+            'user' => $user,
+            'key' => $key,
+        ])->willReturn($atom);
 
         $entityManager->detach($atom)->shouldBeCalled();
         $this->getAtom($user, $key);
@@ -47,22 +45,13 @@ class UserAtomMapperSpec extends ObjectBehavior
     {
         $user->getId()->willReturn(1);
         $key = 'test';
-        $entityRepository->findOneBy(
-            [
-                'user_id' => 1,
-                'key' => $key,
-            ]
-        )->willReturn($atom);
+        $entityRepository->findOneBy([
+            'user' => $user,
+            'key' => $key,
+        ])->willReturn($atom);
 
         $entityManager->detach($atom)->shouldNotBeCalled();
         $this->getAtom($user, $key, false);
-    }
-
-    function it_can_delete_atoms(UserAtom $atom, EntityManager $entityManager)
-    {
-        $entityManager->remove($atom)->shouldBeCalled();
-        $entityManager->flush($atom)->shouldBeCalled();
-        $this->deleteAtom($atom);
     }
 
     function it_can_search_atoms(EntityRepository $entityRepository)

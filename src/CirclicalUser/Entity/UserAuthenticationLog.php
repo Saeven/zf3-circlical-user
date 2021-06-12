@@ -22,16 +22,21 @@ class UserAuthenticationLog
     private $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true});
+     * @var UserInterface
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
-    private $user_id;
+    private $user;
 
     /**
-     * @ORM\Column(type="datetime", nullable=false)
+     * @var \DateTimeImmutable
+     * @ORM\Column(type="datetime_immutable", nullable=false)
      */
     private $auth_time;
 
     /**
+     * @var string
      * @ORM\Column(type="string", nullable=true, length=16, options={"fixed"=true});
      */
     private $ip_address;
@@ -40,7 +45,7 @@ class UserAuthenticationLog
     public function __construct(UserInterface $user, \DateTimeImmutable $time, string $ipAddress)
     {
         $this->id = 0;
-        $this->user_id = $user->getId();
+        $this->user = $user;
         $this->auth_time = $time;
         $this->ip_address = $ipAddress;
     }
