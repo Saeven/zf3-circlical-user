@@ -23,7 +23,6 @@ class UserAuthenticationLog
 
     /**
      * @var UserInterface
-     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
@@ -48,5 +47,25 @@ class UserAuthenticationLog
         $this->user = $user;
         $this->auth_time = $time;
         $this->ip_address = $ipAddress;
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
+
+    public function getAuthTime(): \DateTimeImmutable
+    {
+        return $this->auth_time;
+    }
+
+    public function getIpAddress(): string
+    {
+        return $this->ip_address;
     }
 }
