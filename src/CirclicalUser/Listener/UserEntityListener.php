@@ -2,7 +2,10 @@
 
 namespace CirclicalUser\Listener;
 
+use CirclicalUser\Entity\Authentication;
 use CirclicalUser\Entity\UserApiToken;
+use CirclicalUser\Entity\UserAtom;
+use CirclicalUser\Entity\UserAuthenticationLog;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\Common\EventSubscriber;
 use CirclicalUser\Entity\UserPermission;
@@ -41,6 +44,9 @@ class UserEntityListener implements EventSubscriber
         switch ($classMetadata->getName()) {
             case UserPermission::class:
             case UserApiToken::class:
+            case Authentication::class:
+            case UserAtom::class:
+            case UserAuthenticationLog::class:
                 $classMetadata->associationMappings['user']['targetEntity'] = $this->userEntity;
                 break;
         }

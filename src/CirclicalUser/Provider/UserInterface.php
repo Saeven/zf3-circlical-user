@@ -2,6 +2,8 @@
 
 namespace CirclicalUser\Provider;
 
+use CirclicalUser\Entity\UserAtom;
+
 interface UserInterface
 {
     public function getId();

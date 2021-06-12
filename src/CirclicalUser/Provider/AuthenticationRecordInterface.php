@@ -5,7 +5,7 @@ namespace CirclicalUser\Provider;
 interface AuthenticationRecordInterface
 {
 
-    public function setUsername($usernameOrEmail);
+    public function setUsername(string $usernameOrEmail): void;
 
     public function getSessionKey(): string;
 
@@ -17,9 +17,9 @@ interface AuthenticationRecordInterface
 
     public function getUsername(): string;
 
-    public function getUserId();
-
     public function getHash(): string;
 
     public function setHash(string $hash);
+
+    public function getUserId();
 }

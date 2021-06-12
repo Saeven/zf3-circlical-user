@@ -3,6 +3,7 @@
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\AuthenticationRecordInterface;
+use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Void_;
 
@@ -16,25 +17,26 @@ use phpDocumentor\Reflection\Types\Void_;
 class Authentication implements AuthenticationRecordInterface
 {
     /**
-     * @var int
+     * @var UserInterface
      * @ORM\Id
-     * @ORM\Column(type="integer", nullable=false, length=10, options={"unsigned"=true})
+     * @ORM\OneToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
-    protected $user_id;
+    private $user;
 
 
     /**
      * @var string
      * @ORM\Column(type="string", unique=true, nullable=false, length=254)
      */
-    protected $username;
+    private $username;
 
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=false, length=255)
      */
-    protected $hash;
+    private $hash;
 
 
     /**
@@ -42,61 +44,44 @@ class Authentication implements AuthenticationRecordInterface
      * A base64-encoded representation of the user's session key
      * @ORM\Column(type="string", nullable=true, length=192, options={"fixed" = true})
      */
-    protected $session_key;
+    private $session_key;
 
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true, length=32, options={"fixed" = true})
      */
-    protected $reset_hash;
+    private $reset_hash;
 
 
     /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true )
+     * @var \DateTimeImmutable
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
-    protected $reset_expiry;
+    private $reset_expiry;
 
 
-    public function __construct(int $userId, string $username, string $hash, string $encodedSessionKey)
+    public function __construct(UserInterface $user, string $username, string $hash, string $encodedSessionKey)
     {
-        $this->user_id = $userId;
+        $this->user = $user;
         $this->username = $username;
         $this->hash = $hash;
         $this->session_key = $encodedSessionKey;
     }
 
-    /**
-     * @return int
-     */
-    public function getUserId()
+    public function getUser(): UserInterface
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    /**
-     * @param int $user_id
-     */
-    public function setUserId($user_id)
-    {
-        $this->user_id = $user_id;
-    }
-
-    /**
-     * @return string
-     */
     public function getUsername(): string
     {
         return $this->username;
     }
 
-    /**
-     * @param string $username
-     */
-    public function setUsername($username)
+    public function setUsername(string $usernameOrEmail): void
     {
-        $this->username = $username;
+        $this->username = $usernameOrEmail;
     }
 
     public function getHash(): string
@@ -122,7 +107,7 @@ class Authentication implements AuthenticationRecordInterface
     /**
      * Value gets Base64-encoded for storage
      */
-    public function setSessionKey(string $sessionKey)
+    public function setSessionKey(string $sessionKey): void
     {
         $this->session_key = $sessionKey;
     }
@@ -131,7 +116,7 @@ class Authentication implements AuthenticationRecordInterface
      * Instead of setting a bas64-encoded string, you can set the raw bytes for the key.
      * This setter will base64-encode.
      */
-    public function setRawSessionKey(string $sessionKey)
+    public function setRawSessionKey(string $sessionKey): void
     {
         $this->session_key = base64_encode($sessionKey);
     }
@@ -141,18 +126,23 @@ class Authentication implements AuthenticationRecordInterface
         return $this->reset_hash;
     }
 
-    public function setResetHash(string $resetHash)
+    public function setResetHash(string $resetHash): void
     {
         $this->reset_hash = $resetHash;
     }
 
-    public function getResetExpiry(): \DateTime
+    public function getResetExpiry(): \DateTimeImmutable
     {
         return $this->reset_expiry;
     }
 
-    public function setResetExpiry(\DateTime $dateTime): void
+    public function setResetExpiry(\DateTimeImmutable $dateTime): void
     {
         $this->reset_expiry = $dateTime;
+    }
+
+    public function getUserId()
+    {
+        return $this->getUser()->getId();
     }
 }

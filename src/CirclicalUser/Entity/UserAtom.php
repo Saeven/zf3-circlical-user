@@ -2,6 +2,7 @@
 
 namespace CirclicalUser\Entity;
 
+use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -15,11 +16,12 @@ use Doctrine\ORM\Mapping as ORM;
 class UserAtom
 {
     /**
-     * @var int
+     * @var UserInterface
      * @ORM\Id
-     * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true})
+     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
-    private $user_id;
+    private $user;
 
 
     /**
@@ -36,50 +38,30 @@ class UserAtom
      */
     private $value;
 
-    /**
-     * @return int
-     */
-    public function getUserId()
+
+    public function __construct(UserInterface $user, string $key, string $value)
     {
-        return $this->user_id;
+        $this->user = $user;
+        $this->key = $key;
+        $this->value = $value;
     }
 
-    /**
-     * @param int $user_id
-     */
-    public function setUserId($user_id)
+    public function getUser(): UserInterface
     {
-        $this->user_id = $user_id;
+        return $this->user;
     }
 
-    /**
-     * @return string
-     */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
 
-    /**
-     * @param string $key
-     */
-    public function setKey($key)
-    {
-        $this->key = $key;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }
 
-    /**
-     * @param string $value
-     */
-    public function setValue($value)
+    public function setValue(string $value): void
     {
         $this->value = $value;
     }

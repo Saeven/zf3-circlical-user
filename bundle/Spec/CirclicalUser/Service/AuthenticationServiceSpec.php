@@ -35,18 +35,18 @@ use Spec\CirclicalUser\Objects\SampleUser;
 
 class AuthenticationServiceSpec extends ObjectBehavior
 {
-
     private $systemEncryptionKey;
+
     private $authenticationData;
 
-    public function let(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user, UserResetTokenMapper $tokenMapper)
+    public function let(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user, User $userTwo, UserResetTokenMapper $tokenMapper)
     {
         $hash = password_hash('abc', PASSWORD_DEFAULT);
         $key = KeyFactory::generateEncryptionKey();
 
-        $authenticationData = new Authentication(1, 'userA', $hash, base64_encode($key->getRawKeyMaterial()));
+        $authenticationData = new Authentication($user->getWrappedObject(), 'userA', $hash, base64_encode($key->getRawKeyMaterial()));
         $this->authenticationData = $authenticationData;
-        $orphanAuthData = new Authentication(2, 'orphan', $hash, base64_encode($key->getRawKeyMaterial()));
+        $orphanAuthData = new Authentication($userTwo->getWrappedObject(), 'orphan', $hash, base64_encode($key->getRawKeyMaterial()));
 
         $authenticationMapper->findByUsername(Argument::any())->willReturn(null);
         $authenticationMapper->findByUsername('userA')->willReturn($authenticationData);
