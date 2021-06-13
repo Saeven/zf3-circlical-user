@@ -9,6 +9,7 @@ use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
+use CirclicalUser\Exception\UserWithoutAuthenticationRecordException;
 use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Provider\AuthenticationProviderInterface;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
@@ -187,17 +188,25 @@ class AuthenticationService
      * Passed in by a successful form submission, should set proper auth cookies if the identity verifies.
      * The login should work with both username, and email address.
      *
-     * @throws BadPasswordException Thrown when the password doesn't work
-     * @throws NoSuchUserException Thrown when the user can't be identified
+     * @throws BadPasswordException Thrown when the password doesn't work.
+     * @throws NoSuchUserException Thrown when the user can't be identified.
+     * @throws UserWithoutAuthenticationRecordException If a user was found by email, yet had no matching authentication record.
+     * @throws AuthenticationDataException Can be thrown if your database isn't properly structured, e.g. distinct emails.
      */
     public function authenticate(string $username, string $password): User
     {
         $auth = $this->authenticationProvider->findByUsername($username);
-        $user = null;
 
         if (!$auth && filter_var($username, FILTER_VALIDATE_EMAIL)) {
             if ($user = $this->userProvider->findByEmail($username)) {
-                $auth = $this->authenticationProvider->findByUserId($user->getId());
+                if (!$auth = $user->getAuthenticationRecord()) {
+                    throw new UserWithoutAuthenticationRecordException();
+                }
+
+                // should never happen, but here to protect implementations
+                if ($auth->getUser() !== $user) {
+                    throw new AuthenticationDataException();
+                }
             }
         }
 
@@ -207,24 +216,17 @@ class AuthenticationService
 
         if (password_verify($password, $auth->getHash())) {
             // might have been discovered earlier
-            if (!$user) {
-                $user = $this->userProvider->getUser($auth->getUserId());
+            $user = $auth->getUser();
+            $this->resetAuthenticationKey($auth);
+            $this->setSessionCookies($auth);
+            $this->setIdentity($user);
+
+            if (password_needs_rehash($auth->getHash(), PASSWORD_DEFAULT)) {
+                $auth->setHash(password_hash($password, PASSWORD_DEFAULT));
+                $this->authenticationProvider->update($auth);
             }
 
-            if ($user) {
-                $this->resetAuthenticationKey($auth);
-                $this->setSessionCookies($auth);
-                $this->setIdentity($user);
-
-                if (password_needs_rehash($auth->getHash(), PASSWORD_DEFAULT)) {
-                    $auth->setHash(password_hash($password, PASSWORD_DEFAULT));
-                    $this->authenticationProvider->update($auth);
-                }
-
-                return $user;
-            }
-
-            throw new NoSuchUserException();
+            return $user;
         }
 
         throw new BadPasswordException();
@@ -233,17 +235,17 @@ class AuthenticationService
 
     /**
      * Change an auth record username given a user id and a new username.
-     * Note - in this case username is email.
      *
      * @throws NoSuchUserException Thrown when the user's authentication records couldn't be found
      * @throws UsernameTakenException
+     * @throws UserWithoutAuthenticationRecordException
      */
     public function changeUsername(User $user, string $newUsername): AuthenticationRecordInterface
     {
-        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        $auth = $user->getAuthenticationRecord();
 
         if (!$auth) {
-            throw new NoSuchUserException();
+            throw new UserWithoutAuthenticationRecordException();
         }
 
         // check to see if already taken
@@ -429,7 +431,7 @@ class AuthenticationService
             //
             // 4. Cookies check out - it's up to the user provider now
             //
-            $user = $this->userProvider->getUser($auth->getUserId());
+            $user = $auth->getUser();
             if ($user) {
                 $this->setIdentity($user);
 
@@ -486,9 +488,9 @@ class AuthenticationService
     {
         $this->enforcePasswordStrength($newPassword, $user);
 
-        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        $auth = $user->getAuthenticationRecord();
         if (!$auth) {
-            throw new NoSuchUserException();
+            throw new UserWithoutAuthenticationRecordException();
         }
 
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -504,14 +506,18 @@ class AuthenticationService
      * @param string $password Cleartext password that'w will be verified
      *
      * @return bool
-     *
-     * @throws NoSuchUserException
+     * @throws PersistedUserRequiredException
+     * @throws UserWithoutAuthenticationRecordException
      */
     public function verifyPassword(User $user, string $password): bool
     {
-        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        if (!$user->getId()) {
+            throw new PersistedUserRequiredException("Your user must have an ID before you can create auth records with it");
+        }
+
+        $auth = $user->getAuthenticationRecord();
         if (!$auth) {
-            throw new NoSuchUserException();
+            throw new UserWithoutAuthenticationRecordException();
         }
 
         return password_verify($password, $auth->getHash());
@@ -563,6 +569,10 @@ class AuthenticationService
             throw new PersistedUserRequiredException("Your user must have an ID before you can create auth records with it");
         }
 
+        if ($user->getAuthenticationRecord() !== null) {
+            throw new \LogicException("This user already has an existing authentication record");
+        }
+
         if ($this->authenticationProvider->findByUsername($username)) {
             throw new UsernameTakenException();
         }
@@ -581,11 +591,12 @@ class AuthenticationService
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $auth = $this->authenticationProvider->create(
-            $user->getId(),
+            $user,
             $username,
             $hash,
             KeyFactory::generateEncryptionKey()->getRawKeyMaterial()
         );
+        $user->setAuthenticationRecord($auth);
         $this->authenticationProvider->save($auth);
 
         return $auth;
@@ -612,11 +623,12 @@ class AuthenticationService
     /**
      * Logout.  Reset the user authentication key, and delete all cookies.
      */
-    public function clearIdentity()
+    public function clearIdentity(): void
     {
         if ($user = $this->getIdentity()) {
-            $auth = $this->authenticationProvider->findByUserId($user->getId());
-            $this->resetAuthenticationKey($auth);
+            if ($auth = $user->getAuthenticationRecord()) {
+                $this->resetAuthenticationKey($auth);
+            }
         }
 
         $sp = session_get_cookie_params();
@@ -645,9 +657,9 @@ class AuthenticationService
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 
-        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        $auth = $user->getAuthenticationRecord();
         if (!$auth) {
-            throw new NoSuchUserException();
+            throw new UserWithoutAuthenticationRecordException();
         }
 
         if ($this->resetTokenProvider->getRequestCount($auth) > 5) {
@@ -671,15 +683,15 @@ class AuthenticationService
      * @throws PasswordResetProhibitedException
      * @throws \CirclicalUser\Exception\WeakPasswordException
      */
-    public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword)
+    public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword): void
     {
         if (!$this->resetTokenProvider) {
             throw new PasswordResetProhibitedException('The configuration currently prohibits the resetting of passwords!');
         }
 
-        $auth = $this->authenticationProvider->findByUserId($user->getId());
+        $auth = $user->getAuthenticationRecord();
         if (!$auth) {
-            throw new NoSuchUserException();
+            throw new UserWithoutAuthenticationRecordException();
         }
 
         $remote = new RemoteAddress();

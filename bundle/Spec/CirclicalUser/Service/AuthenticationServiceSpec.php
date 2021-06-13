@@ -8,9 +8,11 @@ use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
+use CirclicalUser\Exception\UserWithoutAuthenticationRecordException;
 use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
+use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Exception\BadPasswordException;
 use CirclicalUser\Exception\EmailUsernameTakenException;
@@ -46,6 +48,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
         $authenticationData = new Authentication($user->getWrappedObject(), 'userA', $hash, base64_encode($key->getRawKeyMaterial()));
         $this->authenticationData = $authenticationData;
+
         $orphanAuthData = new Authentication($userTwo->getWrappedObject(), 'orphan', $hash, base64_encode($key->getRawKeyMaterial()));
 
         $authenticationMapper->findByUsername(Argument::any())->willReturn(null);
@@ -58,6 +61,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
 
         $user->getId()->willReturn(1);
+        $user->getAuthenticationRecord()->willReturn($authenticationData);
 
         $userMapper->findByEmail(Argument::any())->willReturn(null);
         $userMapper->findByEmail('alex@circlical.com')->willReturn($user);
@@ -105,9 +109,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         }
     }
 
-    public function it_checks_via_email_second($authenticationMapper, $userMapper)
+    public function it_checks_via_email_second(AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
     {
-        $authenticationMapper->findByUserId(1)->shouldBeCalled();
+        $userMapper->findByEmail('alex@circlical.com')->shouldBeCalled();
         $user = $this->authenticate('alex@circlical.com', 'abc');
         $user->getId()->shouldBe(1);
     }
@@ -139,13 +143,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(NoSuchUserException::class)->during('authenticate', ['unknown@circlical.com', 'def']);
     }
 
-    public function it_fails_on_orphaned_user_records($authenticationMapper, $userMapper)
-    {
-        $authenticationMapper->findByUserId()->shouldNotBeCalled();
-        $userMapper->findByEmail()->shouldNotBeCalled();
-        $this->shouldThrow(NoSuchUserException::class)->during('authenticate', ['orphan', 'abc']);
-    }
-
     public function it_permits_username_changes($authenticationMapper, $userMapper, $user)
     {
         $this->changeUsername($user, 'newUsername');
@@ -156,14 +153,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->changeUsername($user, 'userA');
     }
 
-    public function it_declines_username_changes_for_missing_users($authenticationMapper, $userMapper, User $user3)
+    public function it_declines_username_changes_when_usernames_are_taken($authenticationMapper, $userMapper, User $user1, Authentication $authRecord)
     {
-        $user3->getId()->willReturn(3);
-        $this->shouldThrow(NoSuchUserException::class)->during('changeUsername', [$user3, 'newUsername']);
-    }
-
-    public function it_declines_username_changes_when_usernames_are_taken($authenticationMapper, $userMapper, User $user1)
-    {
+        $user1->getAuthenticationRecord()->willReturn($authRecord);
         $user1->getId()->willReturn(1);
         $this->shouldThrow(UsernameTakenException::class)->during('changeUsername', [$user1, 'orphan']);
     }
@@ -178,10 +170,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->verifyPassword($user, 'xyz')->shouldBe(false);
     }
 
-    public function it_fails_verify_non_existing_user($authenticationMapper, $userMapper, User $user4)
+    public function it_fails_verify_non_persisted_user($authenticationMapper, $userMapper, User $user4)
     {
-        $user4->getId()->willReturn(4);
-        $this->shouldThrow(NoSuchUserException::class)->during('verifyPassword', [$user4, 'abc']);
+        $user4->getId()->willReturn(0);
+        $this->shouldThrow(PersistedUserRequiredException::class)->during('verifyPassword', [$user4, 'abc']);
     }
 
     public function it_returns_authenticated_identities()
@@ -386,38 +378,42 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->getIdentity()->shouldBe(null);
     }
 
-    public function it_resets_passwords($authenticationMapper, $user)
+    public function it_resets_passwords(AuthenticationMapper $authenticationMapper, User $user)
     {
-        $authenticationMapper->findByUserId(1)->shouldBeCalled();
         $authenticationMapper->update($this->authenticationData)->shouldBeCalled();
         $this->resetPassword($user, 'efg');
     }
 
     public function it_wont_reset_passwords_when_users_do_not_exist(User $user5)
     {
+        $user5->getAuthenticationRecord()->willReturn(null);
         $user5->getId()->willReturn(5);
-        $this->shouldThrow(NoSuchUserException::class)->during('resetPassword', [$user5, 'efg']);
+        $this->shouldThrow(UserWithoutAuthenticationRecordException::class)->during('resetPassword', [$user5, 'efg']);
     }
 
-    public function it_can_create_new_auth_records($authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth)
+    public function it_can_create_new_auth_records(AuthenticationMapper $authenticationMapper, User $user5, AuthenticationRecordInterface $newAuth)
     {
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
         $newAuth->getUsername()->willReturn('email');
         $newAuth->getUserId()->willReturn(5);
+        $user5->getAuthenticationRecord()->willReturn(null);
         $user5->getId()->willReturn(5);
+        $user5->setAuthenticationRecord($newAuth)->shouldBeCalled();
         $authenticationMapper->save(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
-        $authenticationMapper->create(Argument::type('integer'), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
+        $authenticationMapper->create(Argument::type(UserInterface::class), Argument::type('string'), Argument::type('string'), Argument::type('string'))->willReturn($newAuth);
         $this->create($user5, 'userC', 'beestring')->shouldBeAnInstanceOf(AuthenticationRecordInterface::class);
     }
 
     public function it_wont_overwrite_existing_auth_on_create($authenticationMapper, User $user5)
     {
+        $user5->getAuthenticationRecord()->willReturn(null);
         $user5->getId()->willReturn(5);
         $this->shouldThrow(UsernameTakenException::class)->during('create', [$user5, 'userA', 'razorblades']);
     }
 
-    public function it_wont_create_auth_when_email_usernames_belong_to_user_records($authenticationMapper, User $user5)
+    public function it_wont_create_auth_when_email_usernames_belong_to_user_records(AuthenticationMapper $authenticationMapper, User $user5)
     {
+        $user5->getAuthenticationRecord()->willReturn(null);
         $user5->getId()->willReturn(5);
         $user5->getEmail()->willReturn('alex@circlical.com');
         $this->shouldThrow(EmailUsernameTakenException::class)->during('create', [$user5, 'alex@circlical.com', 'pepperspray']);
@@ -425,6 +421,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_does_not_permit_mismatched_emails(User $user6)
     {
+        $user6->getAuthenticationRecord()->willReturn(null);
         $user6->getId()->willReturn(1);
         $user6->getEmail()->willReturn('a@b.com');
         $this->shouldThrow(MismatchedEmailsException::class)->during('create', [$user6, 'b@b.com', 'alphabet']);
@@ -527,7 +524,7 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $newAuth->getUserId()->willReturn(5);
         $authenticationMapper->findByUsername('pwUser')->willReturn(null);
         $userMapper->findByEmail('marco@example.com')->willReturn(null);
-        $authenticationMapper->create(5, 'pwUser', Argument::any(), Argument::any())->willReturn($newAuth);
+        $authenticationMapper->create($userInstance, 'pwUser', Argument::any(), Argument::any())->willReturn($newAuth);
 
 
         // PASSWORD QUALITY CHECKS BELOW
@@ -558,8 +555,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_wont_create_recovery_tokens_for_authless_users(User $who)
     {
+        $who->getAuthenticationRecord()->willReturn(null);
         $who->getId()->willReturn(789);
-        $this->shouldThrow(NoSuchUserException::class)->during('createRecoveryToken', [$who]);
+        $this->shouldThrow(UserWithoutAuthenticationRecordException::class)->during('createRecoveryToken', [$who]);
     }
 
     public function it_fails_to_create_tokens_when_password_changes_are_prohibited($authenticationMapper, $userMapper, $user)
@@ -598,8 +596,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_bails_on_password_changes_for_authless_users(User $who)
     {
+        $who->getAuthenticationRecord()->willReturn(null);
         $who->getId()->willReturn(789);
-        $this->shouldThrow(NoSuchUserException::class)->during('changePasswordWithRecoveryToken', [$who, 123, 'string', 'string']);
+        $this->shouldThrow(UserWithoutAuthenticationRecordException::class)->during('changePasswordWithRecoveryToken', [$who, 123, 'string', 'string']);
     }
 
     public function it_bails_on_password_changes_with_bad_reset_token_ids($user, $tokenMapper)

@@ -19,7 +19,10 @@ class SampleUser implements UserInterface
 
     private string $name;
 
-    private ?AuthenticationRecordInterface $authenticationRecord;
+    /**
+     * @var ?AuthenticationRecordInterface
+     */
+    private $authenticationRecord;
 
     public function __construct(int $id, array $roles, string $email, string $name)
     {
@@ -76,7 +79,7 @@ class SampleUser implements UserInterface
         return false;
     }
 
-    public function setAuthenticationRecord(?AuthenticationRecordInterface $authentication): void
+    public function setAuthenticationRecord(AuthenticationRecordInterface $authentication): void
     {
         $this->authenticationRecord = $authentication;
     }
