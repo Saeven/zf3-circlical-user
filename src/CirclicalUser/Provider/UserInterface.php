@@ -21,7 +21,7 @@ interface UserInterface
 
     public function hasRole(RoleInterface $roleName): bool;
 
-    public function setAuthenticationRecord(?AuthenticationRecordInterface $authentication): void;
+    public function setAuthenticationRecord(AuthenticationRecordInterface $authentication): void;
 
     public function getAuthenticationRecord(): ?AuthenticationRecordInterface;
 }
