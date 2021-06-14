@@ -5,6 +5,7 @@ namespace CirclicalUser\Entity;
 use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\InvalidResetTokenFingerprintException;
 use CirclicalUser\Exception\InvalidResetTokenIpAddressException;
+use CirclicalUser\Exception\MismatchedResetTokenException;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
@@ -69,6 +70,15 @@ class UserResetToken implements UserResetTokenInterface
     private $status;
 
 
+    /**
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     * @throws \ParagonIE\Halite\Alerts\InvalidDigestLength
+     * @throws \SodiumException
+     * @throws \JsonException
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidMessage
+     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
+     */
     public function __construct(AuthenticationRecordInterface $authentication, string $requestingIpAddress)
     {
         $this->authentication = $authentication;
@@ -82,13 +92,11 @@ class UserResetToken implements UserResetTokenInterface
         $this->token = base64_encode(
             Crypto::encrypt(
                 new HiddenString(
-                    json_encode(
-                        [
-                            'fingerprint' => $fingerprint,
-                            'timestamp' => $this->request_time->format('U'),
-                            'userId' => $authentication->getUserId(),
-                        ]
-                    )
+                    json_encode([
+                        'fingerprint' => $fingerprint,
+                        'timestamp' => $this->request_time->format('U'),
+                        'userId' => $authentication->getUserId(),
+                    ], JSON_THROW_ON_ERROR)
                 ),
                 $key
             )
@@ -127,6 +135,12 @@ class UserResetToken implements UserResetTokenInterface
         $this->status = $status;
     }
 
+    /**
+     * @throws InvalidResetTokenIpAddressException
+     * @throws InvalidResetTokenException
+     * @throws InvalidResetTokenFingerprintException
+     * @throws MismatchedResetTokenException
+     */
     public function isValid(
         AuthenticationRecordInterface $authenticationRecord,
         string $checkToken,
@@ -138,8 +152,9 @@ class UserResetToken implements UserResetTokenInterface
             return false;
         }
 
+        // this token is for someone else...
         if ($authenticationRecord !== $this->authentication) {
-            throw new InvalidResetTokenException();
+            throw new MismatchedResetTokenException();
         }
 
         try {
@@ -151,13 +166,13 @@ class UserResetToken implements UserResetTokenInterface
             throw new InvalidResetTokenException();
         }
 
-        $json = @json_decode($jsonString);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            if (!isset($json->fingerprint, $json->timestamp, $json->userId)) {
+        try {
+            $json = @json_decode($jsonString, true, 512, JSON_THROW_ON_ERROR);
+            if (!isset($json['fingerprint'], $json['timestamp'], $json['userId'])) {
                 throw new InvalidResetTokenException();
             }
 
-            if ($validateFingerprint && $json->fingerprint !== $this->getFingerprint()) {
+            if ($validateFingerprint && $json['fingerprint'] !== $this->getFingerprint()) {
                 throw new InvalidResetTokenFingerprintException();
             }
 
@@ -165,11 +180,14 @@ class UserResetToken implements UserResetTokenInterface
                 throw new InvalidResetTokenIpAddressException();
             }
 
-            if ($json->userId !== $authenticationRecord->getUserId()) {
+            if ($json['userId'] !== $authenticationRecord->getUserId()) {
                 throw new InvalidResetTokenException();
             }
+
+            return true;
+        } catch (\JsonException $exception) {
         }
 
-        return true;
+        return false;
     }
 }

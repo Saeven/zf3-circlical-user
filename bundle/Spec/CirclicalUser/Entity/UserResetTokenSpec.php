@@ -7,6 +7,7 @@ use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Exception\InvalidResetTokenException;
 use CirclicalUser\Exception\InvalidResetTokenFingerprintException;
 use CirclicalUser\Exception\InvalidResetTokenIpAddressException;
+use CirclicalUser\Exception\MismatchedResetTokenException;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\Symmetric\Crypto;
@@ -55,7 +56,8 @@ class UserResetTokenSpec extends ObjectBehavior
         $property = new \ReflectionProperty(UserResetToken::class, 'token');
         $property->setAccessible(true);
         $token = $property->getValue($this->getWrappedObject());
-        $this->shouldThrow(InvalidResetTokenException::class)->during(
+        $newAuth->getRawSessionKey()->shouldNotBeCalled();
+        $this->shouldThrow(MismatchedResetTokenException::class)->during(
             'isValid',
             [$newAuth, $token, '10.10.1.1', false, false]
         );
