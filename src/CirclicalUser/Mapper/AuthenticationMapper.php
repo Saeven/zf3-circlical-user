@@ -18,7 +18,12 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
 
     public function findByUserId($userId): ?AuthenticationRecordInterface
     {
-        return $this->getRepository()->findOneBy(['user_id' => $userId]);
+        return $this->getRepository()->createQueryBuilder('a')
+            ->select('a')
+            ->where('a.user = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getSingleResult();
     }
 
     public function create(UserInterface $user, string $username, string $hash, string $rawKey): AuthenticationRecordInterface
