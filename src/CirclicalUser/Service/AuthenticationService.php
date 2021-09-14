@@ -649,7 +649,7 @@ class AuthenticationService
 
         $sp = session_get_cookie_params();
         $killTime = time() - 3600;
-        foreach ([self::COOKIE_USER, self::COOKIE_VERIFY_A, self::COOKIE_VERIFY_B] as $cookieName) {
+        foreach ([self::COOKIE_USER, self::COOKIE_VERIFY_A, self::COOKIE_VERIFY_B, self::COOKIE_TIMESTAMP] as $cookieName) {
             setcookie($cookieName, '', $killTime, '/', $sp['domain'], false, true);
         }
 
