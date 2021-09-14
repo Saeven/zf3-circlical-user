@@ -53,6 +53,13 @@ class AuthenticationService
      */
     public const COOKIE_VERIFY_B = '_sessionc';
 
+
+    /**
+     * Non http-only cookie that contains timestamp, can be used for things like JS-detection of inactivity
+     * against session expiry
+     */
+    public const COOKIE_TIMESTAMP = '_sessiont';
+
     /**
      * Prefix for hash cookies, mmm.
      */
@@ -309,12 +316,21 @@ class AuthenticationService
             self::COOKIE_VERIFY_B,
             hash_hmac('sha256', $hashCookieContents, $userKey)
         );
+
+        //
+        // 5 - Set the timeout cookie
+        //
+        $this->setCookie(
+            self::COOKIE_TIMESTAMP,
+            time(),
+            false
+        );
     }
 
     /**
      * Set a cookie with values defined by configuration
      */
-    private function setCookie(string $name, string $value)
+    private function setCookie(string $name, string $value, bool $httpOnly = true)
     {
         $expiry = $this->transient ? 0 : (time() + 2629743);
         $sessionParameters = session_get_cookie_params();
@@ -326,7 +342,7 @@ class AuthenticationService
                 'path' => '/',
                 'domain' => $sessionParameters['domain'],
                 'secure' => $this->secure,
-                'httponly' => true,
+                'httponly' => $httpOnly,
                 'samesite' => $this->sameSite,
             ]
         );
