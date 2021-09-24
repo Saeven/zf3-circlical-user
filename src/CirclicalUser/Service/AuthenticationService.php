@@ -108,6 +108,11 @@ class AuthenticationService
      */
     private string $sameSite;
 
+    /**
+     * Configure the amount of time added to 'now', for cookie expiry
+     */
+    private int $authenticationCookieDuration;
+
 
     /**
      * AuthenticationService constructor.
@@ -133,7 +138,8 @@ class AuthenticationService
         PasswordCheckerInterface $passwordChecker,
         bool $validateFingerprint,
         bool $validateIp,
-        string $sameSite
+        string $sameSite,
+        int $authenticationCookieDuration
     ) {
         $this->identity = null;
         $this->authenticationProvider = $authenticationProvider;
@@ -146,6 +152,7 @@ class AuthenticationService
         $this->validateFingerprint = $validateFingerprint;
         $this->validateIp = $validateIp;
         $this->sameSite = $sameSite;
+        $this->authenticationCookieDuration = $authenticationCookieDuration;
     }
 
     /**
@@ -285,12 +292,15 @@ class AuthenticationService
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername()), $userKey));
 
+        $expiry = $this->transient ? 0 : (time() + $this->authenticationCookieDuration);
+
         //
         // 1 - Set the cookie that contains the user ID, and hash cookie name
         //
         $this->setCookie(
             self::COOKIE_USER,
-            $userTuple
+            $userTuple,
+            $expiry
         );
 
         //
@@ -298,7 +308,8 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_HASH_PREFIX . $hashCookieName,
-            $hashCookieContents
+            $hashCookieContents,
+            $expiry
         );
 
         //
@@ -306,7 +317,8 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_A,
-            hash_hmac('sha256', $userTuple, $systemKey)
+            hash_hmac('sha256', $userTuple, $systemKey),
+            $expiry
         );
 
         //
@@ -314,7 +326,8 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_B,
-            hash_hmac('sha256', $hashCookieContents, $userKey)
+            hash_hmac('sha256', $hashCookieContents, $userKey),
+            $expiry
         );
 
         //
@@ -322,7 +335,8 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_TIMESTAMP,
-            time(),
+            (string)$expiry,
+            $expiry,
             false
         );
     }
@@ -330,9 +344,8 @@ class AuthenticationService
     /**
      * Set a cookie with values defined by configuration
      */
-    private function setCookie(string $name, string $value, bool $httpOnly = true)
+    private function setCookie(string $name, string $value, int $expiry, bool $httpOnly = true)
     {
-        $expiry = $this->transient ? 0 : (time() + 2629743);
         $sessionParameters = session_get_cookie_params();
         setcookie(
             $name,
@@ -340,7 +353,7 @@ class AuthenticationService
             [
                 'expires' => $expiry,
                 'path' => '/',
-                'domain' => $sessionParameters['domain'],
+                'domain' => (string)$sessionParameters['domain'],
                 'secure' => $this->secure,
                 'httponly' => $httpOnly,
                 'samesite' => $this->sameSite,
@@ -448,11 +461,9 @@ class AuthenticationService
             // 4. Cookies check out - it's up to the user provider now
             //
             $user = $auth->getUser();
-            if ($user) {
-                $this->setIdentity($user);
+            $this->setIdentity($user);
 
-                return $this->identity;
-            }
+            return $this->identity;
         } catch (\Exception $x) {
             $this->purgeHashCookies();
         }
@@ -725,5 +736,14 @@ class AuthenticationService
         $this->resetPassword($user, $newPassword);
         $resetToken->setStatus(UserResetTokenInterface::STATUS_USED);
         $this->resetTokenProvider->update($resetToken);
+    }
+
+    /**
+     * Allow the override of the authentication cookies' durations.  Though this should be set via factory,
+     * this is to help with cache/database-based configurations that may need it.
+     */
+    public function setAuthenticationCookieDuration(int $authenticationCookieDuration): void
+    {
+        $this->authenticationCookieDuration = $authenticationCookieDuration;
     }
 }
