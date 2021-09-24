@@ -1,8 +1,7 @@
 # Authentication, Identity, and RBAC for the Laminas Framework
 
-[![Build Status](https://github.com/saeven/zf3-circlical-user/actions/workflows/phpspec-task.yml/badge.svg)](https://travis-ci.org/Saeven/zf3-circlical-user)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Grade)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/fe24b2bf7ab74919844fdb49adbf99fe)](https://www.codacy.com/app/alemaire/zf3-circlical-user?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Coverage)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed8e71ca6eb04fc080c8e64af51629b9)](https://www.codacy.com/gh/Saeven/zf3-circlical-user/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Saeven/zf3-circlical-user&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ed8e71ca6eb04fc080c8e64af51629b9)](https://www.codacy.com/gh/Saeven/zf3-circlical-user/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Saeven/zf3-circlical-user&utm_campaign=Badge_Coverage)
 [![Latest Stable Version](https://poser.pugx.org/saeven/zf3-circlical-user/v/stable)](https://packagist.org/packages/saeven/zf3-circlical-user)
 [![Total Downloads](https://poser.pugx.org/saeven/zf3-circlical-user/downloads)](https://packagist.org/packages/saeven/zf3-circlical-user)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Saeven_zf3-circlical-user&metric=alert_status)](https://sonarcloud.io/dashboard?id=Saeven_zf3-circlical-user)

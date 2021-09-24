@@ -55,7 +55,8 @@ class AuthenticationServiceFactory implements FactoryInterface
             $container->get(PasswordCheckerInterface::class),
             $userConfig['password_reset_tokens']['validate_fingerprint'] ?? true,
             $userConfig['password_reset_tokens']['validate_ip'] ?? false,
-            $userConfig['auth']['samesite_policy'] ?? 'None'
+            $userConfig['auth']['samesite_policy'] ?? 'None',
+            $userConfig['auth']['cookie_duration'] ?? 2629743
         );
     }
 }

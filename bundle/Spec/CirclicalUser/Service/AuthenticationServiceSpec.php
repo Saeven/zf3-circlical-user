@@ -79,7 +79,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             new PasswordNotChecked(),
             true,
             true,
-            'None'
+            'None',
+            2629743
         );
     }
 
@@ -485,7 +486,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             new Zxcvbn([]),
             true,
             true,
-            'None'
+            'None',
+            2629743
         );
 
         $newAuth->getRawSessionKey()->willReturn(KeyFactory::generateEncryptionKey()->getRawKeyMaterial());
@@ -512,7 +514,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             new Zxcvbn([]),
             true,
             true,
-            'None'
+            'None',
+            2629743
         );
 
         // Required, since the array-cast can't support closures which are passed by phpspec, even with getWrappedObject()
@@ -572,7 +575,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             new PasswordNotChecked(),
             true,
             true,
-            'None'
+            'None',
+            2629743
         );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('createRecoveryToken', [$user]);
     }
@@ -589,7 +593,8 @@ class AuthenticationServiceSpec extends ObjectBehavior
             new PasswordNotChecked(),
             true,
             true,
-            'None'
+            'None',
+            2629743
         );
         $this->shouldThrow(PasswordResetProhibitedException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }
