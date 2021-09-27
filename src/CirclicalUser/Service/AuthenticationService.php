@@ -463,6 +463,11 @@ class AuthenticationService
             $user = $auth->getUser();
             $this->setIdentity($user);
 
+            // these could be limited duration cookies, in which case, they must be renewed
+            if ($this->authenticationCookieDuration !== 0) {
+                $this->setSessionCookies($auth);
+            }
+
             return $this->identity;
         } catch (\Exception $x) {
             $this->purgeHashCookies();
