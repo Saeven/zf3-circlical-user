@@ -6,6 +6,7 @@ composer.lock
 vendor
 .idea
 /build
+/tmp
 .vagrant
 nbproject
 phpunit.xml
