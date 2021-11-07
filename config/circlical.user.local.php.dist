@@ -81,7 +81,7 @@ return [
                  * If the cookie doesn’t have the flag Secure true, the browser ignores the Set-cookie server’s
                  * response header and the cookie is not stored to the browser.
                  */
-                'samesite_policy' => 'lax',
+                'samesite_policy' => 'None',
 
                 /*
                  * Forgot password functionality
