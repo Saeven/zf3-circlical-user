@@ -76,7 +76,10 @@ return [
                 'secure_cookies' => false,
 
                 /*
-                 * What SameSite policy do we give cookies?  Can be set to null 'Strict, 'Lax' or 'None'
+                 * What SameSite policy do we give cookies?  Can be set to null 'Strict, 'Lax' or 'None'.
+                 * Advisory: If the cookie’s attribute SameSite is None the cookie has to be set with flag Secure true.
+                 * If the cookie doesn’t have the flag Secure true, the browser ignores the Set-cookie server’s
+                 * response header and the cookie is not stored to the browser.
                  */
                 'samesite_policy' => 'Lax',
 
