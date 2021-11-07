@@ -78,7 +78,7 @@ return [
                 /*
                  * What SameSite policy do we give cookies?  Can be set to null 'Strict, 'Lax' or 'None'
                  */
-                'samesite_policy' => 'lax',
+                'samesite_policy' => 'Lax',
 
                 /*
                  * Forgot password functionality
