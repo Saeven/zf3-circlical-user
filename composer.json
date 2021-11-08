@@ -43,6 +43,16 @@
     "laminas/laminas-validator": "2.*",
     "laminas/laminas-dependency-plugin": "^2.1"
   },
+  "replace": {
+    "laminas/laminas-cache-storage-adapter-apc": "*",
+    "laminas/laminas-cache-storage-adapter-dba": "*",
+    "laminas/laminas-cache-storage-adapter-memcache": "*",
+    "laminas/laminas-cache-storage-adapter-memcached": "*",
+    "laminas/laminas-cache-storage-adapter-mongodb": "*",
+    "laminas/laminas-cache-storage-adapter-wincache": "*",
+    "laminas/laminas-cache-storage-adapter-xcache": "*",
+    "laminas/laminas-cache-storage-adapter-zend-server": "*"
+  },
   "require-dev": {
     "phpspec/phpspec": "7.0.1",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",

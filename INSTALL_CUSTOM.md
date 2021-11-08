@@ -12,9 +12,6 @@ This module provides an integration with [laminas-cache](https://docs.laminas.de
 with some storage adapters which are not compatible with PHP 8.0 or later. To prevent installation of these unused cache
 adapters, you will need to add the following to your `composer.json` file:
 ```
-    "require": {
-         "doctrine/doctrine-module": "^4.2.0"
-    },
     "replace": {
         "laminas/laminas-cache-storage-adapter-apc": "*",
         "laminas/laminas-cache-storage-adapter-dba": "*",
