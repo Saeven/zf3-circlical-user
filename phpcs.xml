@@ -1,21 +1,25 @@
 <?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
 
-<ruleset name="PHP_CodeSniffer">
+    <arg name="basepath" value="."/>
+    <arg name="cache" value="tmp/.phpcs-cache"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg name="parallel" value="80"/>
 
-    <description>PHPCS configuration file.</description>
-    <!-- check all files in the app directory, feel free to add more files with:
-    <file>FOLDER NAME</file>
-    -->
-    <file>module</file>
+    <!-- Show progress -->
+    <arg value="p"/>
 
-    <!-- exclude our migrations directory from the violation check-->
-    <!-- <exclude-pattern></exclude-pattern> -->
+    <!-- Paths to check -->
+    <file>src</file>
 
-    <!-- ignore warnings and display ERRORS only -->
-    <!-- <arg value="np"/> -->
-
-    <!-- Our base rule: set to PSR12-->
-    <rule ref="PSR12"/>
+    <!-- Include all rules from the Laminas Coding Standard -->
+    <rule ref="LaminasCodingStandard">
+        <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+        <exclude name="Generic.Formatting.SpaceAfterNot"/>
+        <exclude name="WebimpressCodingStandard.Arrays.DoubleArrow"/>
+    </rule>
 
     <rule ref="Generic.Files.LineLength">
         <properties>
@@ -23,5 +27,4 @@
             <property name="absoluteLineLimit" value="220"/>
         </properties>
     </rule>
-
 </ruleset>
