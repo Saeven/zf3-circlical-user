@@ -14,6 +14,18 @@
     <!-- Paths to check -->
     <file>src</file>
 
+    <rule ref="PSR2">
+        <!-- or to disable the whole sniff -->
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="220"/>
+            <property name="absoluteLineLimit" value="220"/>
+        </properties>
+    </rule>
+
     <!-- Include all rules from the Laminas Coding Standard -->
     <rule ref="LaminasCodingStandard"/>
 </ruleset>
