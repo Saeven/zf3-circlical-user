@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class GuardConfigurationException extends \Exception
+use Exception;
+
+class GuardConfigurationException extends Exception
 {
     public function __construct(string $controllerName, string $issue)
     {

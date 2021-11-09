@@ -1,40 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Listener;
 
 use CirclicalUser\Entity\Authentication;
 use CirclicalUser\Entity\UserApiToken;
 use CirclicalUser\Entity\UserAtom;
 use CirclicalUser\Entity\UserAuthenticationLog;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Doctrine\Common\EventSubscriber;
 use CirclicalUser\Entity\UserPermission;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 
 /**
- * Because this module doesn't provide a user
- *
- * Class UserEntityListener
- * @package CirclicalUser\Listener
+ * Because this module doesn't provide a user, for use with Doctrine
  */
 class UserEntityListener implements EventSubscriber
 {
     public const DEFAULT_ENTITY = 'CirclicalUser\Entity\User';
 
-    private $userEntity;
+    private string $userEntity;
 
-    public function __construct($userEntity)
+    public function __construct(string $userEntity)
     {
         $this->userEntity = $userEntity;
     }
 
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return ['loadClassMetadata'];
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
     {
-        /** @var \Doctrine\ORM\Mapping\ClassMetadata $classMetadata */
         $classMetadata = $eventArgs->getClassMetadata();
 
         if ($this->userEntity === self::DEFAULT_ENTITY) {

@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\View\Helper;
 
 use CirclicalUser\Service\AccessService;
 use Laminas\View\Helper\AbstractHelper;
+
+use function is_string;
 
 class RoleAccessViewHelper extends AbstractHelper
 {
@@ -16,6 +20,8 @@ class RoleAccessViewHelper extends AbstractHelper
 
     /**
      * Invoked via 'hasRole' from a template
+     *
+     * @param string|array $roleNameOrList
      */
     public function __invoke($roleNameOrList): bool
     {

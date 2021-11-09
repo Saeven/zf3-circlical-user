@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Doctrine\UuidBinaryType;
 
 /**
  * You can use this as a convenience method for cases where you would like to have public/private UUID situations.
@@ -11,20 +14,17 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * This pattern, is a common in-the-field pattern to keep keys lightweight, yet give you a unique public UUID that
  * can be used to keep the scrapers at bay if you need public object identifier.
- *
- * Trait SecretIdPublicUuidTrait
- * @package CirclicalUser\Entity
  */
 trait SecretIdPublicUuidTrait
 {
     /**
      * The unique auto incremented primary key.
      *
-     * @var int|null
-     *
      * @ORM\Id
      * @ORM\Column(type="integer", options={"unsigned": true})
      * @ORM\GeneratedValue
+     *
+     * @var int|null
      */
     protected $id;
 
@@ -32,6 +32,8 @@ trait SecretIdPublicUuidTrait
      * The internal primary identity key.
      *
      * @ORM\Column(type="uuid_binary", unique=true);
+     *
+     * @var UuidBinaryType
      */
     protected $uuid;
 
@@ -40,7 +42,7 @@ trait SecretIdPublicUuidTrait
         return $this->id;
     }
 
-    public function getUuid()
+    public function getUuid(): UuidBinaryType
     {
         return $this->uuid;
     }

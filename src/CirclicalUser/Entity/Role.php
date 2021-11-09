@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\RoleInterface;
@@ -10,28 +12,30 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity
  * @ORM\Table(name="acl_roles", indexes={@ORM\Index(name="name_idx", columns={"name"})})
- *
  */
 class Role implements RoleInterface
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
+     * @var int
      */
     private $id;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
+     *
+     * @var string
      */
     private $name;
 
     /**
-     * @var RoleInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
      * @ORM\JoinColumn(onDelete="CASCADE")
+     *
+     * @var RoleInterface
      */
     private $parent;
 
@@ -40,7 +44,6 @@ class Role implements RoleInterface
         $this->name = $name;
         $this->parent = $parent;
     }
-
 
     public function getId(): int
     {

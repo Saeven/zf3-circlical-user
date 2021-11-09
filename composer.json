@@ -24,6 +24,7 @@
       "role": "Paper Stapler"
     }
   ],
+  "prefer-stable": true,
   "require": {
     "ext-json": "*",
     "php": "^7.4.0 | >=8",

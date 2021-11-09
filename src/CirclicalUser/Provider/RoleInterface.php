@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Provider;
 
 /**
- * Interface RoleInterface
- *
  * A user role, with a parent.
- *
- * @package CirclicalUser\Provider
  */
 interface RoleInterface
 {
@@ -15,5 +13,5 @@ interface RoleInterface
 
     public function getName(): string;
 
-    public function getParent();
+    public function getParent(): ?RoleInterface;
 }

@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
-use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Entity\UserAtom;
+use CirclicalUser\Provider\UserInterface as User;
 
 /**
- * Class UserAtomMapper
- *
  * A convenience class, this lets you drop nuggets of information to support a user with an easy-to-use API.
- *
- * @package CirclicalUser\Mapper
  */
 class UserAtomMapper extends AbstractDoctrineMapper
 {
-    protected $entityName = UserAtom::class;
+    protected string $entityName = UserAtom::class;
 
     /**
      * Get an atomic piece of user data

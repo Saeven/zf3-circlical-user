@@ -1,27 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Factory\Service;
 
-use CirclicalUser\Mapper\UserResetTokenMapper;
-use CirclicalUser\Provider\PasswordCheckerInterface;
-use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
-use CirclicalUser\Service\AuthenticationService;
 use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
+use CirclicalUser\Mapper\UserResetTokenMapper;
+use CirclicalUser\Provider\PasswordCheckerInterface;
+use CirclicalUser\Service\AuthenticationService;
+use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+use RuntimeException;
+
+use function base64_decode;
+use function is_bool;
+use function is_callable;
 
 class AuthenticationServiceFactory implements FactoryInterface
 {
-    /**
-     * Create an object
-     *
-     * @param ContainerInterface $container
-     * @param string             $requestedName
-     * @param null|array         $options
-     *
-     * @return AuthenticationService
-     */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
@@ -38,7 +36,7 @@ class AuthenticationServiceFactory implements FactoryInterface
             if (is_callable($userConfig['auth']['secure_cookies'] ?? null)) {
                 $secure = $userConfig['auth']['secure_cookies']();
                 if (!is_bool($secure)) {
-                    throw new \RuntimeException("The secure_cookies callback for CirclicalUser must return a boolean value.");
+                    throw new RuntimeException("The secure_cookies callback for CirclicalUser must return a boolean value.");
                 }
             } else {
                 $secure = $userConfig['auth']['secure_cookies'];

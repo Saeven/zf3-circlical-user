@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Service\PasswordChecker;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
 
 class Passwdqc implements PasswordCheckerInterface
 {
-    private $creationOptions;
+    private ?array $creationOptions;
 
-    public function __construct(array $creationOptions = null)
+    public function __construct(?array $creationOptions = null)
     {
         $this->creationOptions = $creationOptions;
     }

@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Listener;
 
-use Application\Controller\IndexController;
-use Application\Controller\LoginController;
+use CirclicalUser\Provider\DenyStrategyInterface;
 use CirclicalUser\Service\AccessService;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\EventManager\ListenerAggregateInterface;
@@ -11,30 +12,37 @@ use Laminas\Http\Response;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use LogicException;
+
+use function implode;
+use function is_string;
+use function strtolower;
 
 class AccessListener implements ListenerAggregateInterface
 {
+    private AccessService $accessService;
 
-    private $accessService;
+    protected array $listeners;
 
-    protected $listeners;
+    private ?DenyStrategyInterface $accessDeniedStrategy;
 
-    private $accessDeniedStrategy;
-
-    public function __construct(AccessService $accessService, $accessDeniedStrategy = null)
+    public function __construct(AccessService $accessService, ?DenyStrategyInterface $accessDeniedStrategy = null)
     {
         $this->listeners = [];
         $this->accessService = $accessService;
         $this->accessDeniedStrategy = $accessDeniedStrategy;
     }
 
-    public function attach(EventManagerInterface $events, $priority = 100)
+    /**
+     * @param int $priority
+     */
+    public function attach(EventManagerInterface $events, $priority = 100): void
     {
         $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, [$this, 'verifyAccess']);
         $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH_ERROR, [$this, 'onDispatchError']);
     }
 
-    public function detach(EventManagerInterface $events)
+    public function detach(EventManagerInterface $events): void
     {
         foreach ($this->listeners as $index => $listener) {
             $events->detach($listener);
@@ -42,7 +50,7 @@ class AccessListener implements ListenerAggregateInterface
         }
     }
 
-    public function verifyAccess(MvcEvent $event)
+    public function verifyAccess(MvcEvent $event): void
     {
         $route = $event->getRouteMatch();
         $controllerName = $route->getParam('controller');
@@ -74,10 +82,9 @@ class AccessListener implements ListenerAggregateInterface
                     return;
                 }
             } else {
-                throw new \LogicException('A controller-action pair or middleware are required to verify access!');
+                throw new LogicException('A controller-action pair or middleware are required to verify access!');
             }
         }
-
 
         $eventError = null;
         if ($this->accessService->hasUser()) {

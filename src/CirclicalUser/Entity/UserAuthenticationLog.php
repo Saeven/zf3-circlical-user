@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\UserInterface;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,34 +17,37 @@ use Doctrine\ORM\Mapping as ORM;
 class UserAuthenticationLog
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\Column(type="integer", options={"unsigned"=true})
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
+     * @var int
      */
     private $id;
 
     /**
-     * @var UserInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
+     *
+     * @var UserInterface
      */
     private $user;
 
     /**
-     * @var \DateTimeImmutable
      * @ORM\Column(type="datetime_immutable", nullable=false)
+     *
+     * @var DateTimeImmutable
      */
     private $auth_time;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true, length=16, options={"fixed"=true});
+     *
+     * @var string
      */
     private $ip_address;
 
-
-    public function __construct(UserInterface $user, \DateTimeImmutable $time, string $ipAddress)
+    public function __construct(UserInterface $user, DateTimeImmutable $time, string $ipAddress)
     {
         $this->id = 0;
         $this->user = $user;
@@ -59,7 +65,7 @@ class UserAuthenticationLog
         return $this->user;
     }
 
-    public function getAuthTime(): \DateTimeImmutable
+    public function getAuthTime(): DateTimeImmutable
     {
         return $this->auth_time;
     }

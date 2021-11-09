@@ -1,38 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Factory;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
+
+use function strstr;
 
 class AbstractDoctrineMapperFactory implements AbstractFactoryInterface
 {
-    /**
-     * Determine if we can create a service with name
-     *
-     * @param ContainerInterface|ServiceLocatorInterface $serviceLocator
-     * @param string                                     $requestedName
-     *
-     * @return bool
-     * @internal param $name
-     */
-    public function canCreate(ContainerInterface $serviceLocator, $requestedName)
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
-        return strstr($requestedName, '\\Mapper\\') != null;
+        return strstr($requestedName, '\\Mapper\\') !== false;
     }
 
-
-    /**
-     * Create an object
-     *
-     * @param ContainerInterface $container
-     * @param string             $requestedName
-     * @param null|array         $options
-     *
-     * @return object
-     */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $mapper = new $requestedName();
         $mapper->setEntityManager($container->get('doctrine.entitymanager.orm_default'));

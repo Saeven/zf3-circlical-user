@@ -1,55 +1,60 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
 
+use function array_diff;
+use function in_array;
+
 /**
  * An example entity that represents an action rule.
  *
  * @ORM\Entity
  * @ORM\Table(name="acl_actions")
- *
  */
 class GroupPermission implements GroupPermissionInterface
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
+     * @var int
      */
     protected $id;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=255)
+     *
+     * @var string
      */
     protected $resource_class;
 
-
     /**
-     * @var string
      * @ORM\Column(type="string", length=255)
+     *
+     * @var string
      */
     protected $resource_id;
 
-
     /**
-     * @var RoleInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
+     *
+     * @var RoleInterface
      */
     protected $role;
 
-
     /**
-     * @var array
      * @ORM\Column(type="array")
+     *
+     * @var array
      */
     protected $actions;
-
 
     public function __construct(RoleInterface $role, string $resourceClass, string $resourceId, array $actions)
     {
@@ -59,18 +64,17 @@ class GroupPermission implements GroupPermissionInterface
         $this->actions = $actions;
     }
 
-
     public function getResourceClass(): string
     {
         return $this->resource_class;
     }
 
-    public function getResourceId()
+    public function getResourceId(): string
     {
         return $this->resource_id;
     }
 
-    public function getRole()
+    public function getRole(): RoleInterface
     {
         return $this->role;
     }
@@ -84,18 +88,18 @@ class GroupPermission implements GroupPermissionInterface
         return $this->actions;
     }
 
-    public function addAction($action)
+    public function addAction(string $action): void
     {
         if (!$this->actions) {
             $this->actions = [];
         }
-        if (in_array($action, $this->actions)) {
+        if (in_array($action, $this->actions, true)) {
             return;
         }
         $this->actions[] = $action;
     }
 
-    public function removeAction($action)
+    public function removeAction(string $action): void
     {
         if (!$this->actions) {
             return;
@@ -103,7 +107,7 @@ class GroupPermission implements GroupPermissionInterface
         $this->actions = array_diff($this->actions, [$action]);
     }
 
-    public function can($actionName): bool
+    public function can(string $actionName): bool
     {
         if (!$this->actions) {
             return false;

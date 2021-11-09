@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Provider;
 
 /**
@@ -7,22 +9,20 @@ namespace CirclicalUser\Provider;
  *
  * This interface defines a user-level permission that supersedes what this user may otherwise have as a function of
  * its group permissions.
- *
- * @package CirclicalUser\Provider
  */
 interface UserPermissionInterface
 {
     public function getResourceClass(): string;
 
-    public function getResourceId();
+    public function getResourceId(): string;
 
-    public function getUser();
+    public function getUser(): UserInterface;
 
-    public function can($actionName): bool;
+    public function can(string $actionName): bool;
 
     public function getActions(): array;
 
-    public function addAction($action);
+    public function addAction(string $action): void;
 
-    public function removeAction($action);
+    public function removeAction(string $action): void;
 }

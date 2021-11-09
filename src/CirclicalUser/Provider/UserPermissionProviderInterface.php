@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Provider;
 
 /**
- * Interface UserPermissionProviderInterface
- *
  * Framework for your user-permission provider.
- *
- * @package CirclicalUser\Provider
  */
 interface UserPermissionProviderInterface
 {
@@ -15,9 +13,9 @@ interface UserPermissionProviderInterface
 
     public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user): ?UserPermissionInterface;
 
-    public function update($rule);
-
     public function create(UserInterface $user, string $resourceClass, string $resourceId, array $actions): UserPermissionInterface;
 
-    public function save($rule);
+    public function save(object $entity);
+
+    public function update(object $entity);
 }

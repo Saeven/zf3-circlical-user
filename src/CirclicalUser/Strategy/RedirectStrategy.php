@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Strategy;
 
 use CirclicalUser\Provider\DenyStrategyInterface;
 use CirclicalUser\Service\AccessService;
+use Laminas\Http\PhpEnvironment\Request;
 use Laminas\Http\Response;
 use Laminas\Mvc\MvcEvent;
 use Laminas\Router\RouteMatch;
 
 /**
- * Class RedirectStrategy
- * @package CirclicalUser\Strategy
- *
  * Show the user to a login form if the request is not an XHTTP request, and the gate occurs because no user is
  * logged in.  Do not interject if they are logged in, yet don't have necessary rights.
  */
@@ -28,7 +28,6 @@ class RedirectStrategy implements DenyStrategyInterface
     protected string $action;
 
     private string $routeName;
-
 
     public function __construct(string $controllerClass, string $action, string $routeName)
     {
@@ -53,7 +52,7 @@ class RedirectStrategy implements DenyStrategyInterface
             $event->setRouteMatch($routeMatch);
             $event->setParam('authRedirect', true);
 
-            /** @var \Laminas\Http\PhpEnvironment\Request $requestData */
+            /** @var Request $requestData */
             $requestData = $event->getRequest();
 
             if ($requestData->getServer('REQUEST_URI')) {

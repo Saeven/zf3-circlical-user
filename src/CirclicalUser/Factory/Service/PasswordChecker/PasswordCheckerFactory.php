@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Factory\Service\PasswordChecker;
 
 use CirclicalUser\Exception\PasswordStrengthCheckerException;
@@ -7,10 +9,14 @@ use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use RuntimeException;
+
+use function is_array;
+use function is_string;
 
 class PasswordCheckerFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $config = $container->get('config');
         $userConfig = $config['circlical']['user'];
@@ -26,7 +32,7 @@ class PasswordCheckerFactory implements FactoryInterface
             }
 
             if (!$checkerImplementation instanceof PasswordCheckerInterface) {
-                throw new \RuntimeException("An invalid type of password checker was specified!");
+                throw new RuntimeException("An invalid type of password checker was specified!");
             }
 
             return $checkerImplementation;
