@@ -48,7 +48,6 @@ class AccessService
      * The AccessService governs permissions around roles and guards.
      *
      * @param   ?RoleInterface $superAdminRole Defined through config, a role that is given all access
-     *
      * @throws  GuardConfigurationException
      */
     public function __construct(
@@ -331,7 +330,8 @@ class AccessService
      * permissions are attributed to roles, as defined by your role provider.  This method checks to see if the set of
      * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
-     * @param ResourceInterface|string $resource
+     * @param mixed $resource
+     *
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
@@ -358,7 +358,7 @@ class AccessService
      * A single permission is returned, since the user can only have one permission set attributed to a given Resource.  A
      * permission object is indexed to a multitude of actions.  So in the example above, the UserPermissionInterface is for 'servers'.
      *
-     * @param ResourceInterface|string $resource
+     * @param mixed $resource
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException

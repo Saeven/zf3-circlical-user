@@ -57,7 +57,7 @@ abstract class AbstractDoctrineMapper
         $this->getEntityManager()->flush();
     }
 
-    public function getPrototype(): string
+    public function getPrototype(): object
     {
         return new $this->entityName();
     }

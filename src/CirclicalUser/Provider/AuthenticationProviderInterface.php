@@ -20,4 +20,8 @@ interface AuthenticationProviderInterface
     public function findByUserId($userId): ?AuthenticationRecordInterface;
 
     public function create(UserInterface $user, string $username, string $hash, string $rawKey): AuthenticationRecordInterface;
+
+    public function save(object $entity);
+
+    public function update(object $entity);
 }

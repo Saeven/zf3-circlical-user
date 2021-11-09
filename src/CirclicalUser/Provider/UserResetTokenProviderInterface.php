@@ -21,4 +21,8 @@ interface UserResetTokenProviderInterface
      * valid token at any time.
      */
     public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord): void;
+
+    public function save(object $entity): void;
+
+    public function update(object $entity): void;
 }

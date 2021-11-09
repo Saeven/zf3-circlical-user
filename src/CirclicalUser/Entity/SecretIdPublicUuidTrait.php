@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CirclicalUser\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Doctrine\UuidBinaryType;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * You can use this as a convenience method for cases where you would like to have public/private UUID situations.
@@ -33,7 +33,7 @@ trait SecretIdPublicUuidTrait
      *
      * @ORM\Column(type="uuid_binary", unique=true);
      *
-     * @var UuidBinaryType
+     * @var UuidInterface
      */
     protected $uuid;
 
@@ -42,7 +42,7 @@ trait SecretIdPublicUuidTrait
         return $this->id;
     }
 
-    public function getUuid(): UuidBinaryType
+    public function getUuid(): UuidInterface
     {
         return $this->uuid;
     }

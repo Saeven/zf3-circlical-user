@@ -64,7 +64,9 @@
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0",
-    "laminas/laminas-coding-standard": "^2.3.0"
+    "laminas/laminas-coding-standard": "^2.3.0",
+    "paragonie/passwdqc": "v0.2.0",
+    "phpstan/phpstan": "1.1.1"
   },
   "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
@@ -78,5 +80,15 @@
     "psr-4": {
       "CirclicalUser\\": "src/CirclicalUser"
     }
+  },
+  "scripts": {
+    "check": [
+      "@stan",
+      "@cs",
+      "@test"
+    ],
+    "cs": "vendor/bin/phpcs",
+    "stan": "vendor/bin/phpstan analyse -c ./phpstan.neon --memory-limit 1G --xdebug --ansi -vvv src",
+    "test": "vendor/bin/phpspec run"
   }
 }

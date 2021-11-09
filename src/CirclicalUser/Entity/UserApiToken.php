@@ -63,7 +63,6 @@ class UserApiToken
 
     /**
      * @param int $scope Push a bit-flag integer into this value to resolve scopes
-     *
      * @throws Exception
      */
     public function __construct(UserInterface $user, int $scope)

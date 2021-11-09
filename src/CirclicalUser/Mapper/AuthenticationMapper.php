@@ -24,7 +24,6 @@ class AuthenticationMapper extends AbstractDoctrineMapper implements Authenticat
 
     /**
      * @param mixed $userId
-     *
      * @throws NonUniqueResultException
      * @throws NoResultException
      */

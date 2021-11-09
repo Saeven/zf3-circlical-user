@@ -17,4 +17,8 @@ interface UserProviderInterface
      * @param mixed $userId
      */
     public function getUser($userId): ?UserInterface;
+
+    public function save(object $entity): void;
+
+    public function update(object $entity): void;
 }

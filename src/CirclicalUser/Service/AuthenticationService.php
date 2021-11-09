@@ -301,7 +301,7 @@ class AuthenticationService
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $sessionKey = new HiddenString($authentication->getRawSessionKey());
         $userKey = new EncryptionKey($sessionKey);
-        $hashCookieName = hash_hmac('sha256', $sessionKey->getString() . $authentication->getUsername(), (string)$systemKey);
+        $hashCookieName = hash_hmac('sha256', $sessionKey->getString() . $authentication->getUsername(), (string) $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername()), $userKey));
 
@@ -330,7 +330,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_A,
-            hash_hmac('sha256', $userTuple, (string)$systemKey),
+            hash_hmac('sha256', $userTuple, (string) $systemKey),
             $expiry
         );
 
@@ -339,7 +339,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_B,
-            hash_hmac('sha256', $hashCookieContents, (string)$userKey),
+            hash_hmac('sha256', $hashCookieContents, (string) $userKey),
             $expiry
         );
 
@@ -348,7 +348,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_TIMESTAMP,
-            (string)$expiry,
+            (string) $expiry,
             $expiry,
             false
         );
@@ -366,7 +366,7 @@ class AuthenticationService
             [
                 'expires' => $expiry,
                 'path' => '/',
-                'domain' => (string)$sessionParameters['domain'],
+                'domain' => (string) $sessionParameters['domain'],
                 'secure' => $this->secure,
                 'httponly' => $httpOnly,
                 'samesite' => $this->sameSite,
@@ -400,7 +400,7 @@ class AuthenticationService
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $verificationCookie = $_COOKIE[self::COOKIE_VERIFY_A];
         $hashPass = hash_equals(
-            hash_hmac('sha256', $_COOKIE[self::COOKIE_USER], (string)$systemKey),
+            hash_hmac('sha256', $_COOKIE[self::COOKIE_USER], (string) $systemKey),
             $verificationCookie
         );
 
@@ -442,7 +442,7 @@ class AuthenticationService
 
             $userKey = new EncryptionKey(new HiddenString($auth->getRawSessionKey()));
             $hashPass = hash_equals(
-                hash_hmac('sha256', $_COOKIE[$hashCookieName], (string)$userKey),
+                hash_hmac('sha256', $_COOKIE[$hashCookieName], (string) $userKey),
                 $_COOKIE[self::COOKIE_VERIFY_B]
             );
 
@@ -504,12 +504,11 @@ class AuthenticationService
 
     /**
      * @param User $user Used by some password checkers to provide better checking
-     *
      * @throws WeakPasswordException
      */
     private function enforcePasswordStrength(string $password, User $user)
     {
-        $userData = array_values(array_filter(array_values((array)$user), 'is_string'));
+        $userData = array_values(array_filter(array_values((array) $user), 'is_string'));
         if (!$this->passwordChecker->isStrongPassword($password, $userData)) {
             throw new WeakPasswordException();
         }
