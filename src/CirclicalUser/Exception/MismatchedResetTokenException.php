@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class MismatchedResetTokenException extends \Exception
-{
+use Exception;
 
+class MismatchedResetTokenException extends Exception
+{
 }

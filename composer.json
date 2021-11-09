@@ -24,6 +24,7 @@
       "role": "Paper Stapler"
     }
   ],
+  "prefer-stable": true,
   "require": {
     "ext-json": "*",
     "php": "^7.4.0 | >=8",
@@ -56,7 +57,9 @@
     "phpspec/phpspec": "7.0.1",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
-    "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0"
+    "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0",
+    "laminas/laminas-coding-standard": "^2.3.0",
+    "phpstan/phpstan": "1.1.1"
   },
   "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
@@ -70,5 +73,15 @@
     "psr-4": {
       "CirclicalUser\\": "src/CirclicalUser"
     }
+  },
+  "scripts": {
+    "check": [
+      "@stan",
+      "@cs",
+      "@test"
+    ],
+    "cs": "vendor/bin/phpcs",
+    "stan": "vendor/bin/phpstan analyse -c ./phpstan.neon --memory-limit 1G --xdebug --ansi -vvv src",
+    "test": "vendor/bin/phpspec run"
   }
 }

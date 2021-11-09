@@ -1,18 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\UserApiToken;
 use Ramsey\Uuid\Doctrine\UuidBinaryType;
 
-/**
- * Class UserApiTokenMapper
- *
- * @package CirclicalUser\Mapper
- */
 class UserApiTokenMapper extends AbstractDoctrineMapper
 {
-    protected $entityName = UserApiToken::class;
+    protected string $entityName = UserApiToken::class;
 
     public function get(string $tokenStringRepresentation): ?UserApiToken
     {

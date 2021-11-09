@@ -1,24 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Exception\ExistingAccessException;
+use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\GuardExpectedException;
 use CirclicalUser\Exception\InvalidRoleException;
 use CirclicalUser\Exception\PermissionExpectedException;
 use CirclicalUser\Exception\PrivilegeEscalationException;
-use CirclicalUser\Provider\GroupPermissionInterface;
-use CirclicalUser\Provider\GroupPermissionProviderInterface;
-use CirclicalUser\Provider\UserPermissionInterface;
-use CirclicalUser\Provider\UserInterface as User;
-use CirclicalUser\Exception\GuardConfigurationException;
 use CirclicalUser\Exception\UnknownResourceTypeException;
 use CirclicalUser\Exception\UserRequiredException;
+use CirclicalUser\Provider\GroupPermissionInterface;
+use CirclicalUser\Provider\GroupPermissionProviderInterface;
 use CirclicalUser\Provider\ResourceInterface;
-use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
+use CirclicalUser\Provider\UserInterface as User;
+use CirclicalUser\Provider\UserPermissionInterface;
+use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserProviderInterface;
+use Exception;
+
+use function array_unique;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_string;
 
 class AccessService
 {
@@ -38,14 +47,8 @@ class AccessService
     /**
      * The AccessService governs permissions around roles and guards.
      *
-     * @param array                            $guardConfiguration
-     * @param RoleProviderInterface            $roleProvider
-     * @param GroupPermissionProviderInterface $groupPermissionProvider
-     * @param UserPermissionProviderInterface  $userPermissionProvider
-     * @param UserProviderInterface            $userProvider
-     * @param ?RoleInterface                   $superAdminRole Defined through config, a role that is given all access
-     *
-     * @throws GuardConfigurationException
+     * @param   ?RoleInterface $superAdminRole Defined through config, a role that is given all access
+     * @throws  GuardConfigurationException
      */
     public function __construct(
         array $guardConfiguration,
@@ -68,19 +71,19 @@ class AccessService
             if (isset($config['controllers'])) {
                 foreach ($config['controllers'] as $controllerName => $controllerConfig) {
                     if (isset($controllerConfig['default'])) {
-                        if (!\is_array($controllerConfig['default'])) {
+                        if (!is_array($controllerConfig['default'])) {
                             throw new GuardConfigurationException($controllerName, 'the "default" setting must be an array');
                         }
                         $this->controllerDefaults[$controllerName] = $controllerConfig['default'];
                     }
 
                     if (isset($controllerConfig['actions'])) {
-                        if (!\is_array($controllerConfig['actions'])) {
+                        if (!is_array($controllerConfig['actions'])) {
                             throw new GuardConfigurationException($controllerName, 'the "actions" setting must be an array');
                         }
 
                         foreach ($controllerConfig['actions'] as $action => $actionRoles) {
-                            if (!\is_array($controllerConfig['actions'][$action])) {
+                            if (!is_array($controllerConfig['actions'][$action])) {
                                 throw new GuardConfigurationException($controllerName, 'the roles for action "$action" must be an array');
                             }
                             $this->actions[$controllerName][$action] = $actionRoles;
@@ -118,6 +121,7 @@ class AccessService
     /**
      * Check the guard configuration to see if the current user (or guest) can access a specific controller.
      * Critical distinction: this method does not guard controller-action rules, only roles at the controller-level.
+     *
      * @see AccessService::canAccessAction()
      */
     public function canAccessController(string $controllerName): bool
@@ -226,15 +230,12 @@ class AccessService
     /**
      * Convenience method that defers to the 'withName' method.
      *
-     * @param RoleInterface $role
-     *
      * @see self::hasRoleWithName
      */
     public function hasRole(RoleInterface $role): bool
     {
         return $this->hasRoleWithName($role->getName());
     }
-
 
     /**
      * Proxy method, for convenience
@@ -244,13 +245,13 @@ class AccessService
         return $this->roleProvider->getRoleWithName($roleName);
     }
 
-
     /**
      * Add a role for the current User
      *
+     * @internal param $roleId
+     *
      * @throws InvalidRoleException
      * @throws UserRequiredException
-     * @internal param $roleId
      */
     public function addRoleByName(string $roleName): void
     {
@@ -278,7 +279,6 @@ class AccessService
         $this->userRoles[] = $roleName;
         $this->userProvider->update($this->user);
     }
-
 
     /**
      * Get the string IDs of all roles accessible to the current user.  If your user has 'admin' role, and 'admin'
@@ -330,6 +330,7 @@ class AccessService
      * permissions are attributed to roles, as defined by your role provider.  This method checks to see if the set of
      * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
+     * @param mixed $resource
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
@@ -339,11 +340,11 @@ class AccessService
             return $this->groupPermissions->getResourcePermissions($resource);
         }
 
-        if (\is_string($resource)) {
+        if (is_string($resource)) {
             return $this->groupPermissions->getPermissions($resource);
         }
 
-        throw new UnknownResourceTypeException($resource ? \get_class($resource) : 'null');
+        throw new UnknownResourceTypeException($resource ? get_class($resource) : 'null');
     }
 
     /**
@@ -356,7 +357,8 @@ class AccessService
      * A single permission is returned, since the user can only have one permission set attributed to a given Resource.  A
      * permission object is indexed to a multitude of actions.  So in the example above, the UserPermissionInterface is for 'servers'.
      *
-     * @throws \Exception
+     * @param mixed $resource
+     * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
@@ -370,11 +372,11 @@ class AccessService
             return $this->userPermissions->getResourceUserPermission($resource, $this->user);
         }
 
-        if (\is_string($resource)) {
+        if (is_string($resource)) {
             return $this->userPermissions->getUserPermission($resource, $this->user);
         }
 
-        throw new UnknownResourceTypeException($resource ? \get_class($resource) : 'null');
+        throw new UnknownResourceTypeException($resource ? get_class($resource) : 'null');
     }
 
     /**
@@ -386,7 +388,8 @@ class AccessService
      * It was a design condition to favor consistent method invocation, and let this library handle string or
      * resource distinction, rather than force you to differentiate the cases in your code.
      *
-     * @throws \Exception
+     * @param ResourceInterface|string $resource
+     * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
@@ -424,7 +427,8 @@ class AccessService
      *
      * isAllowed, will pass the buck to this method if no group rules satisfy the action.
      *
-     * @throws \Exception
+     * @param ResourceInterface|string $resource
+     * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
@@ -442,7 +446,6 @@ class AccessService
 
         return $permission && $permission->can($action);
     }
-
 
     /**
      * List allowed resource IDs by class
@@ -462,13 +465,8 @@ class AccessService
         return array_unique($permitted);
     }
 
-
     /**
      * Give a role, access to a specific resource
-     *
-     * @param RoleInterface     $role
-     * @param ResourceInterface $resource
-     * @param string            $action
      *
      * @throws ExistingAccessException
      * @throws UnknownResourceTypeException
@@ -516,6 +514,7 @@ class AccessService
      * The user must have been loaded in using setUser (done automatically by the factory when a user is authenticated)
      * prior to this call.
      *
+     * @param ResourceInterface|string $resource
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -540,7 +539,7 @@ class AccessService
             return;
         }
 
-        $isString = \is_string($resource);
+        $isString = is_string($resource);
         $permission = $this->userPermissions->create(
             $this->user,
             $isString ? 'string' : $resource->getClass(),
@@ -554,8 +553,6 @@ class AccessService
      * Revoke access to a resource
      *
      * @param ResourceInterface|string $resource
-     * @param string                   $action
-     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -568,7 +565,7 @@ class AccessService
             return;
         }
 
-        if (!\in_array($action, $resourceRule->getActions(), true)) {
+        if (!in_array($action, $resourceRule->getActions(), true)) {
             return;
         }
         $resourceRule->removeAction($action);

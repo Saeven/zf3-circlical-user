@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class AuthenticationHashException extends \Exception
-{
+use Exception;
 
+class AuthenticationHashException extends Exception
+{
 }

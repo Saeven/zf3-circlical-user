@@ -45,7 +45,6 @@ class AccessServiceSpec extends ObjectBehavior
         User $someObject,
         User $superAdmin
     ) {
-
         $userRole = new Role('user', null);
         $userRole->setId(1);
 
@@ -113,7 +112,6 @@ class AccessServiceSpec extends ObjectBehavior
         $userRule3->getResourceClass()->willReturn('ResourceObject');
         $userRule3->getResourceId()->willReturn('1234');
         $userRule3->getUser()->willReturn($user);
-        $userRule3->addAction('foo')->willReturn(null);
         $userRule3->can(Argument::type('string'))->willReturn(false);
         $userRule3->can('bar')->willReturn(true);
 
@@ -440,17 +438,11 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantUserAccess('beer', 'buy');
     }
 
-    function it_can_grant_users_access_to_new_resources(User $user, ResourceInterface $resourceObject)
+    function it_can_grant_users_access_to_existing_resources(User $user, ResourceInterface $resourceObject, UserPermissionInterface $userRule3)
     {
         $this->setUser($user);
         $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
-        $this->grantUserAccess($resourceObject, 'foo');
-    }
-
-    function it_can_grant_users_access_to_existing_resources(User $user, ResourceInterface $resourceObject)
-    {
-        $this->setUser($user);
-        $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
+        $userRule3->addAction('foo')->shouldBeCalled();
         $this->grantUserAccess($resourceObject, 'foo');
     }
 

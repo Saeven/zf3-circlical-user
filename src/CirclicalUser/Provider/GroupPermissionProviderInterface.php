@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Provider;
 
 /**
@@ -10,9 +12,7 @@ namespace CirclicalUser\Provider;
  * necessarily indexed to a User, and will return but a singular permission when getPermission or getResourceUserPermission
  * are called.
  *
- * @see     CirclicalUser\Mapper\GroupPermissionMapper for a sample implementation
- *
- * @package CirclicalUser\Provider
+ * @see \CirclicalUser\Mapper\GroupPermissionMapper for a sample implementation
  */
 interface GroupPermissionProviderInterface
 {
@@ -22,8 +22,6 @@ interface GroupPermissionProviderInterface
     public function getPermissions(string $string): array;
 
     /**
-     * @param ResourceInterface $resource
-     *
      * @return GroupPermissionInterface[]
      */
     public function getResourcePermissions(ResourceInterface $resource): array;
@@ -33,9 +31,9 @@ interface GroupPermissionProviderInterface
      */
     public function getResourcePermissionsByClass(string $resourceClass): array;
 
-    public function update($rule);
-
     public function create(RoleInterface $role, string $resourceClass, string $resourceId, array $actions): GroupPermissionInterface;
 
-    public function save($rule);
+    public function save(object $entity);
+
+    public function update(object $entity);
 }

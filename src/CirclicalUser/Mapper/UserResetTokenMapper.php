@@ -1,33 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
+use DateTime;
+use DateTimeZone;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
-/**
- * Class UserResetTokenMapper
- *
- * @package CirclicalUser\Mapper
- */
 class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTokenProviderInterface
 {
-    protected $entityName = UserResetToken::class;
+    protected string $entityName = UserResetToken::class;
 
     /**
      * Get the count of requests in the last 5 minutes
      *
-     * @param AuthenticationRecordInterface $authenticationRecord
-     *
-     * @return int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function getRequestCount(AuthenticationRecordInterface $authenticationRecord): int
     {
-        $fiveMinutesAgo = new \DateTime('now', new \DateTimeZone('UTC'));
+        $fiveMinutesAgo = new DateTime('now', new DateTimeZone('UTC'));
         $fiveMinutesAgo->modify('-5 minutes');
 
         $query = $this->getRepository()->createQueryBuilder('r')
@@ -41,7 +39,6 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
         return $query->getSingleScalarResult();
     }
 
-
     /**
      * Get the latest request
      */
@@ -53,12 +50,8 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
     /**
      * Modify previously created tokens that are not used, so that their status is invalid. There should only be one
      * valid token at any time.
-     *
-     * @param AuthenticationRecordInterface $authenticationRecord
-     *
-     * @return mixed
      */
-    public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord)
+    public function invalidateUnusedTokens(AuthenticationRecordInterface $authenticationRecord): void
     {
         $query = $this->getRepository()->createQueryBuilder('r')
             ->update()

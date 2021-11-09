@@ -1,25 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\UserPermission;
 use CirclicalUser\Provider\ResourceInterface;
+use CirclicalUser\Provider\UserInterface;
 use CirclicalUser\Provider\UserPermissionInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
-use CirclicalUser\Provider\UserInterface;
+use Doctrine\ORM\NonUniqueResultException;
 
-/**
- * Class UserPermissionMapper
- * @package CirclicalUser\Mapper
- */
 class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermissionProviderInterface
 {
-    protected $entityName = UserPermission::class;
+    protected string $entityName = UserPermission::class;
 
     /**
      * Get any user-level, string (simple) permissions that are configured in the database.
      *
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function getUserPermission(string $string, UserInterface $user): ?UserPermissionInterface
     {
@@ -37,7 +36,7 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
     /**
      * Get resource-type permissions from the database
      *
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function getResourceUserPermission(ResourceInterface $resource, UserInterface $user): ?UserPermissionInterface
     {
@@ -54,8 +53,6 @@ class UserPermissionMapper extends AbstractDoctrineMapper implements UserPermiss
 
     /**
      * Create a user permission, not persisted, and return it.
-     *
-     * @return UserPermissionInterface
      */
     public function create(UserInterface $user, string $resourceClass, string $resourceId, array $actions): UserPermissionInterface
     {

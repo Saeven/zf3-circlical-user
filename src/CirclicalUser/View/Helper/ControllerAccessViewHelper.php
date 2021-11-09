@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\View\Helper;
 
 use CirclicalUser\Service\AccessService;

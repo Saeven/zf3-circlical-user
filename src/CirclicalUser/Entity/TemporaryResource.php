@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\ResourceInterface;
