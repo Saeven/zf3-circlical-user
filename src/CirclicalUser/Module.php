@@ -13,7 +13,7 @@ use const PHP_SAPI;
 
 class Module
 {
-    protected static ?bool $isConsole;
+    protected static ?bool $isConsole = null;
 
     public static function isConsole(): bool
     {
