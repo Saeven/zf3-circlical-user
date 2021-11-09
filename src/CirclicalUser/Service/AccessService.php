@@ -331,7 +331,6 @@ class AccessService
      * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
      * @param mixed $resource
-     *
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */

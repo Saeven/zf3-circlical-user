@@ -65,7 +65,6 @@
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0",
     "laminas/laminas-coding-standard": "^2.3.0",
-    "paragonie/passwdqc": "v0.2.0",
     "phpstan/phpstan": "1.1.1"
   },
   "suggest": {

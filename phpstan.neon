@@ -7,5 +7,7 @@ parameters:
     - '#Property CirclicalUser\\Service\\PasswordChecker\\Passwdqc::\$creationOptions is never read, only written.#'
     - '#Property CirclicalUser\\Entity\\UserResetToken::\$status is never read, only written.#'
     - '#Property CirclicalUser\\Entity\\UserResetToken::\$id is never written, only read.#'
+    - '#Call to method check\(\) on an unknown class ParagonIE\\Passwdqc\\Passwdqc#'
+    - '#Instantiated class ParagonIE\\Passwdqc\\Passwdqc not found.#'
 
 
