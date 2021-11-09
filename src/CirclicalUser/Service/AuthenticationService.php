@@ -385,7 +385,9 @@ class AuthenticationService
      *  - COOKIE_USER has its contents encrypted by the system key
      *  - the random-named-cookie has its contents encrypted by the user key
      *
+     * @throws InvalidKey
      * @see self::setSessionCookies
+     *
      */
     public function getIdentity(): ?User
     {

@@ -9,6 +9,8 @@ use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 
 use function is_array;
@@ -16,6 +18,11 @@ use function is_string;
 
 class PasswordCheckerFactory implements FactoryInterface
 {
+    /**
+     * @throws PasswordStrengthCheckerException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $config = $container->get('config');
