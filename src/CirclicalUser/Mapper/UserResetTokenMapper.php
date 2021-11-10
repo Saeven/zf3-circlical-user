@@ -36,7 +36,7 @@ class UserResetTokenMapper extends AbstractDoctrineMapper implements UserResetTo
             ->setParameter('since', $fiveMinutesAgo)
             ->getQuery();
 
-        return $query->getSingleScalarResult();
+        return (int) $query->getSingleScalarResult();
     }
 
     /**
