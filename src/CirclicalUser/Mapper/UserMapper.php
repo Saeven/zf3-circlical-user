@@ -1,29 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\Role;
 use CirclicalUser\Provider\UserInterface;
-use CirclicalUser\Provider\UserInterface as User;
 use CirclicalUser\Provider\UserProviderInterface;
 
 /**
- * Class UserMapper
- *
  * A UserMapper that'll use whatever User Entity you pass in through your config, if you choose to use the Doctrine
  * Entity system that this library provides.  Of course, you can also create your own Providers.
- *
- * @package CirclicalUser\Mapper
  */
 class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
 {
-    protected $entityName;
+    protected string $entityName;
 
-    public function __construct($entityName)
+    public function __construct(string $entityName)
     {
         $this->entityName = $entityName;
     }
 
+    /**
+     * @param mixed $userId
+     */
     public function getUser($userId): ?UserInterface
     {
         return $this->getRepository()->findOneBy(['id' => $userId]);
@@ -36,7 +36,6 @@ class UserMapper extends AbstractDoctrineMapper implements UserProviderInterface
     {
         return $this->getRepository()->findOneBy(['email' => $email]);
     }
-
 
     /**
      * Fetch a list of all users

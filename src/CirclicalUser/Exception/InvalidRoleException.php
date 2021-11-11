@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class InvalidRoleException extends \Exception
+use Exception;
+
+class InvalidRoleException extends Exception
 {
     public function __construct(string $roleName)
     {

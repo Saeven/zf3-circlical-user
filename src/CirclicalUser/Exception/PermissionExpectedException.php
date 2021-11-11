@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class PermissionExpectedException extends \Exception
+use Exception;
+
+class PermissionExpectedException extends Exception
 {
     public function __construct(string $expected, string $got)
     {

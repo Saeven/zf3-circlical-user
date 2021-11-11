@@ -1,40 +1,65 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Service;
 
 use CirclicalUser\Entity\UserResetToken;
 use CirclicalUser\Exception\AuthenticationDataException;
 use CirclicalUser\Exception\AuthenticationHashException;
+use CirclicalUser\Exception\BadPasswordException;
+use CirclicalUser\Exception\EmailUsernameTakenException;
 use CirclicalUser\Exception\InvalidResetTokenException;
+use CirclicalUser\Exception\MismatchedEmailsException;
+use CirclicalUser\Exception\NoSuchUserException;
 use CirclicalUser\Exception\PasswordResetProhibitedException;
 use CirclicalUser\Exception\PersistedUserRequiredException;
 use CirclicalUser\Exception\TooManyRecoveryAttemptsException;
+use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Exception\UserWithoutAuthenticationRecordException;
 use CirclicalUser\Exception\WeakPasswordException;
 use CirclicalUser\Provider\AuthenticationProviderInterface;
 use CirclicalUser\Provider\AuthenticationRecordInterface;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Provider\UserInterface as User;
-use CirclicalUser\Exception\BadPasswordException;
-use CirclicalUser\Exception\EmailUsernameTakenException;
-use CirclicalUser\Exception\MismatchedEmailsException;
-use CirclicalUser\Exception\NoSuchUserException;
-use CirclicalUser\Exception\UsernameTakenException;
 use CirclicalUser\Provider\UserProviderInterface;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Provider\UserResetTokenProviderInterface;
+use Exception;
+use Laminas\Http\PhpEnvironment\RemoteAddress;
+use LogicException;
+use ParagonIE\Halite\Alerts\InvalidKey;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
-use Laminas\Http\PhpEnvironment\RemoteAddress;
+
+use function array_filter;
+use function array_values;
+use function base64_decode;
+use function base64_encode;
+use function explode;
+use function filter_var;
+use function hash_equals;
+use function hash_hmac;
+use function is_numeric;
+use function password_hash;
+use function password_needs_rehash;
+use function password_verify;
+use function session_get_cookie_params;
+use function setcookie;
+use function strpos;
+use function substr_count;
+use function time;
+use function trim;
+
+use const FILTER_VALIDATE_EMAIL;
+use const PASSWORD_DEFAULT;
 
 /**
  * Cookie-based authentication service that gives the option of using transient sessions.  It also allows
  * you to log in using email or username.  Note, if you permit an auth model where you allow users to register
  * emails as usernames, it's your responsibility to trigger the username change when the email change occurs.
- *
- * Class AuthenticationService
  */
 class AuthenticationService
 {
@@ -52,7 +77,6 @@ class AuthenticationService
      * SHA256 hmac combination that verifies a randomly generated cookie
      */
     public const COOKIE_VERIFY_B = '_sessionc';
-
 
     /**
      * Non http-only cookie that contains timestamp, can be used for things like JS-detection of inactivity
@@ -113,12 +137,7 @@ class AuthenticationService
      */
     private int $authenticationCookieDuration;
 
-
     /**
-     * AuthenticationService constructor.
-     *
-     * @param AuthenticationProviderInterface  $authenticationProvider
-     * @param UserProviderInterface            $userProvider
      * @param ?UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
      * @param string                           $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
      * @param bool                             $transient           True if cookies should expire at the end of the session (zero value, for expiry)
@@ -157,7 +176,6 @@ class AuthenticationService
 
     /**
      * Check to see if a user is logged in
-     * @return bool
      */
     public function hasIdentity(): bool
     {
@@ -166,10 +184,8 @@ class AuthenticationService
 
     /**
      * Authenticate a user
-     *
-     * @param User $user
      */
-    private function setIdentity(User $user)
+    private function setIdentity(User $user): void
     {
         $this->identity = $user;
     }
@@ -191,7 +207,6 @@ class AuthenticationService
     {
         $this->validateIp = $validateIp;
     }
-
 
     public function getPasswordChecker(): PasswordCheckerInterface
     {
@@ -246,11 +261,10 @@ class AuthenticationService
         throw new BadPasswordException();
     }
 
-
     /**
-     * Change an auth record username given a user id and a new username.
+     * Change an auth record username given a user id and a new username. Note that it may throw a NoSuchUserException when the user's authentication records couldn't be found
      *
-     * @throws NoSuchUserException Thrown when the user's authentication records couldn't be found
+     * @throws NoSuchUserException
      * @throws UsernameTakenException
      * @throws UserWithoutAuthenticationRecordException
      */
@@ -277,22 +291,21 @@ class AuthenticationService
         return $auth;
     }
 
-
     /**
      * Set the auth session cookies that can be used to regenerate the session on subsequent visits
      *
-     * @param AuthenticationRecordInterface $authentication
+     * @throws InvalidKey
      */
     private function setSessionCookies(AuthenticationRecordInterface $authentication)
     {
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $sessionKey = new HiddenString($authentication->getRawSessionKey());
         $userKey = new EncryptionKey($sessionKey);
-        $hashCookieName = hash_hmac('sha256', $sessionKey->getString() . $authentication->getUsername(), $systemKey);
+        $hashCookieName = hash_hmac('sha256', $sessionKey->getString() . $authentication->getUsername(), (string) $systemKey);
         $userTuple = base64_encode(Crypto::encrypt(new HiddenString($authentication->getUserId() . ':' . $hashCookieName), $systemKey));
         $hashCookieContents = base64_encode(Crypto::encrypt(new HiddenString(time() . ':' . $authentication->getUserId() . ':' . $authentication->getUsername()), $userKey));
 
-        $expiry = $this->transient ? 0 : (time() + $this->authenticationCookieDuration);
+        $expiry = $this->transient ? 0 : time() + $this->authenticationCookieDuration;
 
         //
         // 1 - Set the cookie that contains the user ID, and hash cookie name
@@ -317,7 +330,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_A,
-            hash_hmac('sha256', $userTuple, $systemKey),
+            hash_hmac('sha256', $userTuple, (string) $systemKey),
             $expiry
         );
 
@@ -326,7 +339,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_VERIFY_B,
-            hash_hmac('sha256', $hashCookieContents, $userKey),
+            hash_hmac('sha256', $hashCookieContents, (string) $userKey),
             $expiry
         );
 
@@ -335,7 +348,7 @@ class AuthenticationService
         //
         $this->setCookie(
             self::COOKIE_TIMESTAMP,
-            (string)$expiry,
+            (string) $expiry,
             $expiry,
             false
         );
@@ -353,7 +366,7 @@ class AuthenticationService
             [
                 'expires' => $expiry,
                 'path' => '/',
-                'domain' => (string)$sessionParameters['domain'],
+                'domain' => (string) $sessionParameters['domain'],
                 'secure' => $this->secure,
                 'httponly' => $httpOnly,
                 'samesite' => $this->sameSite,
@@ -372,10 +385,11 @@ class AuthenticationService
      *  - COOKIE_USER has its contents encrypted by the system key
      *  - the random-named-cookie has its contents encrypted by the user key
      *
-     * @return User|null
+     * @throws InvalidKey
      * @see self::setSessionCookies
+     *
      */
-    public function getIdentity()
+    public function getIdentity(): ?User
     {
         if ($this->identity) {
             return $this->identity;
@@ -388,7 +402,7 @@ class AuthenticationService
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $verificationCookie = $_COOKIE[self::COOKIE_VERIFY_A];
         $hashPass = hash_equals(
-            hash_hmac('sha256', $_COOKIE[self::COOKIE_USER], $systemKey),
+            hash_hmac('sha256', $_COOKIE[self::COOKIE_USER], (string) $systemKey),
             $verificationCookie
         );
 
@@ -406,11 +420,11 @@ class AuthenticationService
             $userTuple = Crypto::decrypt(base64_decode($_COOKIE[self::COOKIE_USER]), $systemKey)->getString();
 
             if (strpos($userTuple, ':') === false) {
-                throw new \LogicException();
+                throw new LogicException();
             }
 
             // paranoid, make sure we have everything we need
-            @list($cookieUserId, $hashCookieSuffix) = @explode(":", $userTuple, 2);
+            @[$cookieUserId, $hashCookieSuffix] = @explode(":", $userTuple, 2);
             if (!is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
                 throw new AuthenticationDataException();
             }
@@ -430,7 +444,7 @@ class AuthenticationService
 
             $userKey = new EncryptionKey(new HiddenString($auth->getRawSessionKey()));
             $hashPass = hash_equals(
-                hash_hmac('sha256', $_COOKIE[$hashCookieName], $userKey),
+                hash_hmac('sha256', $_COOKIE[$hashCookieName], (string) $userKey),
                 $_COOKIE[self::COOKIE_VERIFY_B]
             );
 
@@ -469,7 +483,7 @@ class AuthenticationService
             }
 
             return $this->identity;
-        } catch (\Exception $x) {
+        } catch (Exception $x) {
             $this->purgeHashCookies();
         }
 
@@ -478,10 +492,8 @@ class AuthenticationService
 
     /**
      * Remove all hash cookies, potentially saving one
-     *
-     * @param string|null $skipCookie
      */
-    private function purgeHashCookies(string $skipCookie = null)
+    private function purgeHashCookies(?string $skipCookie = null)
     {
         $sp = session_get_cookie_params();
         $killTime = time() - 3600;
@@ -493,26 +505,22 @@ class AuthenticationService
     }
 
     /**
-     * @param string $password
-     * @param User   $user Used by some password checkers to provide better checking
-     *
+     * @param User $user Used by some password checkers to provide better checking
      * @throws WeakPasswordException
      */
     private function enforcePasswordStrength(string $password, User $user)
     {
-        $userData = array_values(array_filter(array_values((array)$user), 'is_string'));
+        $userData = array_values(array_filter(array_values((array) $user), 'is_string'));
         if (!$this->passwordChecker->isStrongPassword($password, $userData)) {
             throw new WeakPasswordException();
         }
     }
-
 
     /**
      * Reset this user's password
      *
      * @param User   $user        The user to whom this password gets assigned
      * @param string $newPassword Cleartext password that's being hashed
-     *
      * @throws NoSuchUserException
      * @throws WeakPasswordException
      */
@@ -536,8 +544,6 @@ class AuthenticationService
      *
      * @param User   $user     The user to validate password for
      * @param string $password Cleartext password that'w will be verified
-     *
-     * @return bool
      * @throws PersistedUserRequiredException
      * @throws UserWithoutAuthenticationRecordException
      */
@@ -555,16 +561,10 @@ class AuthenticationService
         return password_verify($password, $auth->getHash());
     }
 
-
     /**
      * Register a new user into the auth tables, and, log them in. Essentially calls registerAuthenticationRecord
      * and then stores the necessary cookies and identity into the service.
      *
-     * @param User   $user
-     * @param string $username
-     * @param string $password
-     *
-     * @return AuthenticationRecordInterface
      * @throws PersistedUserRequiredException
      */
     public function create(User $user, string $username, string $password): AuthenticationRecordInterface
@@ -578,18 +578,12 @@ class AuthenticationService
         return $auth;
     }
 
-
     /**
      * Very similar to create, except that it won't log the user in.  This was created to satisfy circumstances where
      * you are creating users from an admin panel for example.  This function is also used by create.
      *
      * Note, this method does not check password strength!
      *
-     * @param User   $user
-     * @param string $username
-     * @param string $password
-     *
-     * @return AuthenticationRecordInterface
      * @throws EmailUsernameTakenException
      * @throws MismatchedEmailsException
      * @throws PersistedUserRequiredException
@@ -602,7 +596,7 @@ class AuthenticationService
         }
 
         if ($user->getAuthenticationRecord() !== null) {
-            throw new \LogicException("This user already has an existing authentication record");
+            throw new LogicException("This user already has an existing authentication record");
         }
 
         if ($this->authenticationProvider->findByUsername($username)) {
@@ -634,13 +628,8 @@ class AuthenticationService
         return $auth;
     }
 
-
     /**
      * Resalt a user's authentication table salt
-     *
-     * @param AuthenticationRecordInterface $auth
-     *
-     * @return AuthenticationRecordInterface
      */
     private function resetAuthenticationKey(AuthenticationRecordInterface $auth): AuthenticationRecordInterface
     {
@@ -650,7 +639,6 @@ class AuthenticationService
 
         return $auth;
     }
-
 
     /**
      * Logout.  Reset the user authentication key, and delete all cookies.
@@ -676,9 +664,6 @@ class AuthenticationService
      * Forgot-password mechanisms are a potential back door; but they're needed.  This only takes care
      * of hash generation.
      *
-     * @param User $user
-     *
-     * @return UserResetToken
      * @throws NoSuchUserException
      * @throws PasswordResetProhibitedException
      * @throws TooManyRecoveryAttemptsException
@@ -708,12 +693,11 @@ class AuthenticationService
         return $token;
     }
 
-
     /**
      * @throws InvalidResetTokenException
      * @throws NoSuchUserException
      * @throws PasswordResetProhibitedException
-     * @throws \CirclicalUser\Exception\WeakPasswordException
+     * @throws WeakPasswordException
      */
     public function changePasswordWithRecoveryToken(User $user, int $tokenId, string $token, string $newPassword): void
     {

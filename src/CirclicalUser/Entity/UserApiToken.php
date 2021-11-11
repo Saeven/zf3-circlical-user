@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\UserInterface;
+use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Doctrine\UuidGenerator;
+use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
@@ -14,7 +18,6 @@ use Ramsey\Uuid\UuidInterface;
  *
  * @ORM\Entity
  * @ORM\Table(name="users_api_tokens")
- *
  */
 class UserApiToken
 {
@@ -23,52 +26,49 @@ class UserApiToken
     public const SCOPE_NONE = 0;
 
     /**
-     * @var UserInterface
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     *
+     * @var UserInterface
      */
     private $user;
 
     /**
-     * @var \DateTimeImmutable
      * @ORM\Column(type="datetime_immutable")
+     *
+     * @var DateTimeImmutable
      */
     private $creation_time;
 
-
     /**
-     * @var \DateTimeImmutable
      * @ORM\Column(type="datetime_immutable", nullable=true)
+     *
+     * @var DateTimeImmutable
      */
     private $last_used;
 
-
     /**
-     * @var integer
      * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
+     *
+     * @var int
      */
     private $times_used;
 
-
     /**
-     * @var integer
      * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
+     *
+     * @var int
      */
     private $scope;
 
-
     /**
-     * UserApiToken constructor.
-     *
-     * @param UserInterface $user
-     * @param int           $scope Push a bit-flag integer into this value to resolve scopes
-     *
-     * @throws \Exception
+     * @param int $scope Push a bit-flag integer into this value to resolve scopes
+     * @throws Exception
      */
     public function __construct(UserInterface $user, int $scope)
     {
         $this->user = $user;
-        $this->creation_time = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $this->creation_time = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $this->scope = $scope;
         $this->times_used = 0;
         $this->uuid = Uuid::uuid4();
@@ -94,7 +94,7 @@ class UserApiToken
         $this->scope = self::SCOPE_NONE;
     }
 
-    public function getLastUsed(): ?\DateTimeImmutable
+    public function getLastUsed(): ?DateTimeImmutable
     {
         return $this->last_used;
     }
@@ -107,7 +107,7 @@ class UserApiToken
     public function tagUse(): void
     {
         $this->times_used++;
-        $this->last_used = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $this->last_used = new DateTimeImmutable('now', new DateTimeZone('UTC'));
     }
 
     public function getUuid(): UuidInterface
@@ -117,7 +117,7 @@ class UserApiToken
 
     public function getToken(): string
     {
-        return $this->uuid;
+        return $this->uuid->toString();
     }
 
     public function getUser(): UserInterface

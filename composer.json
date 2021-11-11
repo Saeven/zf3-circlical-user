@@ -59,8 +59,7 @@
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0",
     "laminas/laminas-coding-standard": "^2.3.0",
-    "squizlabs/php_codesniffer": "3.*",
-    "phpstan/phpstan": "^1.0.2"
+    "phpstan/phpstan": "1.1.1"
   },
   "suggest": {
     "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
@@ -77,13 +76,12 @@
   },
   "scripts": {
     "check": [
-      "@stan-min",
+      "@stan",
+      "@cs",
       "@test"
     ],
-    "cs-check": "vendor/bin/phpcs",
-    "cs-fix": "vendor/bin/phpcbf",
-    "stan-max": "vendor/bin/phpstan analyse -c phpstan.neon --level max --memory-limit 1G --xdebug --ansi -vvv",
-    "stan-next": "vendor/bin/phpstan analyse -c phpstan.neon --level 4 --memory-limit 1G --xdebug --ansi -vvv",
-    "stan-min": "vendor/bin/phpstan analyse -c phpstan.neon --level 3 --memory-limit 1G --xdebug --ansi -vvv"
+    "cs": "vendor/bin/phpcs",
+    "stan": "vendor/bin/phpstan analyse -c ./phpstan.neon --memory-limit 1G --xdebug --ansi -vvv src",
+    "test": "vendor/bin/phpspec run"
   }
 }

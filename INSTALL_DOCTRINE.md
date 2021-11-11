@@ -6,27 +6,6 @@ If you are using Doctrine, installation is really a piece of cake.  First:
      
 This will install the library and all required parts.
 
-### Note on PHP 8.0 or later
-
-This module provides an integration with [laminas-cache](https://docs.laminas.dev/laminas-cache/), which currently comes
-with some storage adapters which are not compatible with PHP 8.0 or later. To prevent installation of these unused cache
-adapters, you will need to add the following to your `composer.json` file:
-```
-    "replace": {
-        "laminas/laminas-cache-storage-adapter-apc": "*",
-        "laminas/laminas-cache-storage-adapter-dba": "*",
-        "laminas/laminas-cache-storage-adapter-memcache": "*",
-        "laminas/laminas-cache-storage-adapter-memcached": "*",
-        "laminas/laminas-cache-storage-adapter-mongodb": "*",
-        "laminas/laminas-cache-storage-adapter-wincache": "*",
-        "laminas/laminas-cache-storage-adapter-xcache": "*",
-        "laminas/laminas-cache-storage-adapter-zend-server": "*"
-    }
-```
-
-Consult the [laminas-cache documentation](https://docs.laminas.dev/laminas-cache/installation/#avoid-unused-cache-adapters-are-being-installed)
-for further information on this issue.
-     
 ### Configuration
 
  - Copy [/vendor/saeven/zf3-circlical-user/config/circlical.user.local.php.dist](config/circlical.user.local.php.dist) into your global autoload folder, remove

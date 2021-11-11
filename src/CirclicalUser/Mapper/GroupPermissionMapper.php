@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
 use CirclicalUser\Entity\GroupPermission;
@@ -10,7 +12,7 @@ use CirclicalUser\Provider\RoleInterface;
 
 class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermissionProviderInterface
 {
-    protected $entityName = GroupPermission::class;
+    protected string $entityName = GroupPermission::class;
 
     /**
      * @return GroupPermissionInterface[]
@@ -28,7 +30,7 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
     }
 
     /**
-     * @return \CirclicalUser\Provider\GroupPermissionInterface[]
+     * @return GroupPermissionInterface[]
      */
     public function getResourcePermissions(ResourceInterface $resource): array
     {
@@ -42,9 +44,6 @@ class GroupPermissionMapper extends AbstractDoctrineMapper implements GroupPermi
         return $query->getResult();
     }
 
-    /**
-     * @return array
-     */
     public function getResourcePermissionsByClass(string $resourceClass): array
     {
         $query = $this->getRepository()->createQueryBuilder('r')

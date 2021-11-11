@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Entity;
 
 use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * CirclicalUser\Entity\UserAtom
- *
  * @ORM\Entity
  * @ORM\Table(name="users_atoms",indexes={
  *    @ORM\Index(name="lookup_idx", columns={"key", "value"}),
@@ -16,28 +16,28 @@ use Doctrine\ORM\Mapping as ORM;
 class UserAtom
 {
     /**
-     * @var UserInterface
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
+     *
+     * @var UserInterface
      */
     private $user;
 
-
     /**
-     * @var string
      * @ORM\Id
      * @ORM\Column(type="string", length=255, name="`key`")
+     *
+     * @var string
      */
     private $key;
 
-
     /**
-     * @var string
      * @ORM\Column(type="string", length=255, name="`value`")
+     *
+     * @var string
      */
     private $value;
-
 
     public function __construct(UserInterface $user, string $key, string $value)
     {

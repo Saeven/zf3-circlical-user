@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-class TooManyRecoveryAttemptsException extends \Exception
-{
+use Exception;
 
+class TooManyRecoveryAttemptsException extends Exception
+{
 }

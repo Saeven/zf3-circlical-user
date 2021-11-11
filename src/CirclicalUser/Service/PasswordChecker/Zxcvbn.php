@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Service\PasswordChecker;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
 
 class Zxcvbn implements PasswordCheckerInterface
 {
-    private $creationOptions;
+    private array $creationOptions;
 
     public function __construct(array $creationOptions)
     {

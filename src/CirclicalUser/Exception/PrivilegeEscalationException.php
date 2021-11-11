@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
-use Throwable;
+use Exception;
 
-class PrivilegeEscalationException extends \Exception
+class PrivilegeEscalationException extends Exception
 {
     public function __construct()
     {

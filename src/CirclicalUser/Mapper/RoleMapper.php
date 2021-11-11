@@ -1,22 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Mapper;
 
+use CirclicalUser\Entity\Role;
 use CirclicalUser\Provider\RoleInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
-use CirclicalUser\Provider\UserInterface;
-use CirclicalUser\Entity\Role;
 
 /**
- * Class RoleMapper
- *
  * Get and put roles out of the database
- *
- * @package CirclicalUser\Mapper
  */
 class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
 {
-    protected $entityName = Role::class;
+    protected string $entityName = Role::class;
 
     public function getAllRoles(): array
     {
@@ -26,7 +23,6 @@ class RoleMapper extends AbstractDoctrineMapper implements RoleProviderInterface
 
         return $query->getResult();
     }
-
 
     /**
      * Fetch a role with a particular name

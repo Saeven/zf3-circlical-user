@@ -57,9 +57,6 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $authenticationMapper->findByUserId(Argument::any())->willReturn(null);
         $authenticationMapper->findByUserId(1)->willReturn($authenticationData);
 
-        $authenticationMapper->update($authenticationData)->willReturn(true);
-
-
         $user->getId()->willReturn(1);
         $user->getAuthenticationRecord()->willReturn($authenticationData);
 
@@ -94,8 +91,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->hasIdentity()->shouldBe(false);
     }
 
-    public function it_returns_true_when_someone_is_there()
+    public function it_returns_true_when_someone_is_there(AuthenticationMapper $authenticationMapper)
     {
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $this->authenticate('userA', 'abc');
         $this->hasIdentity()->shouldBe(true);
     }
@@ -112,13 +110,15 @@ class AuthenticationServiceSpec extends ObjectBehavior
 
     public function it_checks_via_email_second(AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
     {
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $userMapper->findByEmail('alex@circlical.com')->shouldBeCalled();
         $user = $this->authenticate('alex@circlical.com', 'abc');
         $user->getId()->shouldBe(1);
     }
 
-    public function it_checks_via_username_first($authenticationMapper, $userMapper)
+    public function it_checks_via_username_first(AuthenticationMapper $authenticationMapper, UserMapper $userMapper)
     {
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $userMapper->findByEmail()->shouldNotBeCalled();
         $user = $this->authenticate('userA', 'abc');
         $user->getId()->shouldBe(1);
@@ -144,8 +144,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(NoSuchUserException::class)->during('authenticate', ['unknown@circlical.com', 'def']);
     }
 
-    public function it_permits_username_changes($authenticationMapper, $userMapper, $user)
+    public function it_permits_username_changes(AuthenticationMapper $authenticationMapper, UserMapper $userMapper, User $user)
     {
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $this->changeUsername($user, 'newUsername');
     }
 
@@ -177,8 +178,9 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(PersistedUserRequiredException::class)->during('verifyPassword', [$user4, 'abc']);
     }
 
-    public function it_returns_authenticated_identities()
+    public function it_returns_authenticated_identities(AuthenticationMapper $authenticationMapper)
     {
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $this->authenticate('userA', 'abc');
         $user = $this->getIdentity();
         $user->shouldBeAnInstanceOf(User::class);
@@ -428,9 +430,10 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(MismatchedEmailsException::class)->during('create', [$user6, 'b@b.com', 'alphabet']);
     }
 
-    public function it_can_clear_identity()
+    public function it_can_clear_identity(AuthenticationMapper $authenticationMapper)
     {
         $this->authenticate('userA', 'abc');
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
         $this->clearIdentity();
         $this->getIdentity()->shouldBe(null);
     }
@@ -612,12 +615,14 @@ class AuthenticationServiceSpec extends ObjectBehavior
         $this->shouldThrow(InvalidResetTokenException::class)->during('changePasswordWithRecoveryToken', [$user, 123, 'string', 'string']);
     }
 
-    public function it_modifies_storage_when_password_changes_succeed(User $user, UserResetToken $token, $tokenMapper)
+    public function it_modifies_storage_when_password_changes_succeed(User $user, UserResetToken $token, UserResetTokenMapper $tokenMapper, AuthenticationMapper $authenticationMapper)
     {
         $token->isValid(Argument::any(), Argument::any(), Argument::any(), true, true)->willReturn(true);
         $tokenMapper->get(1)->willReturn($token);
         $token->setStatus(UserResetTokenInterface::STATUS_USED)->shouldBeCalled();
         $tokenMapper->update($token)->shouldBeCalled();
+        $authenticationMapper->update(Argument::type(AuthenticationRecordInterface::class))->shouldBeCalled();
+
         $this->changePasswordWithRecoveryToken($user, 1, 'tokenstring', 'newpassword');
     }
 

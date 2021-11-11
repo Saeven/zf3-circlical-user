@@ -1,35 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser;
 
 use CirclicalUser\Listener\AccessListener;
 use Doctrine\DBAL\Types\Type;
-use Ramsey\Uuid\Doctrine\UuidBinaryType;
-use Laminas\Console\Console;
 use Laminas\Mvc\MvcEvent;
+use Ramsey\Uuid\Doctrine\UuidBinaryType;
+
+use const PHP_SAPI;
 
 class Module
 {
-    protected static $isConsole;
+    protected static ?bool $isConsole = null;
 
     public static function isConsole(): bool
     {
         if (null === static::$isConsole) {
-            static::$isConsole = (PHP_SAPI === 'cli');
+            static::$isConsole = PHP_SAPI === 'cli';
         }
 
         return static::$isConsole;
     }
 
-    public static function overrideIsConsole($flag): void
+    public static function overrideIsConsole(?bool $flag): void
     {
-        if (null !== $flag) {
-            $flag = (bool)$flag;
-        }
         static::$isConsole = $flag;
     }
 
-    public function getConfig()
+    public function getConfig(): array
     {
         return include __DIR__ . '/../../config/module.config.php';
     }
@@ -49,21 +49,5 @@ class Module
         $strategy = $serviceLocator->get(AccessListener::class);
         $eventManager = $application->getEventManager();
         $strategy->attach($eventManager);
-
-//            try {
-//                $remote = new RemoteAddress;
-//                $remote->setUseProxy(true);
-//                $mapper = $serviceManager->get(UserAuthenticationLogMapper::class);
-//                $logEntity = new UserAuthenticationLog(
-//                    $authEvent->getIdentity(),
-//                    new \DateTime("now"),
-//                    $remote->getIpAddress()
-//                );
-//                $mapper->save($logEntity);
-//
-//            } catch (\Exception $x) {
-//
-//            }
-//        });
     }
 }

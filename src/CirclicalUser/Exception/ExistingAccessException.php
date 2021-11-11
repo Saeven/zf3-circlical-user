@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CirclicalUser\Exception;
 
 use CirclicalUser\Provider\ResourceInterface;
 use CirclicalUser\Provider\RoleInterface;
+use Exception;
 
-class ExistingAccessException extends \Exception
+use function sprintf;
+
+class ExistingAccessException extends Exception
 {
     public function __construct(RoleInterface $role, ResourceInterface $resource, string $action, string $existingRole)
     {
