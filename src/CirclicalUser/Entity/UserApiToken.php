@@ -26,40 +26,22 @@ class UserApiToken
     public const SCOPE_NONE = 0;
 
     /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User", inversedBy="apiTokens")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     *
-     * @var UserInterface
      */
-    private $user;
+    private UserInterface $user;
 
-    /**
-     * @ORM\Column(type="datetime_immutable")
-     *
-     * @var DateTimeImmutable
-     */
-    private $creation_time;
+    /** @ORM\Column(type="datetime_immutable") */
+    private DateTimeImmutable $creation_time;
 
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     *
-     * @var DateTimeImmutable
-     */
-    private $last_used;
+    /** @ORM\Column(type="datetime_immutable", nullable=true) */
+    private ?DateTimeImmutable $last_used = null;
 
-    /**
-     * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
-     *
-     * @var int
-     */
-    private $times_used;
+    /** @ORM\Column(type="integer", options={"default":0, "unsigned": true}) */
+    private int $times_used = 0;
 
-    /**
-     * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
-     *
-     * @var int
-     */
-    private $scope;
+    /** @ORM\Column(type="integer", options={"default":0, "unsigned": true}) */
+    private int $scope;
 
     /**
      * @param int $scope Push a bit-flag integer into this value to resolve scopes
@@ -70,7 +52,6 @@ class UserApiToken
         $this->user = $user;
         $this->creation_time = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $this->scope = $scope;
-        $this->times_used = 0;
         $this->uuid = Uuid::uuid4();
     }
 
@@ -104,6 +85,9 @@ class UserApiToken
         return $this->times_used;
     }
 
+    /**
+     * @throws Exception
+     */
     public function tagUse(): void
     {
         $this->times_used++;
