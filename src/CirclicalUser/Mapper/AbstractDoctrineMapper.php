@@ -7,6 +7,8 @@ namespace CirclicalUser\Mapper;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Exception\ORMException;
 
 /**
  * Doctrine Mapper
@@ -24,7 +26,7 @@ abstract class AbstractDoctrineMapper
         return $this->entityManager;
     }
 
-    public function setEntityManager(EntityManager $entityManager)
+    public function setEntityManager(EntityManager $entityManager): void
     {
         $this->entityManager = $entityManager;
     }
@@ -39,18 +41,28 @@ abstract class AbstractDoctrineMapper
         return $this->entityManager->getRepository($this->entityName);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function save(object $entity): void
     {
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush($entity);
     }
 
+
+    // ToDo: this function can be deleted, because merge is deprecated, right?
     public function update(object $entity): void
     {
         $this->getEntityManager()->merge($entity);
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function delete(object $entity): void
     {
         $this->getEntityManager()->remove($entity);

@@ -13,7 +13,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * A password-reset token.  This is the thing that you would exchange in a forgot-password email
+ * A password-reset token. This is the thing that you would exchange in a forgot-password email
  * that the user can later consume to trigger a password change.
  *
  * @ORM\Entity
@@ -26,7 +26,7 @@ class UserApiToken
     public const SCOPE_NONE = 0;
 
     /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User", inversedBy="apiTokens")
+     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User", inversedBy="api_tokens")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private UserInterface $user;
@@ -47,7 +47,7 @@ class UserApiToken
      * @param int $scope Push a bit-flag integer into this value to resolve scopes
      * @throws Exception
      */
-    public function __construct(UserInterface $user, int $scope)
+    public function __construct(UserInterface $user, int $scope = self::SCOPE_NONE)
     {
         $this->user = $user;
         $this->creation_time = new DateTimeImmutable('now', new DateTimeZone('UTC'));
@@ -107,5 +107,15 @@ class UserApiToken
     public function getUser(): UserInterface
     {
         return $this->user;
+    }
+
+    public function getCreationTime(): DateTimeImmutable
+    {
+        return $this->creation_time;
+    }
+
+    public function setCreationTime(DateTimeImmutable $creation_time): void
+    {
+        $this->creation_time = $creation_time;
     }
 }
