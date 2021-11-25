@@ -47,7 +47,6 @@ class User implements UserInterface
      */
     private $first_name;
 
-
     /**
      * @ORM\Column(type="string", length=64)
      *
