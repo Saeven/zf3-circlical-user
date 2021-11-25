@@ -20,7 +20,7 @@ class Authentication implements AuthenticationRecordInterface
 {
     /**
      * @ORM\Id
-     * @ORM\OneToOne(targetEntity="CirclicalUser\Entity\User")
+     * @ORM\OneToOne(targetEntity="CirclicalUser\Entity\User", inversedBy="authenticationRecord")
      * @ORM\JoinColumn(onDelete="CASCADE")
      *
      * @var UserInterface
