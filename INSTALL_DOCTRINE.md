@@ -5,7 +5,7 @@ If you are using Doctrine, installation is really a piece of cake.  First:
     composer require "saeven/zf3-circlical-user"
      
 This will install the library and all required parts.
-     
+
 ### Configuration
 
  - Copy [/vendor/saeven/zf3-circlical-user/config/circlical.user.local.php.dist](config/circlical.user.local.php.dist) into your global autoload folder, remove
