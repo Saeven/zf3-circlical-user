@@ -16,6 +16,8 @@ Quickly Installs:
 - user-based access control to complement RBAC
 - resource-based permissions, giving you 'resource' and 'verb' control at the role and user level, e.g. (all administrators can 'add' a server, only Pete can 'delete')
 
+You can see it in action, in this [ready-to-use skeleton](https://github.com/Saeven/laminas-mvc-skeleton).
+
 ### Missive
 
 Sure - there are other Authentication, ACL, and User modules out there. This one comes with out-of-the-box support for **Doctrine** - just plug in your user entity and go.
