@@ -52,10 +52,9 @@ class RedirectStrategy implements DenyStrategyInterface
             $event->setRouteMatch($routeMatch);
             $event->setParam('authRedirect', true);
 
-            /** @var Request $requestData */
             $requestData = $event->getRequest();
 
-            if ($requestData->getServer('REQUEST_URI')) {
+            if ($requestData instanceof Request && $requestData->getServer('REQUEST_URI')) {
                 $event->setParam('authRedirectTo', $requestData->getServer('REQUEST_URI'));
             }
 

@@ -16,5 +16,5 @@ extensions:
     whitelist:
      - src
     blacklist:
-     - src/CirclicalUser/Mapper
-     - src/CirclicalUser/Exception
+      - src/Mapper
+      - src/Exception
