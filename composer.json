@@ -34,7 +34,7 @@
     "laminas/laminas-view": "^2.13",
     "laminas/laminas-http": "^2.15",
     "laminas/laminas-router": "^3.5",
-    "doctrine/doctrine-orm-module": "^4.1",
+    "doctrine/doctrine-orm-module": "^4.1|^5.1.0",
     "doctrine/doctrine-module": "^4.2",
     "doctrine/orm": "^2.10",
     "paragonie/halite": "^4.7",
@@ -43,10 +43,10 @@
     "laminas/laminas-validator": "^2.15"
   },
   "require-dev": {
-    "phpspec/phpspec": "7.0.1",
+    "phpspec/phpspec": "7.0.1|7.2.0",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
-    "bjeavons/zxcvbn-php": "1.1.0 | 1.2.0",
+    "bjeavons/zxcvbn-php": "^1.0",
     "laminas/laminas-coding-standard": "^2.3.0",
     "phpstan/phpstan": "1.1.1"
   },
@@ -72,5 +72,10 @@
     "cs": "vendor/bin/phpcs",
     "stan": "vendor/bin/phpstan analyse -c ./phpstan.neon --memory-limit 1G --xdebug --ansi -vvv src",
     "test": "vendor/bin/phpspec run"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }
