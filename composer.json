@@ -37,7 +37,7 @@
     "doctrine/doctrine-orm-module": "^4.1|^5.1.0",
     "doctrine/doctrine-module": "^4.2|^5.1.0",
     "doctrine/orm": "^2.10",
-    "paragonie/halite": "^4.7|v5.0.0",
+    "paragonie/halite": "^4.7| ^5.0",
     "ramsey/uuid": "^4",
     "ramsey/uuid-doctrine": "^1.6",
     "laminas/laminas-validator": "^2.15"
