@@ -43,7 +43,7 @@
     "laminas/laminas-validator": "^2.15"
   },
   "require-dev": {
-    "phpspec/phpspec": "7.0.1|7.2.0",
+    "phpspec/phpspec": "7.0.1|7.2.0|7.3.0",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "^1.0",
