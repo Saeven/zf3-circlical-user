@@ -43,6 +43,7 @@ use function filter_var;
 use function hash_equals;
 use function hash_hmac;
 use function is_numeric;
+use function is_scalar;
 use function password_hash;
 use function password_needs_rehash;
 use function password_verify;
@@ -498,7 +499,7 @@ class AuthenticationService
         $sp = session_get_cookie_params();
         $killTime = time() - 3600;
         foreach ($_COOKIE as $cookieName => $value) {
-            if ($cookieName !== $skipCookie && strpos($cookieName, self::COOKIE_HASH_PREFIX) !== false) {
+            if ($cookieName !== $skipCookie && is_scalar($cookieName) && strpos((string) $cookieName, self::COOKIE_HASH_PREFIX) !== false) {
                 setcookie($cookieName, '', $killTime, '/', $sp['domain'], false, true);
             }
         }
@@ -506,6 +507,7 @@ class AuthenticationService
 
     /**
      * @param User $user Used by some password checkers to provide better checking
+     *
      * @throws WeakPasswordException
      */
     private function enforcePasswordStrength(string $password, User $user)
@@ -521,6 +523,7 @@ class AuthenticationService
      *
      * @param User   $user        The user to whom this password gets assigned
      * @param string $newPassword Cleartext password that's being hashed
+     *
      * @throws NoSuchUserException
      * @throws WeakPasswordException
      */
@@ -544,6 +547,7 @@ class AuthenticationService
      *
      * @param User   $user     The user to validate password for
      * @param string $password Cleartext password that'w will be verified
+     *
      * @throws PersistedUserRequiredException
      * @throws UserWithoutAuthenticationRecordException
      */
