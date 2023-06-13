@@ -7,9 +7,9 @@ namespace CirclicalUser\Factory\Listener;
 use CirclicalUser\Listener\AccessListener;
 use CirclicalUser\Service\AccessService;
 use Exception;
-use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 use function class_exists;
 

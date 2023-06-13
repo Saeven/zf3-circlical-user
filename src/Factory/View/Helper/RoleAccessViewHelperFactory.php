@@ -6,8 +6,8 @@ namespace CirclicalUser\Factory\View\Helper;
 
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\View\Helper\RoleAccessViewHelper;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class RoleAccessViewHelperFactory implements FactoryInterface
 {

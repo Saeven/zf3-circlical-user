@@ -6,8 +6,8 @@ namespace CirclicalUser\Factory\Listener;
 
 use CirclicalUser\Listener\UserEntityListener;
 use DomainException;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class UserEntityListenerFactory implements FactoryInterface
 {

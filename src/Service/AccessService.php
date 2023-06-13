@@ -52,7 +52,6 @@ class AccessService
      * The AccessService governs permissions around roles and guards.
      *
      * @param   ?RoleInterface $superAdminRole Defined through config, a role that is given all access
-     *
      * @throws  GuardConfigurationException
      */
     public function __construct(
@@ -267,8 +266,6 @@ class AccessService
      *
      * @throws InvalidRoleException
      * @throws UserRequiredException
-     * @internal param $roleId
-     *
      */
     public function addRoleByName(string $roleName): void
     {
@@ -348,7 +345,6 @@ class AccessService
      * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
      * @param mixed $resource
-     *
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
@@ -376,7 +372,6 @@ class AccessService
      * permission object is indexed to a multitude of actions.  So in the example above, the UserPermissionInterface is for 'servers'.
      *
      * @param mixed $resource
-     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -408,7 +403,6 @@ class AccessService
      * resource distinction, rather than force you to differentiate the cases in your code.
      *
      * @param ResourceInterface|string $resource
-     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -448,7 +442,6 @@ class AccessService
      * isAllowed, will pass the buck to this method if no group rules satisfy the action.
      *
      * @param ResourceInterface|string $resource
-     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -536,7 +529,6 @@ class AccessService
      * prior to this call.
      *
      * @param ResourceInterface|string $resource
-     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -575,7 +567,6 @@ class AccessService
      * Revoke access to a resource
      *
      * @param ResourceInterface|string $resource
-     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
