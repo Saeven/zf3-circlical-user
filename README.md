@@ -136,6 +136,20 @@ Configuring guards is very simple. Your module's config would look like so:
                                     'list' => [ 'user' ], // role 'user' can access 'listAction' on AdminController
                                 ],
                             ],
+                            \Application\Controller\ComplexController::class => [
+                                'default' => ['user'],
+                                'actions' => [  // action-level guards
+                                    'save' => [
+                                        AccessService::GUARD_ACTION => 'save',      // you can lean on action/resource rules as well
+                                        AccessService::GUARD_RESOURCE => 'complex', // which call 'isAllowed' on AccessService
+                                    ],
+                                    'delete' => [
+                                        AccessService::GUARD_ROLE => 'admin',       // it is also possible to override the role requirement
+                                        AccessService::GUARD_ACTION => 'save',
+                                        AccessService::GUARD_RESOURCE => 'complex',
+                                    ],
+                                ],
+                            ],
                         ],
                     ],
                 ],

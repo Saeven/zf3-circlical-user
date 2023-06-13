@@ -9,8 +9,8 @@ use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Mapper\UserResetTokenMapper;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\AuthenticationService;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 use RuntimeException;
 
 use function base64_decode;

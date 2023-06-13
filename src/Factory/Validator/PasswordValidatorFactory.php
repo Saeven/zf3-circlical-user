@@ -6,8 +6,8 @@ namespace CirclicalUser\Factory\Validator;
 
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Validator\PasswordValidator;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class PasswordValidatorFactory implements FactoryInterface
 {

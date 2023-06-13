@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace CirclicalUser\Factory\Strategy;
 
 use CirclicalUser\Strategy\RedirectStrategy;
-use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class RedirectStrategyFactory implements FactoryInterface
 {

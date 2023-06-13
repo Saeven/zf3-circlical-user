@@ -12,9 +12,9 @@ use CirclicalUser\Mapper\UserPermissionMapper;
 use CirclicalUser\Provider\RoleProviderInterface;
 use CirclicalUser\Service\AccessService;
 use CirclicalUser\Service\AuthenticationService;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use LogicException;
+use Psr\Container\ContainerInterface;
 
 class AccessServiceFactory implements FactoryInterface
 {

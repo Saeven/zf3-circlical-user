@@ -7,9 +7,9 @@ namespace CirclicalUser\Factory\Service\PasswordChecker;
 use CirclicalUser\Exception\PasswordStrengthCheckerException;
 use CirclicalUser\Provider\PasswordCheckerInterface;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 

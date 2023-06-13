@@ -20,6 +20,7 @@ use CirclicalUser\Exception\UserRequiredException;
 use CirclicalUser\Provider\GroupPermissionInterface;
 use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\RoleProviderInterface;
+use CirclicalUser\Service\AccessService;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -39,6 +40,7 @@ class AccessServiceSpec extends ObjectBehavior
         UserPermissionInterface $userRule1,
         UserPermissionInterface $userRule2,
         UserPermissionInterface $userRule3,
+        UserPermissionInterface $userRule4,
         ResourceInterface $resourceObject,
         GroupPermissionInterface $groupActionRule,
         UserMapper $userMapper,
@@ -115,6 +117,13 @@ class AccessServiceSpec extends ObjectBehavior
         $userRule3->can(Argument::type('string'))->willReturn(false);
         $userRule3->can('bar')->willReturn(true);
 
+        $userRule4->getActions()->willReturn(['save']);
+        $userRule4->getResourceClass()->willReturn('string');
+        $userRule4->getResourceId()->willReturn('complex');
+        $userRule4->getUser()->willReturn($user);
+        $userRule4->can(Argument::type('string'))->willReturn(false);
+        $userRule4->can('save')->willReturn(true);
+
         $resourceObject->getClass()->willReturn("ResourceObject");
         $resourceObject->getId()->willReturn("1234");
 
@@ -125,8 +134,10 @@ class AccessServiceSpec extends ObjectBehavior
         $groupActionRule->can(Argument::type('string'))->willReturn(false);
         $groupActionRule->can('bar')->willReturn(true);
 
+
         $userRules->getUserPermission(Argument::type('string'), Argument::any())->willReturn(null);
         $userRules->getUserPermission('beer', $admin)->willReturn($userRule1);
+        $userRules->getUserPermission('complex', $user)->willReturn($userRule4);
         $userRules->create($user, 'string', 'beer', ['buy'])->willReturn($userRule2);
         $userRules->save($userRule2)->willReturn(null);
         $userRules->getResourceUserPermission($resourceObject, $user)->willReturn($userRule3);
@@ -136,6 +147,7 @@ class AccessServiceSpec extends ObjectBehavior
         $userRules->getUserPermission('badresult', $user)->willReturn($someObject);
 
         $groupRules->getPermissions('beer')->willReturn([$rule1, $rule2, $rule3]);
+        $groupRules->getPermissions('complex')->willReturn([]);
         $groupRules->getResourcePermissions($resourceObject)->willReturn([$groupActionRule]);
         $groupRules->getResourcePermissionsByClass('ResourceObject')->willReturn([$groupActionRule]);
 
@@ -168,6 +180,20 @@ class AccessServiceSpec extends ObjectBehavior
                         'actions' => [
                             'home' => [],
                             'login' => [],
+                        ],
+                    ],
+                    'Admin\Controller\ComplexController' => [
+                        'default' => ['user'],
+                        'actions' => [
+                            'save' => [
+                                AccessService::GUARD_ACTION => 'save',
+                                AccessService::GUARD_RESOURCE => 'complex',
+                            ],
+                            'delete' => [
+                                AccessService::GUARD_ROLE => 'admin',
+                                AccessService::GUARD_ACTION => 'save',
+                                AccessService::GUARD_RESOURCE => 'complex',
+                            ],
                         ],
                     ],
                 ],
@@ -369,6 +395,38 @@ class AccessServiceSpec extends ObjectBehavior
         $this->canAccessAction('Foo\Controller\IndexController', 'home')->shouldBe(true);
         $this->canAccessAction('Foo\Controller\IndexController', 'login')->shouldBe(true);
     }
+
+    function it_allows_resource_based_action_rules(User $user)
+    {
+        $this->setUser($user);
+        $this->canAccessAction('Admin\Controller\ComplexController', 'save')->shouldBe(true);
+    }
+
+    /**
+     * There is no resource rule defined for this action, so it should not be allowed.
+     */
+    function it_still_falls_back_onto_controller_definitions_when_actions_are_not_defined(User $user)
+    {
+        $this->setUser($user);
+        $this->canAccessAction('Admin\Controller\ComplexController', 'load')->shouldBe(true);
+    }
+
+    /**
+     * There is no resource rule defined for this action, so it should not be allowed.
+     */
+    function it_will_protect_in_cases_where_users_are_not_defined(User $user)
+    {
+        $this->canAccessAction('Admin\Controller\ComplexController', 'save')->shouldBe(false);
+    }
+
+    /**
+     * There is no resource rule defined for this action, so it should not be allowed.
+     */
+    function it_supports_overriding_default_roles(User $user)
+    {
+        $this->canAccessAction('Admin\Controller\ComplexController', 'delete')->shouldBe(false);
+    }
+
 
     function it_returns_roles_when_no_user_is_set()
     {
