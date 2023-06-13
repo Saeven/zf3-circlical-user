@@ -23,6 +23,7 @@ use CirclicalUser\Provider\UserPermissionProviderInterface;
 use CirclicalUser\Provider\UserProviderInterface;
 use Exception;
 
+use function array_key_exists;
 use function array_unique;
 use function get_class;
 use function in_array;
@@ -33,6 +34,9 @@ class AccessService
 {
     public const ACCESS_DENIED = 'ACL_ACCESS_DENIED';
     public const ACCESS_UNAUTHORIZED = 'ACCESS_UNAUTHORIZED';
+    public const GUARD_ROLE = 'role';
+    public const GUARD_ACTION = 'action';
+    public const GUARD_RESOURCE = 'resource';
 
     private ?User $user;
     private UserProviderInterface $userProvider;
@@ -48,6 +52,7 @@ class AccessService
      * The AccessService governs permissions around roles and guards.
      *
      * @param   ?RoleInterface $superAdminRole Defined through config, a role that is given all access
+     *
      * @throws  GuardConfigurationException
      */
     public function __construct(
@@ -167,6 +172,18 @@ class AccessService
                 return true;
             }
 
+            $actionConfiguration = $this->actions[$controllerName][$action];
+
+            if (is_array($actionConfiguration) && array_key_exists(self::GUARD_RESOURCE, $actionConfiguration) && array_key_exists(self::GUARD_ACTION, $actionConfiguration)) {
+                if (!empty($actionConfiguration[self::GUARD_ROLE])) {
+                    if (!$this->hasRoleWithName($actionConfiguration[self::GUARD_ROLE])) {
+                        return false;
+                    }
+                }
+
+                return $this->isAllowed($actionConfiguration[self::GUARD_RESOURCE], $actionConfiguration[self::GUARD_ACTION]);
+            }
+
             foreach ($this->actions[$controllerName][$action] as $role) {
                 if ($this->hasRoleWithName($role)) {
                     return true;
@@ -248,10 +265,10 @@ class AccessService
     /**
      * Add a role for the current User
      *
-     * @internal param $roleId
-     *
      * @throws InvalidRoleException
      * @throws UserRequiredException
+     * @internal param $roleId
+     *
      */
     public function addRoleByName(string $roleName): void
     {
@@ -331,6 +348,7 @@ class AccessService
      * roles associated to your user, grants access to a specific verb-actions on a resource.
      *
      * @param mixed $resource
+     *
      * @return GroupPermissionInterface[]
      * @throws UnknownResourceTypeException
      */
@@ -358,6 +376,7 @@ class AccessService
      * permission object is indexed to a multitude of actions.  So in the example above, the UserPermissionInterface is for 'servers'.
      *
      * @param mixed $resource
+     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -389,6 +408,7 @@ class AccessService
      * resource distinction, rather than force you to differentiate the cases in your code.
      *
      * @param ResourceInterface|string $resource
+     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -428,6 +448,7 @@ class AccessService
      * isAllowed, will pass the buck to this method if no group rules satisfy the action.
      *
      * @param ResourceInterface|string $resource
+     *
      * @throws Exception
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -515,6 +536,7 @@ class AccessService
      * prior to this call.
      *
      * @param ResourceInterface|string $resource
+     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
@@ -553,6 +575,7 @@ class AccessService
      * Revoke access to a resource
      *
      * @param ResourceInterface|string $resource
+     *
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
