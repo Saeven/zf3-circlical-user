@@ -45,10 +45,12 @@ abstract class AbstractDoctrineMapper
         $this->getEntityManager()->flush($entity);
     }
 
+    /**
+     * @deprecated Please use save instead
+     */
     public function update(object $entity): void
     {
-        $this->getEntityManager()->merge($entity);
-        $this->getEntityManager()->flush();
+        $this->save($entity);
     }
 
     public function delete(object $entity): void
