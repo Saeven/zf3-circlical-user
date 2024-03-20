@@ -139,9 +139,9 @@ class AccessServiceSpec extends ObjectBehavior
         $userRules->getUserPermission('beer', $admin)->willReturn($userRule1);
         $userRules->getUserPermission('complex', $user)->willReturn($userRule4);
         $userRules->create($user, 'string', 'beer', ['buy'])->willReturn($userRule2);
-        $userRules->save($userRule2)->willReturn(null);
+//        $userRules->save($userRule2)->willReturn(null);
         $userRules->getResourceUserPermission($resourceObject, $user)->willReturn($userRule3);
-        $userRules->update(Argument::any())->willReturn(null);
+//        $userRules->update(Argument::any())->willReturn(null);
 
         // to test a case, where a user implementation returns complete garbage
         $userRules->getUserPermission('badresult', $user)->willReturn($someObject);
@@ -204,7 +204,7 @@ class AccessServiceSpec extends ObjectBehavior
 
         $user->getId()->willReturn(100);
         $user->getRoles()->willReturn([$userRole]);
-        $user->addRole(Argument::any())->willReturn(null);
+//        $user->addRole(Argument::any())->willReturn(null);
 
         $admin->getId()->willReturn(101);
         $admin->getRoles()->willReturn([$adminRole]);
@@ -300,6 +300,7 @@ class AccessServiceSpec extends ObjectBehavior
     function it_adds_roles(User $user)
     {
         $this->setUser($user);
+        $user->addRole(Argument::type(Role::class))->shouldBeCalled();
         $this->hasRoleWithName('admin')->shouldBe(false);
         $this->addRoleByName('admin');
         $this->hasRoleWithName('admin')->shouldBe(true);
@@ -496,10 +497,11 @@ class AccessServiceSpec extends ObjectBehavior
         $this->grantUserAccess('beer', 'buy');
     }
 
-    function it_can_grant_users_access_to_existing_resources(User $user, ResourceInterface $resourceObject, UserPermissionInterface $userRule3)
+    function it_can_grant_users_access_to_existing_resources(User $user, UserPermissionProviderInterface $userRules, ResourceInterface $resourceObject, UserPermissionInterface $userRule3)
     {
         $this->setUser($user);
         $this->isAllowed($resourceObject, 'foo')->shouldBe(false);
+        $userRules->update($userRule3)->shouldBeCalled();
         $userRule3->addAction('foo')->shouldBeCalled();
         $this->grantUserAccess($resourceObject, 'foo');
     }

@@ -40,6 +40,7 @@ class AccessServiceFactory implements FactoryInterface
         $superAdminRole = null;
         if (!empty($userConfig['access']['superadmin']['role_name'])) {
             $superAdminRole = $roleProvider->getRoleWithName($userConfig['access']['superadmin']['role_name']);
+            /** @psalm-suppress RiskyTruthyFalsyComparison */
             if ($userConfig['access']['superadmin']['throw_exception_when_missing'] ?? false) {
                 throw new InvalidRoleException(
                     'A super-admin role was configured in the application files, yet could not be found in the database. Please create this role, or disable exceptions in config.'

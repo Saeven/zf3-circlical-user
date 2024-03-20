@@ -7,7 +7,7 @@ namespace CirclicalUser\View\Helper;
 use CirclicalUser\Service\AccessService;
 use Laminas\View\Helper\AbstractHelper;
 
-use function is_string;
+use function is_array;
 
 class RoleAccessViewHelper extends AbstractHelper
 {
@@ -20,17 +20,14 @@ class RoleAccessViewHelper extends AbstractHelper
 
     /**
      * Invoked via 'hasRole' from a template
-     *
-     * @param string|array $roleNameOrList
      */
-    public function __invoke($roleNameOrList): bool
+    public function __invoke(string|array $roleNameOrList): bool
     {
-        $roles = $roleNameOrList;
-        if (is_string($roleNameOrList)) {
-            $roles = [$roleNameOrList];
+        if (!is_array($roleNameOrList)) {
+            $roleNameOrList = [$roleNameOrList];
         }
 
-        foreach ($roles as $roleName) {
+        foreach ($roleNameOrList as $roleName) {
             if ($this->accessService->hasRoleWithName($roleName)) {
                 return true;
             }

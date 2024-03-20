@@ -12,17 +12,17 @@ interface AuthenticationRecordInterface
 
     public function getRawSessionKey(): string;
 
-    public function setSessionKey(string $sessionKey);
+    public function setSessionKey(string $sessionKey): void;
 
-    public function setRawSessionKey(string $rawKey);
+    public function setRawSessionKey(string $rawKey): void;
 
     public function getUsername(): string;
 
     public function getHash(): string;
 
-    public function setHash(string $hash);
+    public function setHash(string $hash): void;
 
-    public function getUserId();
+    public function getUserId(): int|string;
 
     public function getUser(): UserInterface;
 }

@@ -33,7 +33,7 @@ interface GroupPermissionProviderInterface
 
     public function create(RoleInterface $role, string $resourceClass, string $resourceId, array $actions): GroupPermissionInterface;
 
-    public function save(object $entity);
+    public function save(object $entity): void;
 
-    public function update(object $entity);
+    public function update(object $entity): void;
 }

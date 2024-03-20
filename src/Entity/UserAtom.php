@@ -7,37 +7,21 @@ namespace CirclicalUser\Entity;
 use CirclicalUser\Provider\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="users_atoms",indexes={
- *    @ORM\Index(name="lookup_idx", columns={"key", "value"}),
- * });
- */
+#[ORM\Entity, ORM\Table(name:"users_atoms"), ORM\Index(fields: ['key', 'value'], name: "lookup_idx")]
 class UserAtom
 {
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     *
-     * @var UserInterface
-     */
-    private $user;
+    /** @psalm-suppress ArgumentTypeCoercion */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: 'CirclicalUser\Entity\User')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private UserInterface $user;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string", length=255, name="`key`")
-     *
-     * @var string
-     */
-    private $key;
+    #[ORM\Id]
+    #[ORM\Column(type: "string", length: 255, name: '`key`')]
+    private string $key;
 
-    /**
-     * @ORM\Column(type="string", length=255, name="`value`")
-     *
-     * @var string
-     */
-    private $value;
+    #[ORM\Column(type: "string", length: 255, name: '`value`')]
+    private string $value;
 
     public function __construct(UserInterface $user, string $key, string $value)
     {

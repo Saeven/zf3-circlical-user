@@ -30,6 +30,7 @@ use CirclicalUser\View\Helper\ControllerAccessViewHelper;
 use CirclicalUser\View\Helper\RoleAccessViewHelper;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use function dirname;
 
 return [
@@ -62,7 +63,7 @@ return [
 
         'driver' => [
             'circlical_entities' => [
-                'class' => AnnotationDriver::class,
+                'class' => AttributeDriver::class,
                 'paths' => [
                     dirname(__DIR__) . '/src/Entity',
                 ],

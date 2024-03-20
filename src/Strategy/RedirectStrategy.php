@@ -11,6 +11,8 @@ use Laminas\Http\Response;
 use Laminas\Mvc\MvcEvent;
 use Laminas\Router\RouteMatch;
 
+use function is_string;
+
 /**
  * Show the user to a login form if the request is not an XHTTP request, and the gate occurs because no user is
  * logged in.  Do not interject if they are logged in, yet don't have necessary rights.
@@ -54,8 +56,11 @@ class RedirectStrategy implements DenyStrategyInterface
 
             $requestData = $event->getRequest();
 
-            if ($requestData instanceof Request && $requestData->getServer('REQUEST_URI')) {
-                $event->setParam('authRedirectTo', $requestData->getServer('REQUEST_URI'));
+            if ($requestData instanceof Request) {
+                $requestUri = $requestData->getServer('REQUEST_URI');
+                if (is_string($requestUri)) {
+                    $event->setParam('authRedirectTo', $requestUri);
+                }
             }
 
             return true;

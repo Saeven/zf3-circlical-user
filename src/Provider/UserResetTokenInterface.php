@@ -10,7 +10,7 @@ interface UserResetTokenInterface
     public const STATUS_INVALID = 9;
     public const STATUS_USED = 1;
 
-    public function setStatus(int $status);
+    public function setStatus(int $status): void;
 
     public function isValid(
         AuthenticationRecordInterface $authenticationRecord,

@@ -15,7 +15,7 @@ interface UserPermissionProviderInterface
 
     public function create(UserInterface $user, string $resourceClass, string $resourceId, array $actions): UserPermissionInterface;
 
-    public function save(object $entity);
+    public function save(object $entity): void;
 
-    public function update(object $entity);
+    public function update(object $entity): void;
 }

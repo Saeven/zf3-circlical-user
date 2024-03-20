@@ -10,18 +10,14 @@ class SampleUser implements UserInterface
 {
     private int $id;
 
-    /**
-     * @var RoleInterface[]
-     */
+    /**@var RoleInterface[] */
     private array $roles;
 
     private string $email;
 
     private string $name;
 
-    /**
-     * @var ?AuthenticationRecordInterface
-     */
+    /** @var ?AuthenticationRecordInterface */
     private $authenticationRecord;
 
     public function __construct(int $id, array $roles, string $email, string $name)
@@ -37,22 +33,22 @@ class SampleUser implements UserInterface
         return $this->name;
     }
 
-    public function getId()
+    public function getId(): int|string
     {
         return $this->id;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         return $this->roles;
     }
 
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    public function addRole(RoleInterface $role)
+    public function addRole(RoleInterface $role): void
     {
         $this->roles[] = $role;
     }

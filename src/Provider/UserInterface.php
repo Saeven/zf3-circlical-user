@@ -6,18 +6,18 @@ namespace CirclicalUser\Provider;
 
 interface UserInterface
 {
-    public function getId();
+    public function getId(): int|string;
 
-    public function getRoles();
+    public function getRoles(): array;
 
-    public function getEmail();
+    public function getEmail(): string;
 
     /**
      * When you implement this, strongly consider adding your own guard to ensure that the role being added,
      * is NOT the super-admin role.  Preventing privilege escalation is important if you enable super-admins
      * via configuration.
      */
-    public function addRole(RoleInterface $role);
+    public function addRole(RoleInterface $role): void;
 
     public function hasRoleWithName(string $roleName): bool;
 

@@ -16,6 +16,7 @@ use RuntimeException;
 use function base64_decode;
 use function is_bool;
 use function is_callable;
+use function is_string;
 
 class AuthenticationServiceFactory implements FactoryInterface
 {
@@ -46,7 +47,7 @@ class AuthenticationServiceFactory implements FactoryInterface
         return new AuthenticationService(
             $container->get($authMapper),
             $container->get($userProvider),
-            $resetTokenProvider ? $container->get($resetTokenProvider) : null,
+            is_string($resetTokenProvider) ? $container->get($resetTokenProvider) : null,
             base64_decode($userConfig['auth']['crypto_key']),
             $userConfig['auth']['transient'],
             $secure,
