@@ -27,15 +27,15 @@
   "prefer-stable": true,
   "require": {
     "ext-json": "*",
-    "php": "^7.4.0 || ~8.0.12 || ~8.1.0 || ~8.2.0",
+    "php": "^7.4.0 || ~8.0.12 || ~8.1.0 || ~8.2.0 || ~8.3.0",
     "laminas/laminas-eventmanager": "^3.4",
     "laminas/laminas-servicemanager": "^3.7",
     "laminas/laminas-mvc": "^3.3",
     "laminas/laminas-view": "^2.13",
     "laminas/laminas-http": "^2.15",
     "laminas/laminas-router": "^3.5",
-    "doctrine/doctrine-orm-module": "^4.1|~5.1",
-    "doctrine/doctrine-module": "^4.2|~5.1",
+    "doctrine/doctrine-orm-module": "^4.1|~5.1|~6.1",
+    "doctrine/doctrine-module": "^4.2|~5.1|~6.0",
     "doctrine/orm": "^2.10",
     "paragonie/halite": "^4.7| ^5.0",
     "ramsey/uuid": "^4",
@@ -43,7 +43,7 @@
     "laminas/laminas-validator": "^2.15"
   },
   "require-dev": {
-    "phpspec/phpspec": "7.0.1|7.2.0|7.3.0",
+    "phpspec/phpspec": "7.0.1|7.2.0|7.3.0|7.5.0",
     "friends-of-phpspec/phpspec-code-coverage": "@stable",
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "^1.0",
