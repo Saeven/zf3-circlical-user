@@ -33,7 +33,7 @@ class SampleUser implements UserInterface
         return $this->name;
     }
 
-    public function getId(): int|string
+    public function getId(): int|string|null
     {
         return $this->id;
     }

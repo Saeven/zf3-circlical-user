@@ -285,7 +285,7 @@ class AccessServiceSpec extends ObjectBehavior
 
     function it_rejects_users_with_no_id(User $noUser)
     {
-        $noUser->getId()->willReturn(null);
+        $noUser->getId()->willReturn();
         $this->shouldThrow(UserRequiredException::class)->during('setUser', [$noUser]);
     }
 

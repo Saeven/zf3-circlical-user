@@ -6,7 +6,7 @@ namespace CirclicalUser\Provider;
 
 interface UserInterface
 {
-    public function getId(): int|string;
+    public function getId(): int|string|null;
 
     public function getRoles(): array;
 
