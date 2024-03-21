@@ -29,26 +29,27 @@ use Exception;
 use Laminas\Http\PhpEnvironment\RemoteAddress;
 use LogicException;
 use ParagonIE\Halite\Alerts\InvalidKey;
-use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
+use ParagonIE\HiddenString\HiddenString;
 
 use function array_filter;
 use function array_values;
 use function base64_decode;
 use function base64_encode;
+use function count;
 use function explode;
 use function filter_var;
 use function hash_equals;
 use function hash_hmac;
 use function is_numeric;
-use function is_scalar;
 use function password_hash;
 use function password_needs_rehash;
 use function password_verify;
 use function session_get_cookie_params;
 use function setcookie;
+use function str_contains;
 use function strpos;
 use function substr_count;
 use function time;
@@ -139,14 +140,14 @@ class AuthenticationService
     private int $authenticationCookieDuration;
 
     /**
-     * @param ?UserResetTokenProviderInterface $resetTokenProvider  If not null, permit password reset
-     * @param string                           $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
-     * @param bool                             $transient           True if cookies should expire at the end of the session (zero value, for expiry)
-     * @param bool                             $secure              True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
-     * @param PasswordCheckerInterface         $passwordChecker     Optional, a password checker implementation
-     * @param bool                             $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
-     * @param bool                             $validateIp          If password reset is enabled, do we validate the user IP address?
-     * @param string                           $sameSite            Should be one of 'None', 'Lax' or 'Strict'.
+     * @param ?UserResetTokenProviderInterface $resetTokenProvider If not null, permit password reset
+     * @param string $systemEncryptionKey The raw material of a Halite-generated encryption key, stored in config.
+     * @param bool $transient True if cookies should expire at the end of the session (zero value, for expiry)
+     * @param bool $secure True if cookies should be marked as 'Secure', enforced as 'true' in production by this service's Factory
+     * @param PasswordCheckerInterface $passwordChecker Optional, a password checker implementation
+     * @param bool $validateFingerprint If password reset is enabled, do we validate the browser fingerprint?
+     * @param bool $validateIp If password reset is enabled, do we validate the user IP address?
+     * @param string $sameSite Should be one of 'None', 'Lax' or 'Strict'.
      */
     public function __construct(
         AuthenticationProviderInterface $authenticationProvider,
@@ -297,7 +298,7 @@ class AuthenticationService
      *
      * @throws InvalidKey
      */
-    private function setSessionCookies(AuthenticationRecordInterface $authentication)
+    private function setSessionCookies(AuthenticationRecordInterface $authentication): void
     {
         $systemKey = new EncryptionKey($this->systemEncryptionKey);
         $sessionKey = new HiddenString($authentication->getRawSessionKey());
@@ -358,7 +359,7 @@ class AuthenticationService
     /**
      * Set a cookie with values defined by configuration
      */
-    private function setCookie(string $name, string $value, int $expiry, bool $httpOnly = true)
+    private function setCookie(string $name, string $value, int $expiry, bool $httpOnly = true): void
     {
         $sessionParameters = session_get_cookie_params();
         setcookie(
@@ -425,7 +426,14 @@ class AuthenticationService
             }
 
             // paranoid, make sure we have everything we need
-            @[$cookieUserId, $hashCookieSuffix] = @explode(":", $userTuple, 2);
+            $explodedUserTuple = @explode(":", $userTuple, 2);
+            if (count($explodedUserTuple) !== 2) {
+                throw new AuthenticationDataException();
+            }
+
+            @[$cookieUserId, $hashCookieSuffix] = $explodedUserTuple;
+
+            /** @psalm-suppress PossiblyNullArgument */
             if (!is_numeric($cookieUserId) || !trim($hashCookieSuffix)) {
                 throw new AuthenticationDataException();
             }
@@ -494,12 +502,12 @@ class AuthenticationService
     /**
      * Remove all hash cookies, potentially saving one
      */
-    private function purgeHashCookies(?string $skipCookie = null)
+    private function purgeHashCookies(?string $skipCookie = null): void
     {
         $sp = session_get_cookie_params();
         $killTime = time() - 3600;
         foreach ($_COOKIE as $cookieName => $value) {
-            if ($cookieName !== $skipCookie && is_scalar($cookieName) && strpos((string) $cookieName, self::COOKIE_HASH_PREFIX) !== false) {
+            if ($cookieName !== $skipCookie && str_contains($cookieName, self::COOKIE_HASH_PREFIX)) {
                 setcookie($cookieName, '', $killTime, '/', $sp['domain'], false, true);
             }
         }
@@ -509,7 +517,7 @@ class AuthenticationService
      * @param User $user Used by some password checkers to provide better checking
      * @throws WeakPasswordException
      */
-    private function enforcePasswordStrength(string $password, User $user)
+    private function enforcePasswordStrength(string $password, User $user): void
     {
         $userData = array_values(array_filter(array_values((array) $user), 'is_string'));
         if (!$this->passwordChecker->isStrongPassword($password, $userData)) {
@@ -520,12 +528,12 @@ class AuthenticationService
     /**
      * Reset this user's password
      *
-     * @param User   $user        The user to whom this password gets assigned
+     * @param User $user The user to whom this password gets assigned
      * @param string $newPassword Cleartext password that's being hashed
      * @throws NoSuchUserException
      * @throws WeakPasswordException
      */
-    public function resetPassword(User $user, string $newPassword)
+    public function resetPassword(User $user, string $newPassword): void
     {
         $this->enforcePasswordStrength($newPassword, $user);
 
@@ -543,7 +551,7 @@ class AuthenticationService
     /**
      * Validate user password
      *
-     * @param User   $user     The user to validate password for
+     * @param User $user The user to validate password for
      * @param string $password Cleartext password that'w will be verified
      * @throws PersistedUserRequiredException
      * @throws UserWithoutAuthenticationRecordException

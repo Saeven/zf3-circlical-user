@@ -27,17 +27,18 @@
   "prefer-stable": true,
   "require": {
     "ext-json": "*",
-    "php": "^7.4.0 || ~8.0.12 || ~8.1.0 || ~8.2.0 || ~8.3.0",
+    "php": "~8.0.12 || ~8.1.0 || ~8.2.0 || ~8.3.0",
     "laminas/laminas-eventmanager": "^3.4",
     "laminas/laminas-servicemanager": "^3.7",
     "laminas/laminas-mvc": "^3.3",
     "laminas/laminas-view": "^2.13",
     "laminas/laminas-http": "^2.15",
     "laminas/laminas-router": "^3.5",
-    "doctrine/doctrine-orm-module": "^4.1|~5.1|~6.1",
-    "doctrine/doctrine-module": "^4.2|~5.1|~6.0|~6.1",
+    "doctrine/doctrine-orm-module": "~5.3.0|~6.1",
+    "doctrine/doctrine-module": "~6.0.0|~6.1.0",
     "doctrine/orm": "^2.10",
-    "paragonie/halite": "^4.7| ^5.0",
+    "paragonie/halite": "~5.1.0",
+    "paragonie/hidden-string": "v2.0.0",
     "ramsey/uuid": "^4",
     "ramsey/uuid-doctrine": "^1.6",
     "laminas/laminas-validator": "^2.15"
@@ -48,10 +49,10 @@
     "codacy/coverage": "^1.0",
     "bjeavons/zxcvbn-php": "^1.0",
     "laminas/laminas-coding-standard": "^2.3.0",
-    "phpstan/phpstan": "1.1.1"
+    "phpstan/phpstan": "~1.10.0",
+    "vimeo/psalm": "5.23.1"
   },
   "suggest": {
-    "paragonie/passwdqc": "Add built-in support for password-strength checking! See README for configuration details.",
     "bjeavons/zxcvbn-php": "Even better password checking!",
     "laminas/laminas-diactoros": "Recommended to support middleware guards.",
     "laminas/laminas-psr7bridge": "Recommended to support middleware guards.",
@@ -71,7 +72,8 @@
     ],
     "cs": "vendor/bin/phpcs",
     "stan": "vendor/bin/phpstan analyse -c ./phpstan.neon --memory-limit 1G --xdebug --ansi -vvv src",
-    "test": "XDEBUG_MODE=coverage vendor/bin/phpspec run"
+    "test": "XDEBUG_MODE=coverage vendor/bin/phpspec run",
+    "psalm": "vendor/bin/psalm --shepherd"
   },
   "config": {
     "allow-plugins": {

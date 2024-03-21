@@ -31,7 +31,7 @@ class UserEntityListener implements EventSubscriber
         return ['loadClassMetadata'];
     }
 
-    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
+    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs): void
     {
         $classMetadata = $eventArgs->getClassMetadata();
 
@@ -45,6 +45,7 @@ class UserEntityListener implements EventSubscriber
             case Authentication::class:
             case UserAtom::class:
             case UserAuthenticationLog::class:
+                /** @psalm-suppress PropertyTypeCoercion */
                 $classMetadata->associationMappings['user']['targetEntity'] = $this->userEntity;
                 break;
         }

@@ -7,6 +7,7 @@ namespace CirclicalUser\Mapper;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use RuntimeException;
 
 /**
  * Doctrine Mapper
@@ -21,21 +22,34 @@ abstract class AbstractDoctrineMapper
 
     public function getEntityManager(): EntityManager
     {
+        if (!$this->entityManager) {
+            throw new RuntimeException('No entity manager was set');
+        }
+
         return $this->entityManager;
     }
 
-    public function setEntityManager(EntityManager $entityManager)
+    public function setEntityManager(EntityManager $entityManager): void
     {
         $this->entityManager = $entityManager;
     }
 
     public function getDatabase(): Connection
     {
+        if (!$this->entityManager) {
+            throw new RuntimeException('No entity manager was set');
+        }
+
         return $this->entityManager->getConnection();
     }
 
     public function getRepository(): EntityRepository
     {
+        if (!$this->entityManager) {
+            throw new RuntimeException('No entity manager was set');
+        }
+
+        /** @psalm-suppress ArgumentTypeCoercion */
         return $this->entityManager->getRepository($this->entityName);
     }
 
@@ -61,6 +75,7 @@ abstract class AbstractDoctrineMapper
 
     public function getPrototype(): object
     {
+        /** @psalm-suppress InvalidStringClass */
         return new $this->entityName();
     }
 }

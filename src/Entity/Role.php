@@ -7,37 +7,17 @@ namespace CirclicalUser\Entity;
 use CirclicalUser\Provider\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * An example entity that represents a role.
- *
- * @ORM\Entity
- * @ORM\Table(name="acl_roles", indexes={@ORM\Index(name="name_idx", columns={"name"})})
- */
+#[ORM\Entity, ORM\Table(name: "acl_roles"), ORM\Index(fields: ['name'], name: "name_idx")]
 class Role implements RoleInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var int
-     */
-    private $id;
+    #[ORM\Id, ORM\Column(type: "integer"), ORM\GeneratedValue(strategy: "AUTO")]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
-     *
-     * @var string
-     */
-    private $name;
+    #[ORM\Column(type: "string", length: 255, unique: true, nullable: true)]
+    private string $name;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     *
-     * @var RoleInterface
-     */
-    private $parent;
+    #[ORM\ManyToOne(targetEntity: self::class), ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?RoleInterface $parent = null;
 
     public function __construct(string $name, ?RoleInterface $parent)
     {
@@ -47,7 +27,7 @@ class Role implements RoleInterface
 
     public function getId(): int
     {
-        return $this->id;
+        return $this->id ?? 0;
     }
 
     /**

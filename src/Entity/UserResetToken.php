@@ -21,9 +21,9 @@ use ParagonIE\Halite\Alerts\InvalidDigestLength;
 use ParagonIE\Halite\Alerts\InvalidKey;
 use ParagonIE\Halite\Alerts\InvalidMessage;
 use ParagonIE\Halite\Alerts\InvalidType;
-use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
+use ParagonIE\HiddenString\HiddenString;
 use SodiumException;
 
 use function base64_decode;
@@ -38,56 +38,28 @@ use const JSON_THROW_ON_ERROR;
 /**
  * A password-reset token.  This is the thing that you would exchange in a forgot-password email
  * that the user can later consume to trigger a password change.
- *
- * @ORM\Entity
- * @ORM\Table(name="users_auth_reset")
  */
+#[ORM\Entity, ORM\Table(name: "users_auth_reset")]
 class UserResetToken implements UserResetTokenInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var int
-     */
-    private $id;
+    #[ORM\Id, ORM\Column(type: "integer", options: ['unsigned' => true]), ORM\GeneratedValue(strategy: "AUTO")]
+    private ?int $id = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Authentication")
-     * @ORM\JoinColumn(name="auth_user_id", referencedColumnName="user_id",onDelete="CASCADE")
-     *
-     * @var AuthenticationRecordInterface
-     */
-    private $authentication;
+    #[ORM\ManyToOne(targetEntity: Authentication::class)]
+    #[ORM\JoinColumn(name: 'auth_user_id', referencedColumnName: 'user_id', onDelete: 'CASCADE')]
+    private AuthenticationRecordInterface $authentication;
 
-    /**
-     * @ORM\Column(type="string", length=2048)
-     *
-     * @var string
-     */
-    private $token;
+    #[ORM\Column(type: "string", length: 2048)]
+    private string $token;
 
-    /**
-     * @ORM\Column(type="datetime", length=255)
-     *
-     * @var DateTimeImmutable
-     */
-    private $request_time;
+    #[ORM\Column(type: "datetime_immutable")]
+    private DateTimeImmutable $request_time;
 
-    /**
-     * @ORM\Column(type="string", length=16, options={"fixed":true})
-     *
-     * @var string
-     */
-    private $request_ip_address;
+    #[ORM\Column(type: "string", length: 46, options: ['fixed' => true])]
+    private string $request_ip_address;
 
-    /**
-     * @ORM\Column(type="integer", options={"default":0})
-     *
-     * @var int
-     */
-    private $status;
+    #[ORM\Column(type: "integer", options: ['default' => 0])]
+    private int $status;
 
     /**
      * @throws InvalidType
@@ -144,10 +116,10 @@ class UserResetToken implements UserResetTokenInterface
 
     public function getId(): int
     {
-        return $this->id;
+        return $this->id ?? 0;
     }
 
-    public function setStatus(int $status)
+    public function setStatus(int $status): void
     {
         if (!in_array($status, [UserResetTokenInterface::STATUS_UNUSED, UserResetTokenInterface::STATUS_INVALID, UserResetTokenInterface::STATUS_USED], true)) {
             throw new InvalidArgumentException("An invalid status is being set!");

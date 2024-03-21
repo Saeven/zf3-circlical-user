@@ -25,7 +25,6 @@ use Exception;
 
 use function array_key_exists;
 use function array_unique;
-use function get_class;
 use function in_array;
 use function is_array;
 use function is_string;
@@ -240,7 +239,7 @@ class AccessService
     {
         $this->compileUserRoles();
 
-        return in_array($role, $this->userRoles, true);
+        return in_array($role, $this->userRoles ?? [], true);
     }
 
     /**
@@ -304,13 +303,13 @@ class AccessService
     {
         $this->compileUserRoles();
 
-        return $this->userRoles;
+        return $this->userRoles ?? [];
     }
 
     /**
      * Flattens roles using the roleProvider, for quick lookup.
      */
-    private function compileUserRoles()
+    private function compileUserRoles(): void
     {
         if ($this->userRoles !== null) {
             return;
@@ -358,7 +357,7 @@ class AccessService
             return $this->groupPermissions->getPermissions($resource);
         }
 
-        throw new UnknownResourceTypeException($resource ? get_class($resource) : 'null');
+        throw new UnknownResourceTypeException($resource ? $resource::class : 'null');
     }
 
     /**
@@ -390,7 +389,7 @@ class AccessService
             return $this->userPermissions->getUserPermission($resource, $this->user);
         }
 
-        throw new UnknownResourceTypeException($resource ? get_class($resource) : 'null');
+        throw new UnknownResourceTypeException($resource ? $resource::class : 'null');
     }
 
     /**
@@ -485,7 +484,7 @@ class AccessService
      * @throws ExistingAccessException
      * @throws UnknownResourceTypeException
      */
-    public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, string $action)
+    public function grantRoleAccess(RoleInterface $role, ResourceInterface $resource, string $action): void
     {
         $resourcePermissions = $this->getGroupPermissions($resource);
         $matchedPermission = null;
@@ -528,16 +527,19 @@ class AccessService
      * The user must have been loaded in using setUser (done automatically by the factory when a user is authenticated)
      * prior to this call.
      *
-     * @param ResourceInterface|string $resource
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
-    public function grantUserAccess($resource, string $action)
+    public function grantUserAccess(ResourceInterface|string $resource, string $action): void
     {
         // already have permission? get out
         if ($this->isAllowed($resource, $action)) {
             return;
+        }
+
+        if ($this->user === null) {
+            throw new UserRequiredException();
         }
 
         $permission = $this->getUserPermission($resource);
@@ -553,12 +555,19 @@ class AccessService
             return;
         }
 
-        $isString = is_string($resource);
+        if ($resource instanceof ResourceInterface) {
+            $resourceClass = $resource->getClass();
+            $resourceId = $resource->getId();
+        } else {
+            $resourceClass = 'string';
+            $resourceId = $resource;
+        }
+
         $permission = $this->userPermissions->create(
-            $this->user,
-            $isString ? 'string' : $resource->getClass(),
-            $isString ? $resource : $resource->getId(),
-            [$action]
+            user: $this->user,
+            resourceClass: $resourceClass,
+            resourceId: $resourceId,
+            actions: [$action]
         );
         $this->userPermissions->save($permission);
     }
@@ -566,12 +575,11 @@ class AccessService
     /**
      * Revoke access to a resource
      *
-     * @param ResourceInterface|string $resource
      * @throws PermissionExpectedException
      * @throws UnknownResourceTypeException
      * @throws UserRequiredException
      */
-    public function revokeUserAccess($resource, string $action)
+    public function revokeUserAccess(ResourceInterface|string $resource, string $action): void
     {
         $resourceRule = $this->getUserPermission($resource);
 

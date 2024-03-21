@@ -9,12 +9,14 @@ use CirclicalUser\Service\AccessService;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\EventManager\ListenerAggregateInterface;
 use Laminas\Http\Response;
+use Laminas\Mvc\Application;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use LogicException;
 
 use function implode;
+use function is_array;
 use function is_string;
 use function strtolower;
 
@@ -53,6 +55,11 @@ class AccessListener implements ListenerAggregateInterface
     public function verifyAccess(MvcEvent $event): void
     {
         $route = $event->getRouteMatch();
+
+        if (!$route) {
+            return;
+        }
+
         $controllerName = $route->getParam('controller');
         $actionName = $route->getParam('action');
         $middleware = $route->getParam('middleware');
@@ -86,7 +93,6 @@ class AccessListener implements ListenerAggregateInterface
             }
         }
 
-        $eventError = null;
         if ($this->accessService->hasUser()) {
             if ($this->accessService->canAccessAction($controllerName, $actionName)) {
                 return;
@@ -114,16 +120,16 @@ class AccessListener implements ListenerAggregateInterface
         }
 
         $app = $event->getTarget();
+        $event->setName(MvcEvent::EVENT_DISPATCH_ERROR);
 
-        if (is_string($app)) {
+        if (!$app instanceof Application) {
             return;
         }
 
-        $event->setName(MvcEvent::EVENT_DISPATCH_ERROR);
         $app->getEventManager()->triggerEvent($event);
     }
 
-    public function onDispatchError(MvcEvent $event)
+    public function onDispatchError(MvcEvent $event): void
     {
         switch ($event->getError()) {
             case AccessService::ACCESS_DENIED:
@@ -146,7 +152,10 @@ class AccessListener implements ListenerAggregateInterface
             $viewModel->setTemplate('user/' . $statusCode);
         }
 
-        $viewModel->setVariables($event->getParams());
+        $eventParams = $event->getParams();
+        if (is_array($eventParams)) {
+            $viewModel->setVariables($eventParams);
+        }
         $response = $event->getResponse();
         if ($response instanceof Response) {
             $response->setStatusCode($statusCode);

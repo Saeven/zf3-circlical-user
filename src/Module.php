@@ -6,12 +6,14 @@ namespace CirclicalUser;
 
 use CirclicalUser\Listener\AccessListener;
 use Doctrine\DBAL\Types\Type;
+use Laminas\EventManager\EventInterface;
+use Laminas\ModuleManager\Feature\BootstrapListenerInterface;
 use Laminas\Mvc\MvcEvent;
 use Ramsey\Uuid\Doctrine\UuidBinaryType;
 
 use const PHP_SAPI;
 
-class Module
+class Module implements BootstrapListenerInterface
 {
     protected static ?bool $isConsole = null;
 
@@ -34,7 +36,10 @@ class Module
         return include __DIR__ . '/../config/module.config.php';
     }
 
-    public function onBootstrap(MvcEvent $mvcEvent)
+    /**
+     * @inheritDoc
+     */
+    public function onBootstrap(EventInterface $e)
     {
         if (!Type::hasType('uuid_binary')) {
             Type::addType('uuid_binary', UuidBinaryType::class);
@@ -44,7 +49,11 @@ class Module
             return;
         }
 
-        $application = $mvcEvent->getApplication();
+        if (!$e instanceof MvcEvent) {
+            return;
+        }
+
+        $application = $e->getApplication();
         $serviceLocator = $application->getServiceManager();
         $strategy = $serviceLocator->get(AccessListener::class);
         $eventManager = $application->getEventManager();

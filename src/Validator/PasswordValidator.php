@@ -20,23 +20,24 @@ class PasswordValidator extends AbstractValidator
 
     private PasswordCheckerInterface $passwordChecker;
 
-    /** @var array */
-    private $options;
+    private ?array $options;
 
+    /**
+     * @inheritDoc
+     * @psalm-suppress PossiblyInvalidArgument
+     */
     public function __construct(PasswordCheckerInterface $passwordChecker, ?array $options = null)
     {
         $this->passwordChecker = $passwordChecker;
+        $this->options = $options;
 
         parent::__construct($options);
     }
 
-    /**
-     * @param mixed $value
-     */
-    public function isValid($value, ?array $context = null): bool
+    public function isValid(mixed $value, ?array $context = null): bool
     {
         $userData = [];
-        if (is_array($context) && is_array($this->options) && isset($this->options['user_data']) && is_array($this->options['user_data'])) {
+        if (is_array($context) && $this->options && isset($this->options['user_data']) && is_array($this->options['user_data'])) {
             foreach ($this->options['user_data'] as $key) {
                 if (is_string($context[$key] ?? null)) {
                     $userData[] = $context[$key];

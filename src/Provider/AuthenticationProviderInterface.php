@@ -14,14 +14,12 @@ interface AuthenticationProviderInterface
 
     /**
      * Find an  authentication record by user ID.
-     *
-     * @param mixed $userId
      */
-    public function findByUserId($userId): ?AuthenticationRecordInterface;
+    public function findByUserId(mixed $userId): ?AuthenticationRecordInterface;
 
     public function create(UserInterface $user, string $username, string $hash, string $rawKey): AuthenticationRecordInterface;
 
-    public function save(object $entity);
+    public function save(object $entity): void;
 
-    public function update(object $entity);
+    public function update(object $entity): void;
 }

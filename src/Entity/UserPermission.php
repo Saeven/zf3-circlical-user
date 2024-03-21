@@ -14,49 +14,26 @@ use function in_array;
 /**
  * Similar to a standard action rule, that is role-based -- this one is user-based.
  * Used in cases where roles don't fit.
- *
- * @ORM\Entity
- * @ORM\Table(name="acl_actions_users")
  */
+#[ORM\Entity, ORM\Table(name: "acl_actions_users")]
 class UserPermission implements UserPermissionInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var int
-     */
-    protected $id;
+    #[ORM\Id, ORM\Column(type: "integer", options: ['unsigned' => true]), ORM\GeneratedValue(strategy: "AUTO")]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     *
-     * @var string
-     */
-    protected $resource_class;
+    #[ORM\Column(type: "string", length: 255)]
+    protected string $resource_class;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     *
-     * @var string
-     */
-    protected $resource_id;
+    #[ORM\Column(type: "string", length: 255)]
+    protected string $resource_id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     *
-     * @var UserInterface
-     */
-    protected $user;
+    /** @psalm-suppress ArgumentTypeCoercion */
+    #[ORM\ManyToOne(targetEntity: 'CirclicalUser\Entity\User')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    protected UserInterface $user;
 
-    /**
-     * @ORM\Column(type="array")
-     *
-     * @var array
-     */
-    protected $actions;
+    #[ORM\Column(type: 'array')]
+    protected array $actions;
 
     public function __construct(UserInterface $user, string $resourceClass, string $resourceId, array $actions)
     {
@@ -116,5 +93,10 @@ class UserPermission implements UserPermissionInterface
         }
 
         return in_array($actionName, $this->actions, true);
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 }

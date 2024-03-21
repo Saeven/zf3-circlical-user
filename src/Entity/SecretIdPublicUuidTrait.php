@@ -19,23 +19,15 @@ trait SecretIdPublicUuidTrait
 {
     /**
      * The unique auto incremented primary key.
-     *
-     * @ORM\Id
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\GeneratedValue
-     *
-     * @var int|null
      */
-    protected $id;
+    #[ORM\Id, ORM\Column(type: "integer", options: ['unsigned' => true]), ORM\GeneratedValue(strategy: "AUTO")]
+    protected ?int $id = null;
 
     /**
      * The internal primary identity key.
-     *
-     * @ORM\Column(type="uuid_binary", unique=true);
-     *
-     * @var UuidInterface
      */
-    protected $uuid;
+    #[ORM\Column(type: 'uuid_binary', unique: true)]
+    protected ?UuidInterface $uuid;
 
     public function getId(): ?int
     {

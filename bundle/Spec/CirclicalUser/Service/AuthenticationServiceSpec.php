@@ -23,7 +23,6 @@ use CirclicalUser\Mapper\AuthenticationMapper;
 use CirclicalUser\Mapper\UserMapper;
 use CirclicalUser\Provider\UserResetTokenInterface;
 use CirclicalUser\Service\AuthenticationService;
-use CirclicalUser\Service\PasswordChecker\Passwdqc;
 use CirclicalUser\Service\PasswordChecker\PasswordNotChecked;
 use CirclicalUser\Service\PasswordChecker\Zxcvbn;
 use ParagonIE\Halite\HiddenString;

@@ -10,42 +10,23 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Log entity that you can use when users log in.
- *
- * @ORM\Entity
- * @ORM\Table(name="users_auth_logs")
  */
+#[ORM\Entity, ORM\Table(name: 'users_auth_logs')]
 class UserAuthenticationLog
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer", options={"unsigned"=true})
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var int
-     */
-    private $id;
+    #[ORM\Id, ORM\Column(type: "integer", options: ['unsigned' => true]), ORM\GeneratedValue(strategy: "AUTO")]
+    private ?int $id = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     *
-     * @var UserInterface
-     */
-    private $user;
+    /** @psalm-suppress ArgumentTypeCoercion */
+    #[ORM\ManyToOne(targetEntity: 'CirclicalUser\Entity\User')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private UserInterface $user;
 
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=false)
-     *
-     * @var DateTimeImmutable
-     */
-    private $auth_time;
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
+    private DateTimeImmutable $auth_time;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, length=16, options={"fixed"=true});
-     *
-     * @var string
-     */
-    private $ip_address;
+    #[ORM\Column(type: "string", length: 46, nullable: true, options: ['fixed' => true])]
+    private string $ip_address;
 
     public function __construct(UserInterface $user, DateTimeImmutable $time, string $ipAddress)
     {
@@ -57,7 +38,7 @@ class UserAuthenticationLog
 
     public function getId(): int
     {
-        return $this->id;
+        return $this->id ?? 0;
     }
 
     public function getUser(): UserInterface

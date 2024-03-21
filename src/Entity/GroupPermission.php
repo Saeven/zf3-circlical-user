@@ -13,48 +13,24 @@ use function in_array;
 
 /**
  * An example entity that represents an action rule.
- *
- * @ORM\Entity
- * @ORM\Table(name="acl_actions")
  */
+#[ORM\Entity, ORM\Table(name: 'acl_actions')]
 class GroupPermission implements GroupPermissionInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var int
-     */
-    protected $id;
+    #[ORM\Id, ORM\Column(type: "integer"), ORM\GeneratedValue(strategy: "AUTO")]
+    protected ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     *
-     * @var string
-     */
-    protected $resource_class;
+    #[ORM\Column(type: "string", length: 255)]
+    protected string $resource_class;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     *
-     * @var string
-     */
-    protected $resource_id;
+    #[ORM\Column(type: "string", length: 255)]
+    protected string $resource_id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\Role")
-     *
-     * @var RoleInterface
-     */
-    protected $role;
+    #[ORM\ManyToOne(targetEntity: Role::class)]
+    protected RoleInterface $role;
 
-    /**
-     * @ORM\Column(type="array")
-     *
-     * @var array
-     */
-    protected $actions;
+    #[ORM\Column(type: 'array')]
+    protected array $actions;
 
     public function __construct(RoleInterface $role, string $resourceClass, string $resourceId, array $actions)
     {

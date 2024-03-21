@@ -11,55 +11,35 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 
 /**
  * A password-reset token.  This is the thing that you would exchange in a forgot-password email
  * that the user can later consume to trigger a password change.
- *
- * @ORM\Entity
- * @ORM\Table(name="users_api_tokens")
  */
+#[ORM\Entity, ORM\Table(name: 'users_api_tokens')]
 class UserApiToken
 {
     use SecretIdPublicUuidTrait;
 
     public const SCOPE_NONE = 0;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="CirclicalUser\Entity\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     *
-     * @var UserInterface
-     */
-    private $user;
+    /** @psalm-suppress ArgumentTypeCoercion */
+    #[ORM\ManyToOne(targetEntity: 'CirclicalUser\Entity\User')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private UserInterface $user;
 
-    /**
-     * @ORM\Column(type="datetime_immutable")
-     *
-     * @var DateTimeImmutable
-     */
-    private $creation_time;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private DateTimeImmutable $creation_time;
 
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     *
-     * @var DateTimeImmutable
-     */
-    private $last_used;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $last_used;
 
-    /**
-     * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
-     *
-     * @var int
-     */
-    private $times_used;
+    #[ORM\Column(type: 'integer', options: ['default' => 0, 'unsigned' => true])]
+    private int $times_used;
 
-    /**
-     * @ORM\Column(type="integer", options={"default":0, "unsigned": true})
-     *
-     * @var int
-     */
-    private $scope;
+    #[ORM\Column(type: 'integer', options: ['default' => 0, 'unsigned' => true])]
+    private int $scope;
 
     /**
      * @param int $scope Push a bit-flag integer into this value to resolve scopes
@@ -72,6 +52,7 @@ class UserApiToken
         $this->scope = $scope;
         $this->times_used = 0;
         $this->uuid = Uuid::uuid4();
+        $this->last_used = null;
     }
 
     public function addScope(int $newScope): void
@@ -112,12 +93,15 @@ class UserApiToken
 
     public function getUuid(): UuidInterface
     {
+        if ($this->uuid === null) {
+            throw new RuntimeException("The API token was expected to have a UUID, but did not. Did you reflect this?");
+        }
         return $this->uuid;
     }
 
     public function getToken(): string
     {
-        return $this->uuid->toString();
+        return $this->getUuid()->toString();
     }
 
     public function getUser(): UserInterface

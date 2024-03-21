@@ -12,57 +12,30 @@ use Doctrine\ORM\Mapping as ORM;
 use function base64_decode;
 use function base64_encode;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="users_auth", indexes={@ORM\Index(name="username_idx", columns={"username"})})
- */
+#[ORM\Entity, ORM\Table(name: 'users_auth')]
+#[ORM\Index(name: 'username_idx', columns: ['username'])]
 class Authentication implements AuthenticationRecordInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\OneToOne(targetEntity="CirclicalUser\Entity\User", inversedBy="authenticationRecord")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     *
-     * @var UserInterface
-     */
-    private $user;
+    /** @psalm-suppress ArgumentTypeCoercion */
+    #[ORM\Id]
+    #[ORM\OneToOne(targetEntity: 'CirclicalUser\Entity\User', inversedBy: 'authenticationRecord')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private UserInterface $user;
 
-    /**
-     * @ORM\Column(type="string", unique=true, nullable=false, length=254)
-     *
-     * @var string
-     */
-    private $username;
+    #[ORM\Column(type: "string", length: 254, unique: true, nullable: false)]
+    private string $username;
 
-    /**
-     * @ORM\Column(type="string", nullable=false, length=255)
-     *
-     * @var string
-     */
-    private $hash;
+    #[ORM\Column(type: "string", length: 255, nullable: false)]
+    private string $hash;
 
-    /**
-     * A base64-encoded representation of the user's session key
-     *
-     * @ORM\Column(type="string", nullable=true, length=192, options={"fixed" = true})
-     *
-     * @var string
-     */
-    private $session_key;
+    #[ORM\Column(type: "string", length: 192, nullable: true, options: ['fixed' => true])]
+    private string $session_key;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, length=32, options={"fixed" = true})
-     *
-     * @var string
-     */
-    private $reset_hash;
+    #[ORM\Column(type: "string", length: 32, nullable: true, options: ['fixed' => true])]
+    private ?string $reset_hash;
 
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     *
-     * @var DateTimeImmutable
-     */
-    private $reset_expiry;
+    #[ORM\Column(type: "datetime_immutable", nullable: true)]
+    private ?DateTimeImmutable $reset_expiry;
 
     public function __construct(UserInterface $user, string $username, string $hash, string $encodedSessionKey)
     {
@@ -92,7 +65,7 @@ class Authentication implements AuthenticationRecordInterface
         return $this->hash;
     }
 
-    public function setHash(string $hash)
+    public function setHash(string $hash): void
     {
         $this->hash = $hash;
     }
@@ -119,12 +92,12 @@ class Authentication implements AuthenticationRecordInterface
      * Instead of setting a bas64-encoded string, you can set the raw bytes for the key.
      * This setter will base64-encode.
      */
-    public function setRawSessionKey(string $sessionKey): void
+    public function setRawSessionKey(string $rawKey): void
     {
-        $this->session_key = base64_encode($sessionKey);
+        $this->session_key = base64_encode($rawKey);
     }
 
-    public function getResetHash(): string
+    public function getResetHash(): ?string
     {
         return $this->reset_hash;
     }
@@ -134,7 +107,7 @@ class Authentication implements AuthenticationRecordInterface
         $this->reset_hash = $resetHash;
     }
 
-    public function getResetExpiry(): DateTimeImmutable
+    public function getResetExpiry(): ?DateTimeImmutable
     {
         return $this->reset_expiry;
     }
@@ -144,10 +117,7 @@ class Authentication implements AuthenticationRecordInterface
         $this->reset_expiry = $dateTime;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUserId()
+    public function getUserId(): int|string
     {
         return $this->getUser()->getId();
     }
